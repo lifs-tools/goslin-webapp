@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head></head>
+  <body>
+    <hr />
+    <footer th:fragment="footer" class="sticky-bottom footer mastfooter" style="background-color: #FFFFFF;">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-3 align-middle">
+            <figure class="figure float-left m-2 p-2">
+              <a href="https://www.isas.de/en" target="_blank"><img src="/static/img/isas-logo-sm.jpg" th:src="@{/img/isas-logo.jpg}" height="67px" class="figure-img img-fluid" alt="ISAS Logo"/></a>
+            </figure>
+          </div>
+          <div class="col-md-4 align-middle">
+<!--            <figure class="figure float-left m-2 p-2">
+              <a href="https://fz-borstel.de" target="_blank"><img src="/static/img/fz-borstel-en.jpg" th:src="@{/img/fz-borstel-en.jpg}" height="67px" class="figure-img img-fluid" alt="FZ Borstel Logo"/></a>
+            </figure>-->
+          </div>
+          <div class="col-md-2 align-middle">
+<!--            <figure class="figure float-right m-2 p-2">
+              <a href="https://www.mpi-cbg.de/home/" target="_blank"><img src="/static/img/mpi-logo.png" th:src="@{/img/mpi-logo.png}" height="67px" class="figure-img img-fluid" alt="MPI CBG Logo"/></a>
+            </figure>-->
+          </div>
+          <div class="col-md-3 align-middle">
+            <figure class="figure float-right m-2 p-2">
+              <a href="https://lifs.isas.de" target="_blank"><img src="/static/img/LIFS-signet-2017x03x13-transp-small.png" th:src="@{/img/LIFS-signet-2017x03x13-transp-small.png}" height="67px" class="figure-img img-fluid" alt="LIFS Logo"/></a>
+            </figure>
+          </div>
+        </div>
+        <hr />
+        <div class="row">
+          <div class="col-md-4 text-left">
+              <small class="text-muted">&nbsp;&copy;&nbsp;<span th:text="${#dates.year(#dates.createNow())}">2018</span>&nbsp;ISAS e.V.</small>
+          </div>
+          <div class="col-md-8 text-right">
+            <small class="text-muted" th:if="${page!=null and page.scmCommitId != null and page.buildDate != null and page.scmBranch != null}">Built on <span th:text="${page.buildDate}"></span> from commit <a th:href="${'https://gitlab.isas.de/lifs/lifs-apps/commit/'+page.scmCommitId}" target="_blank" href="https://gitlab.isas.de/lifs/lifs-apps/commit/"><span th:text="${page.scmCommitId}"></span></a> on branch <span th:text="${page.scmBranch}"></span></small>
+          </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-4">
+
+            </div>
+            <div class="col-md-8">
+                <figure class="figure float-right m-1 p-1">
+                    <a href="https://denbi.de" title="German Network for Bioinformatics Infrastructure" target="_blank"><img src="https://lifs.isas.de/images/deNBI_logo.jpg" width="190px" class="figure-img img-fluid" alt="DeNBI Logo" style="vertical-align: bottom;"/></a>
+                    <a href="https://bmbf.de" title="Federal Ministry of Education and Research" target="_blank"><img src="https://lifs.isas.de/images/bmbf_forderlogo_englisch-300x226.jpg" width="100px" class="figure-img img-fluid" alt="BMBF Logo"/></a>
+                </figure>
+            </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

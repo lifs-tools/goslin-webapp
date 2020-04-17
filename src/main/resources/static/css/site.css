@@ -1,0 +1,35 @@
+.card-img-right {
+    max-width: 25%;
+    max-height: -moz-fill-available;
+    max-height: -webkit-fill-available;
+    max-height: fill-available;
+    width: 50%;
+    height: 50%;
+}
+.no-gutters {
+    margin-right: 0;
+    margin-left: 0;
+    padding-right: 0;
+    padding-left: 0;
+}
+#validationResultTable_wrapper {
+    padding-right: 0px;
+    padding-left: 0px;
+}
+.form-group {
+    padding-right: 1rem;
+    margin-bottom: 0.1rem;
+}
+p.matomo-optout span.js label {
+    display: inline;
+}
+.table-fa thead th {
+    font-weight: normal;
+}
+
+.service-card {
+    padding: 0.5rem;
+}
+div.dataTables_wrapper div.dataTables_length label {
+    padding-right: 1rem;
+}

@@ -1,0 +1,2 @@
+src/main/resources/swiss-lipids-normalized.tsv filter=lfs diff=lfs merge=lfs -text
+src/main/resources/lipidmaps-normalized.tsv filter=lfs diff=lfs merge=lfs -text

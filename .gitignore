@@ -1,0 +1,10 @@
+.Rproj.user
+.RData
+.Rhistory
+.Rprofile
+webapp/target/**
+/testData/target/
+/lipidxplorer-linux/target/
+/target/
+/nbproject/
+nbactions.tmp

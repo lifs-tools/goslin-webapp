@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html html-lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head>
+    <th:block th:include="fragments/html-head :: html-head"></th:block>
+</head>
+<body>
+    <div class="container">
+
+        <div class="row">
+
+            <div class="container">
+                <th:block th:include="fragments/nav :: nav"></th:block>
+
+                <main role="main" class="my-3">
+                    <th:block th:include="fragments/login :: login-card"></th:block>
+                    
+                </main>
+
+                <th:block th:include="fragments/footer :: footer"></th:block>
+
+            </div>
+
+        </div>
+
+    </div>
+<th:block th:include="fragments/script-footer :: script-footer"></th:block>
+</body>
+</html>

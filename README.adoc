@@ -1,0 +1,42 @@
+= LIFS Goslin Webapplication
+Nils Hoffmann &lt;nils.hoffmann@isas.de&gt;
+
+//Build status: image:https://travis-ci.org/nilshoffmann/jmzTab-m-webapp.svg?branch=master["Build Status", link="https://travis-ci.org/nilshoffmann/jmzTab-m-webapp"]
+
+This project provides a webapplication for the jGoslin library.
+
+== Building the project from the command-line
+
+In order to build the project and run the unit tests, execute the following command from a terminal:
+
+	./mvnw install
+
+== Running the Web Application 
+The web-application is based on https://projects.spring.io/spring-boot/[Spring-Boot], http://www.thymeleaf.org/[Thymeleaf], https://jquery.com/[jQuery], https://datatables.net/[jQuery Datatables] and https://getbootstrap.com/[Bootstrap 4].
+The `target` folder holds all necessary dependencies and resources as a stand-alone, executable JAR file that can be run as follows (please replace <VERSION> with the correct one)
+
+  ./goslin-webapp-<VERSION>.jar
+
+This will start the application with a default configuration, running on http port 8083. 
+The application can then be accessed from your web browser at
+
+  http://localhost:8083/goslin
+
+== Building the Web Application Docker Image
+If you want to run the web application as a docker container, you can build it as follows:
+
+  ./mvnw -Pdocker install
+
+This will build a Docker container for the webapplication and will make it locally available to be run by docker.
+
+  docker image ls
+  REPOSITORY              TAG            IMAGE ID     CREATED        SIZE
+  lifs/lifs-goslin-webapp 1.0.5-SNAPSHOT 7347237b752e 16 seconds ago 274MB
+
+To run the web application as a Docker container, type in the following (replacing <VERSION> with the current project version, i.e. the TAG version displayed by `docker image ls`):
+
+  docker run -it --rm --name lifsgoslin -p 8080:8083 lifs/lifs-goslin-webapp:<VERSION>
+
+You can then access the application from your browser at http://localhost:8080/goslin
+
+

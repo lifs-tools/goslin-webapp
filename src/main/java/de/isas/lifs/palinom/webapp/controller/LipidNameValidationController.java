@@ -1,0 +1,321 @@
+/*
+ * Copyright 2017 Leibniz Institut für Analytische Wissenschaften - ISAS e.V..
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package de.isas.lifs.palinom.webapp.controller;
+
+import com.google.common.io.Files;
+import de.isas.lifs.palinom.webapp.domain.AppInfo;
+import de.isas.lifs.palinom.webapp.domain.Page;
+import de.isas.lifs.palinom.webapp.domain.PalinomStorageServiceSlots;
+import de.isas.lifs.palinom.webapp.domain.ValidationFileRequest;
+import de.isas.lifs.palinom.webapp.domain.ValidationRequest;
+import de.isas.lifs.palinom.webapp.domain.ValidationResult;
+import de.isas.lifs.palinom.webapp.domain.ValidationResults;
+import de.isas.lifs.palinom.webapp.services.LipidNameValidationService;
+import de.isas.lifs.webapps.common.domain.StorageServiceSlot;
+import de.isas.lifs.webapps.common.domain.UserSessionFile;
+import de.isas.lifs.webapps.common.service.SessionIdGenerator;
+import de.isas.lifs.webapps.common.service.StorageService;
+import de.isas.lipidomics.domain.FattyAcid;
+import de.isas.lipidomics.domain.LipidClass;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.util.Streams;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
+import springfox.documentation.annotations.ApiIgnore;
+//import uk.ac.ebi.pride.jmztab2.utils.errors.MZTabErrorType;
+
+/**
+ *
+ * @author Nils Hoffmann &lt;nils.hoffmann@isas.de&gt;
+ */
+@ApiIgnore
+@Slf4j
+@Controller
+public class LipidNameValidationController {
+
+    private final AppInfo appInfo;
+    private final StorageService storageService;
+    private final SessionIdGenerator sessionIdGenerator;
+    private final LipidNameValidationService lipidNameValidationService;
+    private final LocaleResolver localeResolver;
+    private final Resource lipidnames;
+
+    @Autowired
+    public LipidNameValidationController(LipidNameValidationService lipidNameValidationService, StorageService storageService,
+            AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames) {
+        this.appInfo = appInfo;
+        this.lipidNameValidationService = lipidNameValidationService;
+        this.storageService = storageService;
+        this.sessionIdGenerator = sessionIdGenerator;
+        this.localeResolver = localeResolver;
+        this.lipidnames = lipidnames;
+    }
+
+    @GetMapping("/")
+    public ModelAndView handleHome(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (language != null) {
+            localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
+        }
+        ModelAndView model = new ModelAndView("index");
+        model.addObject("page", createPage("Translate Lipid Names"));
+        ValidationRequest vr = new ValidationRequest();
+        vr.setLipidNames(Streams.asString(lipidnames.getInputStream(), "UTF8").lines().collect(Collectors.toList()));
+        model.addObject("validationRequest", vr);
+        model.addObject("validationFileRequest", new ValidationFileRequest());
+        return model;
+    }
+
+    @PostMapping("/validatefile")
+    public RedirectView validate(@Valid @ModelAttribute("validationFileRequest") ValidationFileRequest validationFileRequest, BindingResult bindingResult,
+            RedirectAttributes redirectAttributes, HttpServletRequest request,
+            HttpSession session) throws IOException {
+        ValidationRequest validationRequest = new ValidationRequest();
+        validationRequest.setLipidNames(new String(validationFileRequest.getFile().getBytes(), StandardCharsets.UTF_8).lines().filter((t) -> {
+            return !t.isEmpty();
+        }).collect(Collectors.toList()));
+        redirectAttributes.addFlashAttribute("validationRequest", validationRequest);
+        return new RedirectView("/validate", true);
+    }
+
+    @RequestMapping(path = {"/validate"}, method = {RequestMethod.GET,
+        RequestMethod.POST})
+    public ModelAndView validate(@Valid @ModelAttribute("validationRequest") ValidationRequest validationRequest, BindingResult bindingResult,
+            RedirectAttributes redirectAttributes, HttpServletRequest request,
+            HttpSession session) {
+        if (bindingResult.hasErrors()) {
+            log.warn("Binding result has errors: {}", bindingResult);
+            ModelAndView modelAndView = new ModelAndView("index");
+            modelAndView.addObject("page", createPage("Translate Lipid Names"));
+            modelAndView.addObject("validationRequest", validationRequest);
+            modelAndView.addObject("hasBeenSubmitted", true);
+            modelAndView.addObject("validationFileRequest", new ValidationFileRequest());
+            return modelAndView;
+        }
+        ModelAndView mav = new ModelAndView("validationResult");
+        mav.addObject("page", createPage("Lipid Name Validation Results"));
+        List<ValidationResult> validationResults = lipidNameValidationService.validate(Optional.ofNullable(validationRequest.getLipidNames()).orElse(Collections.emptyList()));
+        log.info("Received {} validation results!", validationResults.size());
+        ValidationResults results = new ValidationResults();
+        results.setResults(validationResults);
+        UUID sessionId = sessionIdGenerator.generate();
+        UserSessionFile usf = storageService.store(toTable(results),
+                sessionId, PalinomStorageServiceSlots.OUTPUT_TSV_FILE);
+        mav.addObject("validationResults", results);
+        mav.addObject("validationResultsTsv", "OUTPUT_TSV_FILE");
+        mav.addObject(new ValidationFileRequest());
+        mav.addObject("userSessionId", usf.getUserSessionId());
+        long parsingErrors = validationResults.stream().filter((t) -> {
+            return t.getLipidAdduct() == null;
+        }).count();
+        log.info("Encountered {} parsing errors!", parsingErrors);
+        if (parsingErrors > 0) {
+            mav.addObject("message", "Encountered " + parsingErrors + " parsing errors!");
+            mav.addObject("messageLevel", "alert-danger");
+        }
+        return mav;
+    }
+
+    @GetMapping("/download/{sessionId:.+}/{storageServiceSlot:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> getResults(
+            @PathVariable String sessionId, @PathVariable String storageServiceSlot,
+            HttpServletRequest request,
+            HttpSession session) throws FileNotFoundException {
+        UUID resultSessionId = UUID.fromString(sessionId);
+        if ("OUTPUT_TSV_FILE".equals(storageServiceSlot)) {
+            MediaType mediaType = MediaType.ALL;
+            StorageServiceSlot slot = PalinomStorageServiceSlots.OUTPUT_TSV_FILE;
+            UserSessionFile usf = storageService.load(resultSessionId, slot);
+            String ext = Files.getFileExtension(usf.getFilename()).toLowerCase();
+            switch (ext) {
+                case "zip":
+                    mediaType = MediaType.valueOf("application/zip");
+                    break;
+                case "txt":
+                case "log":
+                case "csv":
+                case "tsv":
+                    mediaType = MediaType.TEXT_PLAIN;
+                    break;
+                case "svg":
+                case "xml":
+                    mediaType = MediaType.APPLICATION_XML;
+                    break;
+                case "png":
+                    mediaType = MediaType.IMAGE_PNG;
+                    break;
+                case "gif":
+                    mediaType = MediaType.IMAGE_GIF;
+                    break;
+                case "jpg":
+                case "jpeg":
+                    mediaType = MediaType.IMAGE_JPEG;
+                    break;
+                case "json":
+                    mediaType = MediaType.APPLICATION_JSON;
+                    break;
+                default:
+                    mediaType = MediaType.APPLICATION_OCTET_STREAM;
+                    throw new FileNotFoundException(
+                            "No handler for file extension '" + ext + "' available for '" + sessionId + "' and filename '" + usf.getFilename() + "'!");
+            }
+            Resource file = storageService.loadAsResource(usf, slot);
+            return ResponseEntity.ok().
+                    header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + file.getFilename() + "\"").
+                    contentType(mediaType).
+                    body(file);
+        } else {
+            throw new FileNotFoundException("No such file!");
+        }
+    }
+
+    @GetMapping("/documentation")
+    public ModelAndView handleDocumentation() throws IOException {
+        ModelAndView mav = new ModelAndView("documentation");
+        mav.addObject("page", new Page("documentation", appInfo));
+//        mav.addObject("exampleFiles", exampleFiles.getExampleFile());
+        return mav;
+    }
+
+    private String toTable(ValidationResults vr) {
+        StringBuilder sb = new StringBuilder();
+        HashSet<String> keys = new LinkedHashSet<>();
+        List<Map<String, String>> entries = vr.getResults().stream().map((t) -> {
+            Map<String, String> m = new LinkedHashMap<>();
+            m.put("Normalized Name", t.getGoslinName());
+            m.put("Original Name", t.getLipidName());
+            m.put("Grammar", t.getGrammar().name());
+//           m.put("Adduct",t.getLipidAdduct().getAdduct().toString());
+//           m.put("Sum Formula", t.getLipidAdduct().getSumFormula());
+            m.put("Lipid Maps Category", t.getLipidAdduct().getLipid().getLipidCategory().getFullName() + " [" + t.getLipidAdduct().getLipid().getLipidCategory().name() + "]");
+            LipidClass lclass = t.getLipidAdduct().getLipid().getLipidClass().orElse(LipidClass.UNDEFINED);
+            m.put("Lipid Maps Main Class", lclass.getLipidMapsClassName());
+            m.put("Lipid Maps Reference", t.getLipidMapsReference().map((r) -> {
+                return r.getDatabaseUrl()+r.getDatabaseElementId();
+            }).orElse(""));
+            m.put("Swiss Lipids Reference", t.getSwissLipidsReference().map((r) -> {
+                return r.getDatabaseUrl()+r.getDatabaseElementId();
+            }).orElse(""));
+            m.put("Functional Class Abbr", "[" + lclass.getAbbreviation() + "]");
+            m.put("Functional Class Synonyms", "[" + lclass.getSynonyms().stream().collect(Collectors.joining(", ")) + "]");
+            m.put("Level", t.getLipidSpeciesInfo().getLevel().toString());
+            m.put("Total #C", t.getLipidSpeciesInfo().getNCarbon() + "");
+            m.put("Total #OH", t.getLipidSpeciesInfo().getNHydroxy() + "");
+            m.put("Total #DB", t.getLipidSpeciesInfo().getNDoubleBonds() + "");
+            for (FattyAcid fa : t.getFattyAcids().values()) {
+                m.put(fa.getName() + " SN Position", fa.getPosition() + "");
+                m.put(fa.getName() + " #C", fa.getNCarbon() + "");
+                m.put(fa.getName() + " #OH", fa.getNHydroxy() + "");
+                m.put(fa.getName() + " #DB", fa.getNDoubleBonds() + "");
+                m.put(fa.getName() + " Bond Type", fa.getLipidFaBondType() + "");
+            }
+            keys.addAll(m.keySet());
+            return m;
+        }).collect(Collectors.toList());
+        sb.append(keys.stream().collect(Collectors.joining("\t"))).append("\n");
+        for (Map<String, String> m : entries) {
+            List<String> l = new LinkedList();
+            for (String key : keys) {
+                l.add(m.getOrDefault(key, ""));
+            }
+            sb.append(l.stream().collect(Collectors.joining("\t"))).append("\n");
+        }
+        return sb.toString();
+    }
+
+    @GetMapping("/login")
+    public ModelAndView login() {
+        ModelAndView mav = new ModelAndView("login");
+        mav.addObject("page", createPage("Login"));
+        return mav;
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ModelAndView handleError(HttpServletRequest req, Exception exception)
+            throws Exception {
+        log.error("Caught exception: ", exception);
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("page", createPage("Error"));
+        mav.addObject("title", "Oops, this shouldn't have happened!");
+        mav.addObject("error", exception);
+        mav.addObject("url", req.getRequestURL());
+        mav.addObject("timestamp", new Date().toString());
+        mav.addObject("status", 500);
+        mav.setViewName("error");
+        return mav;
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ModelAndView handleUnmapped(HttpServletRequest req) {
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("page", createPage("Error"));
+        mav.addObject("title", "Sorry... the requested resource does not exist.");
+        mav.addObject("error", "Resource not found!");
+        mav.addObject("url", req.getRequestURL());
+        mav.addObject("timestamp", new Date().toString());
+        mav.addObject("status", 404);
+        mav.setViewName("error");
+        return mav;
+    }
+
+    protected Page createPage(String title) {
+        return new Page(title, appInfo);
+    }
+
+}
