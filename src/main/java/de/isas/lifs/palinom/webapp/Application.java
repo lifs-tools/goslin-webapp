@@ -15,6 +15,7 @@
  */
 package de.isas.lifs.palinom.webapp;
 
+import de.isas.lifs.palinom.webapp.config.NewsPropertyConfig;
 import de.isas.lifs.webapps.common.service.storage.StorageProperties;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
@@ -31,7 +32,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @SpringBootApplication
 @EnableSwagger2
-@EnableConfigurationProperties(value = {StorageProperties.class})
+@EnableConfigurationProperties(value = {StorageProperties.class, NewsPropertyConfig.class})
 @EnableScheduling
 @ComponentScan(basePackages = {"de.isas.lifs.webapps", "de.isas.lifs.palinom"})
 public class Application {

@@ -16,6 +16,7 @@
 package de.isas.lifs.palinom.webapp.controller;
 
 import com.google.common.io.Files;
+import de.isas.lifs.palinom.webapp.config.NewsPropertyConfig;
 import de.isas.lifs.palinom.webapp.domain.AppInfo;
 import de.isas.lifs.palinom.webapp.domain.Page;
 import de.isas.lifs.palinom.webapp.domain.PalinomStorageServiceSlots;
@@ -33,6 +34,7 @@ import de.isas.lipidomics.domain.LipidClass;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -86,25 +88,27 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 @Controller
 public class LipidNameValidationController {
-
+    
     private final AppInfo appInfo;
     private final StorageService storageService;
     private final SessionIdGenerator sessionIdGenerator;
     private final LipidNameValidationService lipidNameValidationService;
     private final LocaleResolver localeResolver;
     private final Resource lipidnames;
-
+    private final NewsPropertyConfig newsPropertyConfig;
+    
     @Autowired
     public LipidNameValidationController(LipidNameValidationService lipidNameValidationService, StorageService storageService,
-            AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames) {
+            AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames, NewsPropertyConfig newsPropertyConfig) {
         this.appInfo = appInfo;
         this.lipidNameValidationService = lipidNameValidationService;
         this.storageService = storageService;
         this.sessionIdGenerator = sessionIdGenerator;
         this.localeResolver = localeResolver;
         this.lipidnames = lipidnames;
+        this.newsPropertyConfig = newsPropertyConfig;
     }
-
+    
     @GetMapping("/")
     public ModelAndView handleHome(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (language != null) {
@@ -118,7 +122,19 @@ public class LipidNameValidationController {
         model.addObject("validationFileRequest", new ValidationFileRequest());
         return model;
     }
-
+    
+    @GetMapping("/info")
+    public ModelAndView handleInfo(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (language != null) {
+            localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
+        }
+        log.info("Retrieved the following news items: {}", newsPropertyConfig.getNews());
+        ModelAndView model = new ModelAndView("info");
+        model.addObject("page", createPage("Goslin Webapp Information"));
+        model.addObject("news", newsPropertyConfig.getNews());
+        return model;
+    }
+    
     @PostMapping("/validatefile")
     public RedirectView validate(@Valid @ModelAttribute("validationFileRequest") ValidationFileRequest validationFileRequest, BindingResult bindingResult,
             RedirectAttributes redirectAttributes, HttpServletRequest request,
@@ -130,7 +146,7 @@ public class LipidNameValidationController {
         redirectAttributes.addFlashAttribute("validationRequest", validationRequest);
         return new RedirectView("/validate", true);
     }
-
+    
     @RequestMapping(path = {"/validate"}, method = {RequestMethod.GET,
         RequestMethod.POST})
     public ModelAndView validate(@Valid @ModelAttribute("validationRequest") ValidationRequest validationRequest, BindingResult bindingResult,
@@ -168,7 +184,7 @@ public class LipidNameValidationController {
         }
         return mav;
     }
-
+    
     @GetMapping("/download/{sessionId:.+}/{storageServiceSlot:.+}")
     @ResponseBody
     public ResponseEntity<Resource> getResults(
@@ -223,7 +239,7 @@ public class LipidNameValidationController {
             throw new FileNotFoundException("No such file!");
         }
     }
-
+    
     @GetMapping("/documentation")
     public ModelAndView handleDocumentation() throws IOException {
         ModelAndView mav = new ModelAndView("documentation");
@@ -231,7 +247,7 @@ public class LipidNameValidationController {
 //        mav.addObject("exampleFiles", exampleFiles.getExampleFile());
         return mav;
     }
-
+    
     private String toTable(ValidationResults vr) {
         StringBuilder sb = new StringBuilder();
         HashSet<String> keys = new LinkedHashSet<>();
@@ -240,23 +256,24 @@ public class LipidNameValidationController {
             m.put("Normalized Name", t.getGoslinName());
             m.put("Original Name", t.getLipidName());
             m.put("Grammar", t.getGrammar().name());
-//           m.put("Adduct",t.getLipidAdduct().getAdduct().toString());
-//           m.put("Sum Formula", t.getLipidAdduct().getSumFormula());
+            m.put("Adduct", t.getLipidAdduct().getAdduct().getAdductString());
             m.put("Lipid Maps Category", t.getLipidAdduct().getLipid().getLipidCategory().getFullName() + " [" + t.getLipidAdduct().getLipid().getLipidCategory().name() + "]");
             LipidClass lclass = t.getLipidAdduct().getLipid().getLipidClass().orElse(LipidClass.UNDEFINED);
             m.put("Lipid Maps Main Class", lclass.getLipidMapsClassName());
-            m.put("Lipid Maps Reference", t.getLipidMapsReference().map((r) -> {
-                return r.getDatabaseUrl()+r.getDatabaseElementId();
-            }).orElse(""));
-            m.put("Swiss Lipids Reference", t.getSwissLipidsReference().map((r) -> {
-                return r.getDatabaseUrl()+r.getDatabaseElementId();
-            }).orElse(""));
+            m.put("Lipid Maps References", t.getLipidMapsReferences().stream().flatMap(Collection::stream).map((r) -> {
+                return r.getDatabaseUrl() + r.getDatabaseElementId();
+            }).collect(Collectors.joining(" | ")));
+            m.put("Swiss Lipids References", t.getSwissLipidsReferences().stream().flatMap(Collection::stream).map((r) -> {
+                return r.getDatabaseUrl() + r.getDatabaseElementId();
+            }).collect(Collectors.joining(" | ")));
             m.put("Functional Class Abbr", "[" + lclass.getAbbreviation() + "]");
             m.put("Functional Class Synonyms", "[" + lclass.getSynonyms().stream().collect(Collectors.joining(", ")) + "]");
             m.put("Level", t.getLipidSpeciesInfo().getLevel().toString());
             m.put("Total #C", t.getLipidSpeciesInfo().getNCarbon() + "");
             m.put("Total #OH", t.getLipidSpeciesInfo().getNHydroxy() + "");
             m.put("Total #DB", t.getLipidSpeciesInfo().getNDoubleBonds() + "");
+            m.put("Exact Mass", String.format("%.4f", t.getMass()));
+            m.put("Formula", t.getSumFormula());
             for (FattyAcid fa : t.getFattyAcids().values()) {
                 m.put(fa.getName() + " SN Position", fa.getPosition() + "");
                 m.put(fa.getName() + " #C", fa.getNCarbon() + "");
@@ -277,14 +294,14 @@ public class LipidNameValidationController {
         }
         return sb.toString();
     }
-
+    
     @GetMapping("/login")
     public ModelAndView login() {
         ModelAndView mav = new ModelAndView("login");
         mav.addObject("page", createPage("Login"));
         return mav;
     }
-
+    
     @ExceptionHandler(Exception.class)
     public ModelAndView handleError(HttpServletRequest req, Exception exception)
             throws Exception {
@@ -299,7 +316,7 @@ public class LipidNameValidationController {
         mav.setViewName("error");
         return mav;
     }
-
+    
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ModelAndView handleUnmapped(HttpServletRequest req) {
@@ -313,9 +330,9 @@ public class LipidNameValidationController {
         mav.setViewName("error");
         return mav;
     }
-
+    
     protected Page createPage(String title) {
         return new Page(title, appInfo);
     }
-
+    
 }

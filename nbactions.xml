@@ -23,4 +23,14 @@
                 <activatedProfile>dev</activatedProfile>
             </activatedProfiles>
         </action>
+        <action>
+            <actionName>CUSTOM-dev offline</actionName>
+            <displayName>dev offline</displayName>
+            <goals>
+                <goal>spring-boot:run</goal>
+            </goals>
+            <activatedProfiles>
+                <activatedProfile>dev</activatedProfile>
+            </activatedProfiles>
+        </action>
     </actions>

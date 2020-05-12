@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head></head>
+    <body>
+        <div th:fragment="manual">
+            <div class="card my-2">
+                <div class="card-body">
+                    <h4 class="card-title" id="user-content-sec:webserviceusers">Web Application and REST API</h4>
+                    <div>
+                        <h4 id="user-content-interactive-usage">Interactive Usage</h4>
+                        <p>The interactive&nbsp;goslin web application is available
+                            at&nbsp;<a href="https://apps.lifs.isas.de/goslin" rel="nofollow">https://apps.lifs.isas.de/goslin</a>. It provides two forms to i) upload
+                            a file containing one lipid name per line (see <a href="#fig:goslin-webapp-form-01">Figure 1.</a>), or ii)
+                            upload a list of lipid names, defined by the user in an interactive form
+                            (see <a href="#fig:goslin-webapp-form-02">Figure 2</a>). The
+                            latter form also allows pasting lists of lipid names directly from the
+                            clipboard with&nbsp;<code>CTRL+V</code>. Both forms provide feedback for issues
+                            concerning every processed lipid, such as invalid names or typos (see <a href="#fig:goslin-webapp-form-02a">Figure 3.</a>), to
+                            allow the user to cross-check their data before proceeding.</p>
+                        <figure class="figure">
+                            <a id="fig:goslin-webapp-form-01" ><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-form-01.png" alt="SubmissionForm1" style="max-width:100%;"/></a>
+                            <figcaption class="figure-caption"><b>Figure 1.</b>&nbsp;Goslin web application submission form for text files with one lipid name per row.</figcaption>
+                        </figure>
+                        <figure class="figure">
+                            <a id="fig:goslin-webapp-form-02"><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-form-02.png" alt="SubmissionForm2" style="max-width:100%;"/></a>
+                            <figcaption class="figure-caption"><b>Figure 2.</b>&nbsp;Goslin web application submission form for user-defined lipid names.</figcaption>
+                        </figure>
+                        <figure class="figure">
+                            <a id="fig:goslin-webapp-form-02a"><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-form-02a.png" alt="SubmissionForm3" style="max-width:100%;"/></a>
+                            <figcaption class="figure-caption"><b>Figure 3.</b>&nbsp;Goslin web application submission form for user-defined lipid names provides feedback for unknown or unsupported names and parts thereof.</figcaption>
+                        </figure>
+                        <figure class="figure">
+                            <a id="fig:goslin-webapp-form-03" ><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-result-03.png" alt="ResultForm" style="max-width:100%;"/></a>
+                            <figcaption class="figure-caption"><b>Figure 4.</b>&nbsp;Parsing results are displayed as ’cards’ for every lipid name. Clicking on a card opens it and shows details of the according lipid.</figcaption>
+                        </figure>
+                        <p>After successful validation, the validated lipids are returned in
+                            overview cards (see <a href="#fig:goslin-webapp-form-03">Figure 4.</a>),
+                            detailing their LIPID MAPS&REG; classification, cross-links to SwissLipids
+                            and/or LIPID MAPS&REG; or HMDB. Additionally, the cards show summary
+                            information about the number of carbon atoms, double bonds,
+                            hydroxylations and detailed information, such as double bond position,
+                            long-chain-base status, and the bond type of the fatty acyl to the head
+                            group for each fatty acyl, if available (see <a href="#fig:goslin-webapp-form-04" >Figure 5.</a>).</p>
+                        <figure class="figure">
+                            <a id="fig:goslin-webapp-form-04" ><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-result-detail-04.png" alt="ResultDetail" style="max-width:100%;"/></a>
+                            <figcaption class="figure-caption"><b>Figure 5.</b>&nbsp;Each result card displays summary and detail information about a lipid. Depending on the lipid level, this can include information about each individual fatty acyl. Cross-links to SwissLipids and LIPID MAPS&REG; are shown where a normalized lipid name could be matched unambiguously against the normalized names of SwissLipids and / or LIPID MAPS&REG; lipids.</figcaption>
+                        </figure>
+                        <p>Finally, it is also possible to download the translated list of lipid names and their properties as a tab-separated file, by clicking on the <em>Download</em> button.</p>
+                        <hr/>
+                        <p>The source code for the web application and instructions to build it as
+                            a Docker container are available at
+                            <a href="https://github.com/lifs-tools/goslin-webapp">https://github.com/lifs-tools/goslin-webapp</a> under the terms of the open
+                            source Apache license version 2.</p>
+                    </div>
+                    <hr/>
+                    <div>
+                        <h4 id="user-content-programmatic-access-via-the-rest-api">Programmatic access via the REST API</h4>
+                        <div>
+                            <p>An interactive documentation for the rest api of the goslin web
+                                application is available at
+                                <a href="https://apps.lifs.isas.de/goslin/swagger-ui.html" rel="nofollow">https://apps.lifs.isas.de/goslin/swagger-ui.html</a> (see <a href="#fig:goslin-webapp-rest-05">Figure 6.</a>). To
+                                illustrate its usage, we will briefly show a small example how a user
+                                can access the rest api with a standard http client.</p>
+                        </div>
+                        <figure class="figure">
+                            <a id="fig:goslin-webapp-rest-05" ><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-rest-05.png" alt="RESTForm" style="max-width:100%;"/></a>
+                            <figcaption class="figure-caption"><b>Figure 6.</b>&nbsp;The goslin web application provides an interactive documentation for its rest api to simplify programmatic access.</figcaption>
+                        </figure>
+                        <div>
+                            <p>The Structure for the request consists of a json object&nbsp;\{} enclosing
+                                two lists, with the names <code>lipidNames</code> and <code>grammars</code>. Acceptable values
+                                for <code>grammars</code> are: <code>LIPIDMAPS</code>, <code>GOSLIN</code>, <code>GOSLIN_FRAGMENTS</code>,
+                                <code>SWISSLIPIDS</code>, and <code>HMDB</code>. A complete list is available from the
+                                interactive rest api documentation’s <code>Models</code> section under
+                                <code>ValidationRequest</code>. Both fields in the <code>ValidationRequest</code> accept
+                                comma-separated entries, enclosed in double quotes:</p>
+                        </div>
+                        <div>
+                            <div>
+                                <pre>  {
+      "lipidNames": [
+        "Cer(d18:1/16:1(6Z))"
+      ],
+      "grammars": [
+        "LIPIDMAPS"
+      ]
+  }</pre>
+                            </div>
+                        </div>
+                        <div>
+                            <p>Sending the http POST request with <code>curl</code> as an http client looks as
+                                follows:</p>
+                        </div>
+                        <div>
+                            <div>
+                                <pre>  curl -X POST "https://apps.lifs.isas.de/goslin/rest/validate" -H  "accept: */*" -H  "Content-Type: application/json" -d "{  \"lipidNames\": [    \"Cer(d18:1/16:1(6Z))\"  ],  \"grammars\": [    \"LIPIDMAPS\"  ]}"</pre>
+                            </div>
+                        </div>
+                        <div>
+                            <p>The rest api will return the following result for the request, with a
+                                http response code of 200 (OK). This result returns a map of properties
+                                for each lipid name that was parsed. If at least one name is not
+                                parseable, the rest api will return a response code of 400 (Client
+                                error), together with the same results reponse object. In that case, the
+                                <code>failedToParse</code> field in the response will contain the number of lipid
+                                names that could not be parsed. For those results where no grammar was
+                                applicable, the <code>grammar</code> field will contain the string
+                                <code>NOT_PARSEABLE</code>.¸In other cases, that field will contain the last
+                                grammar used to parse the lipid name and the <code>messages</code> field will
+                                contain a list of validation messages that help to narrow down the
+                                offending bits in the lipid name.</p>
+                        </div>
+                        <div>
+                            <div>
+                                <div class="highlight highlight-source-json"><pre>{
+  <span class="pl-s"><span class="pl-pds">"</span>results<span class="pl-pds">"</span></span>: [
+    {
+      <span class="pl-s"><span class="pl-pds">"</span>lipidName<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Cer(d18:1/16:1(6Z))<span class="pl-pds">"</span></span>,
+      <span class="pl-s"><span class="pl-pds">"</span>grammar<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>LIPIDMAPS<span class="pl-pds">"</span></span>,
+      <span class="pl-s"><span class="pl-pds">"</span>messages<span class="pl-pds">"</span></span>: [],
+      <span class="pl-s"><span class="pl-pds">"</span>lipidAdduct<span class="pl-pds">"</span></span>: {
+        <span class="pl-s"><span class="pl-pds">"</span>lipid<span class="pl-pds">"</span></span>: {
+          <span class="pl-s"><span class="pl-pds">"</span>lipidCategory<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>SP<span class="pl-pds">"</span></span>,
+          <span class="pl-s"><span class="pl-pds">"</span>lipidClass<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>CER<span class="pl-pds">"</span></span>,
+          <span class="pl-s"><span class="pl-pds">"</span>headGroup<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Cer<span class="pl-pds">"</span></span>,
+          <span class="pl-s"><span class="pl-pds">"</span>info<span class="pl-pds">"</span></span>: {
+            <span class="pl-s"><span class="pl-pds">"</span>type<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>STRUCTURAL<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Cer<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>position<span class="pl-pds">"</span></span>: <span class="pl-c1">-1</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>lipidFaBondType<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>ESTER<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>lcb<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>modifications<span class="pl-pds">"</span></span>: [],
+            <span class="pl-s"><span class="pl-pds">"</span>doubleBondPositions<span class="pl-pds">"</span></span>: {},
+            <span class="pl-s"><span class="pl-pds">"</span>level<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>STRUCTURAL_SUBSPECIES<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>ncarbon<span class="pl-pds">"</span></span>: <span class="pl-c1">34</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>nhydroxy<span class="pl-pds">"</span></span>: <span class="pl-c1">2</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>ndoubleBonds<span class="pl-pds">"</span></span>: <span class="pl-c1">2</span>
+          },</pre></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p>The response part also reports the normalized name (<code>goslinName</code>), as
+                                well as classification information using the LIPID MAPS&REG; category and
+                                class associated to the parsed lipid.</p>
+                        </div>
+                        <div>
+                            <div>
+                                <div class="highlight highlight-source-json"><pre>      },
+      <span class="pl-s"><span class="pl-pds">"</span>goslinName<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Cer 18:1;2/16:1(6Z)<span class="pl-pds">"</span></span>,
+      <span class="pl-s"><span class="pl-pds">"</span>lipidMapsCategory<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>SP<span class="pl-pds">"</span></span>,
+      <span class="pl-s"><span class="pl-pds">"</span>lipidMapsClass<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>SP0203<span class="pl-pds">"</span></span>,</pre></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p>The response also reports information on the fatty acyls detected in the
+                                lipid name. In this case, a lcb (in the ceramide) has been detected. The
+                                name given here as an example was classified on structural subspecies
+                                level, since the lcb contains one double bond, but without positional
+                                E/Z information. The fatty acyl FA1 at the sn2 position does report E/Z
+                                information for its double bond, thus FA1 is an isomeric fatty acyl.
+                                Overall, the lipid can thus be classified as a structural subspecies.</p>
+                        </div>
+                        <div>
+                            <div>
+                                <div class="highlight highlight-source-json"><pre>      <span class="pl-s"><span class="pl-pds">"</span>fattyAcids<span class="pl-pds">"</span></span>: {
+        <span class="pl-s"><span class="pl-pds">"</span>LCB<span class="pl-pds">"</span></span>: {
+          <span class="pl-s"><span class="pl-pds">"</span>type<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>STRUCTURAL<span class="pl-pds">"</span></span>,
+          <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>LCB<span class="pl-pds">"</span></span>,
+          <span class="pl-s"><span class="pl-pds">"</span>position<span class="pl-pds">"</span></span>: <span class="pl-c1">1</span>,
+          <span class="pl-s"><span class="pl-pds">"</span>lipidFaBondType<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>ESTER<span class="pl-pds">"</span></span>,
+          <span class="pl-s"><span class="pl-pds">"</span>lcb<span class="pl-pds">"</span></span>: <span class="pl-c1">true</span>,
+          <span class="pl-s"><span class="pl-pds">"</span>modifications<span class="pl-pds">"</span></span>: [],
+          <span class="pl-s"><span class="pl-pds">"</span>doubleBondPositions<span class="pl-pds">"</span></span>: {},
+          <span class="pl-s"><span class="pl-pds">"</span>ncarbon<span class="pl-pds">"</span></span>: <span class="pl-c1">18</span>,
+          <span class="pl-s"><span class="pl-pds">"</span>nhydroxy<span class="pl-pds">"</span></span>: <span class="pl-c1">2</span>,
+          <span class="pl-s"><span class="pl-pds">"</span>ndoubleBonds<span class="pl-pds">"</span></span>: <span class="pl-c1">1</span>
+        },
+        <span class="pl-s"><span class="pl-pds">"</span>FA1<span class="pl-pds">"</span></span>: {
+          <span class="pl-s"><span class="pl-pds">"</span>type<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>ISOMERIC<span class="pl-pds">"</span></span>,
+          <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>FA1<span class="pl-pds">"</span></span>,
+          <span class="pl-s"><span class="pl-pds">"</span>position<span class="pl-pds">"</span></span>: <span class="pl-c1">2</span>,
+          <span class="pl-s"><span class="pl-pds">"</span>lipidFaBondType<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>ESTER<span class="pl-pds">"</span></span>,
+          <span class="pl-s"><span class="pl-pds">"</span>lcb<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>,
+          <span class="pl-s"><span class="pl-pds">"</span>modifications<span class="pl-pds">"</span></span>: [],
+          <span class="pl-s"><span class="pl-pds">"</span>doubleBondPositions<span class="pl-pds">"</span></span>: {
+            <span class="pl-s"><span class="pl-pds">"</span>6<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Z<span class="pl-pds">"</span></span>
+          },
+          <span class="pl-s"><span class="pl-pds">"</span>ncarbon<span class="pl-pds">"</span></span>: <span class="pl-c1">16</span>,
+          <span class="pl-s"><span class="pl-pds">"</span>nhydroxy<span class="pl-pds">"</span></span>: <span class="pl-c1">0</span>,
+          <span class="pl-s"><span class="pl-pds">"</span>ndoubleBonds<span class="pl-pds">"</span></span>: <span class="pl-c1">1</span>
+        }
+      }</pre></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p>Finally, the response reports the total number lipid names received, the
+                                total number parsed and the total number of parsing failures.</p>
+                        </div>
+                        <div>
+                            <div>
+                                <div class="highlight highlight-source-json"><pre>  ],
+  <span class="pl-s"><span class="pl-pds">"</span>totalReceived<span class="pl-pds">"</span></span>: <span class="pl-c1">1</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>totalParsed<span class="pl-pds">"</span></span>: <span class="pl-c1">1</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>failedToParse<span class="pl-pds">"</span></span>: <span class="pl-c1">0</span>
+}</pre></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

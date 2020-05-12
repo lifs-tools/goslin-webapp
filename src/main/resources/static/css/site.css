@@ -33,3 +33,73 @@ p.matomo-optout span.js label {
 div.dataTables_wrapper div.dataTables_length label {
     padding-right: 1rem;
 }
+
+ul.timeline {
+    list-style-type: none;
+    position: relative;
+}
+ul.timeline:before {
+    content: ' ';
+    background: #d4d9df;
+    display: inline-block;
+    position: absolute;
+    left: 29px;
+    width: 2px;
+    height: 100%;
+    z-index: 400;
+}
+ul.timeline > li {
+    margin: 1rem 0;
+    padding-top: 1rem;
+    padding-left: 20px;
+    padding-bottom: 5px;
+}
+ul.timeline > li:before {
+    content: ' ';
+    background: white;
+    display: inline-block;
+    position: absolute;
+    border-radius: 50%;
+    border: 5px solid #49b0dc;
+    margin-top: 1.4rem;
+    left: 20px;
+    width: 20px;
+    height: 20px;
+    z-index: 400;
+}
+/*
+.timeline-arrow {
+    border-top: 0.75rem solid transparent;
+    border-right: 1rem solid #49b0dc4d;
+    border-bottom: 0.75rem solid transparent;
+    display: block;
+    position: absolute;
+    left: -1rem;
+    margin-top: 0.1rem;
+}
+
+*/
+#toc > ul > li > a.nav-link:hover {
+    color: #49b0dc;
+    border-left: 1px solid #49b0dc;
+}
+
+#toc > ul > li > a.active {
+    color: #137dc0;
+    border-left: 2px solid #137dc0;
+}
+pre {
+    background-color: #f6f8fa;
+}
+.pl-c1, .pl-s .pl-v {
+    color: #005cc5;
+}
+.pl-k {
+    color: #d73a49;
+}
+.pl-smw, .pl-v {
+    color: #e36209;
+}
+.pl-e, .pl-en {
+    color: #6f42c1;
+}

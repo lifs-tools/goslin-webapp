@@ -19,6 +19,7 @@ import de.isas.lipidomics.domain.ExternalDatabaseReference;
 import de.isas.lipidomics.domain.FattyAcid;
 import de.isas.lipidomics.domain.LipidAdduct;
 import de.isas.lipidomics.domain.LipidSpeciesInfo;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -51,10 +52,14 @@ public class ValidationResult {
     private String lipidMapsCategory;
 
     private String lipidMapsClass;
+    
+    private Double mass;
+    
+    private String sumFormula;
 
-    private Optional<ExternalDatabaseReference> lipidMapsReference;
+    private Optional<Collection<ExternalDatabaseReference>> lipidMapsReferences;
 
-    private Optional<ExternalDatabaseReference> swissLipidsReference;
+    private Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences;
 
     private Map<String, FattyAcid> fattyAcids = Collections.emptyMap();
 

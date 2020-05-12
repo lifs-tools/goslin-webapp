@@ -77,7 +77,7 @@ public class LipidNameValidationService {
         }).collect(Collectors.toList());
     }
 
-    private VisitorParser parserFor(ValidationResult.Grammar grammar) {
+    private VisitorParser<LipidAdduct> parserFor(ValidationResult.Grammar grammar) {
         switch (grammar) {
             case GOSLIN:
                 return new GoslinVisitorParser();
@@ -97,7 +97,7 @@ public class LipidNameValidationService {
     private ValidationResult parseWith(String lipidName, Deque<ValidationResult.Grammar> grammars) {
         log.debug("Grammars left: " + grammars.size());
         ValidationResult.Grammar grammar = grammars.pop();
-        VisitorParser parser = parserFor(grammar);
+        VisitorParser<LipidAdduct> parser = parserFor(grammar);
         log.debug("Using grammar " + grammar + " with parser: " + parser.getClass().getSimpleName());
         SyntaxErrorListener listener = new SyntaxErrorListener();
         try {
@@ -109,13 +109,19 @@ public class LipidNameValidationService {
             result.setMessages(toStringMessages(listener));
             result.setLipidMapsCategory(la.getLipid().getLipidCategory().name());
             String speciesName = la.getLipid().getLipidString(LipidLevel.SPECIES);
+            Double mass = la.getMass();
+            if(mass==0.0) {
+                mass = Double.NaN;
+            }
+            result.setMass(mass);
+            result.setSumFormula(la.getSumFormula());
             result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
             result.setLipidSpeciesInfo(la.getLipid().getInfo().orElse(LipidSpeciesInfo.NONE));
             try {
                 String normalizedName = la.getLipid().getNormalizedLipidString();
                 result.setGoslinName(normalizedName);
-                result.setLipidMapsReference(dbLoader.findLipidMapsEntry(normalizedName));
-                result.setSwissLipidsReference(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
+                result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName));
+                result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
             } catch (RuntimeException re) {
                 log.debug("Parsing error for {}!", lipidName);
             }

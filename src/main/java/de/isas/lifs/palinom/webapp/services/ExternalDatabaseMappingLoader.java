@@ -21,12 +21,14 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import de.isas.lipidomics.domain.ExternalDatabaseReference;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -38,18 +40,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExternalDatabaseMappingLoader {
     
-    private final Map<String, ExternalDatabaseReference> lipidMapsReferences;
-    private final Map<String, ExternalDatabaseReference> swissLipidsReferences;
+    private final MultiValuedMap<String, ExternalDatabaseReference> lipidMapsReferences;
+    private final MultiValuedMap<String, ExternalDatabaseReference> swissLipidsReferences;
     
     public ExternalDatabaseMappingLoader() {
-        this.lipidMapsReferences = new HashMap<>();
-        this.swissLipidsReferences = new HashMap<>();
+        this.lipidMapsReferences = new ArrayListValuedHashMap<>();
+        this.swissLipidsReferences = new ArrayListValuedHashMap<>();
         int lipidMapsEntries = 0;
         for (ExternalDatabaseReference edr : loadObjectList(ExternalDatabaseReference.class, "lipidmaps-normalized.tsv", '\t')) {
             this.lipidMapsReferences.put(edr.getNormalizedName(), edr);
             this.lipidMapsReferences.put(edr.getNativeAbbreviation(), edr);
             lipidMapsEntries++;
         }
+        log.info("Loaded {} records for Lipid MAPS!", lipidMapsEntries);
         int swissLipidsEntries = 0;
         for (ExternalDatabaseReference edr : loadObjectList(ExternalDatabaseReference.class, "swiss-lipids-normalized.tsv", '\t')) {
             this.swissLipidsReferences.put(edr.getNormalizedName(), edr);
@@ -57,25 +60,20 @@ public class ExternalDatabaseMappingLoader {
             swissLipidsEntries++;
         }
         
-        log.info("Loaded {} records for Lipid MAPS!", lipidMapsEntries);
         log.info("Loaded {} records for Swiss Lipids!", swissLipidsEntries);
     }
     
-    public Optional<ExternalDatabaseReference> findSwissLipidsEntry(String... names) {
+    public Optional<Collection<ExternalDatabaseReference>> findSwissLipidsEntry(String... names) {
         List<String> namesList = Arrays.asList(names);
-        return Optional.ofNullable(namesList.stream().map((t) -> {
+        return Optional.of(namesList.stream().map((t) -> {
             return this.swissLipidsReferences.get(t);
-        }).filter((t) -> {
+        }).flatMap(Collection::stream).filter((t) -> {
             return t != null;
-        }).findFirst().orElse(null));
+        }).distinct().collect(Collectors.toList()));
     }
     
-    public Optional<ExternalDatabaseReference> findLipidMapsEntry(String lipidMapsNames) {
-        Optional<ExternalDatabaseReference> ref = Optional.ofNullable(this.lipidMapsReferences.get(lipidMapsNames));
-        if (ref.isPresent()) {
-            log.info("Found LipidMAPS match for " + lipidMapsNames + ": " + ref.get());
-        }
-        return ref;
+    public Optional<Collection<ExternalDatabaseReference>> findLipidMapsEntry(String lipidMapsNames) {
+        return Optional.of(this.lipidMapsReferences.get(lipidMapsNames).stream().distinct().collect(Collectors.toList()));
     }
     
     protected <T> List<T> loadObjectList(Class<T> type, String fileName, char columnSeparator) {

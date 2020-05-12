@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html html-lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+    <head>
+    <th:block th:include="fragments/html-head :: html-head"></th:block>
+</head>
+<body data-spy="scroll" data-target="#toc">
+    <div class="container">
+
+        <div class="row">
+
+            <div class="container">
+                <th:block th:include="fragments/nav :: nav"></th:block>
+                <main role="main" class="my-3 col-md-12">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <th:block th:include="fragments/overview :: overview"></th:block>
+                            <th:block th:include="fragments/news :: news"></th:block>
+                            <th:block th:include="fragments/manual :: manual"></th:block>
+                            <th:block th:include="fragments/news :: citing"></th:block>
+                            <th:block th:include="fragments/news :: acknowledgements"></th:block>
+                        </div>
+                        <div class="col-sm-3">
+                            <nav id="toc" data-toggle="toc" class="sticky-top"></nav>
+                        </div>
+                    </div>
+
+                </main>
+
+                <th:block th:include="fragments/footer :: footer"></th:block>
+
+            </div>
+
+        </div>
+
+    </div>
+<th:block th:include="fragments/script-footer :: script-footer"></th:block>
+</body>
+</html>
