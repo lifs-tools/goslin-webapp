@@ -1,6 +1,7 @@
 = LIFS Goslin Webapplication
 Nils Hoffmann &lt;nils.hoffmann@isas.de&gt;
 
+image:https://zenodo.org/badge/DOI/10.5281/zenodo.3829055.svg["DOI", link="https://doi.org/10.5281/zenodo.3829055"]
 //Build status: image:https://travis-ci.org/nilshoffmann/jmzTab-m-webapp.svg?branch=master["Build Status", link="https://travis-ci.org/nilshoffmann/jmzTab-m-webapp"]
 
 This project provides a webapplication for the jgoslin library.
