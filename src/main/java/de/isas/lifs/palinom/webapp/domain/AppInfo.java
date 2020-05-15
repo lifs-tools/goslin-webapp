@@ -46,6 +46,12 @@ public class AppInfo {
     @Value("${lifs.user.url}")
     private String lifsUserUrl;
     
+    @Value("${jgoslin.version.number}")
+    private String jgoslinVersionNumber;
+    
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private String maxFileSize;
+    
     public String getBuildDate() {
         if(buildDate!=null && !buildDate.isEmpty()) {
             LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(buildDate)), ZoneId.of("Z"));

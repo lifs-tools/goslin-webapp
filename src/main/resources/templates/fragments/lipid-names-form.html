@@ -11,14 +11,14 @@
                     <div class="card-body">
                         <form th:if="${validationResult}" th:object="${validationResult}">
                             <div class="form-group row">
-                                <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The Goslin normalized lipid name."><strong>Normalized Name</strong>&nbsp;</abbr></label>
+                                <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The Goslin normalized lipid name, without the adduct."><strong>Normalized Name</strong>&nbsp;</abbr></label>
                                 <div class="col-sm-9">
                                     <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{goslinName}"></input>
                                     <!-- <a th:href="@{'https://www.swisslipids.org/#/search/'+${validationResult.goslinName}}">SwissLipids</a> -->
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The original lipid name, as submitted">Original Name&nbsp;</abbr></label>
+                                <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The original lipid name, as submitted.">Original Name&nbsp;</abbr></label>
                                 <div class="col-sm-9">
                                     <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{lipidName}"></input>
                                     <!-- <a th:href="@{'https://www.swisslipids.org/#/search/'+${validationResult.goslinName}}">SwissLipids</a> -->
@@ -66,24 +66,24 @@
                                     </div>
                                 </div>
                                 <div th:if="${validationResult.lipidMapsReferences!=null && validationResult.lipidMapsReferences.isPresent()}" class="form-group row">
-                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Corresponding LIPID MAPS&REG; entries, based on the normalized lipid name.">LIPID MAPS&REG; Entries&nbsp;</abbr></label>
-                                    <div class="input-group col-sm-9" th:if="${validationResult.lipidMapsReferences.isPresent()}">
-                                        <div readonly="true" class="form-control-plaintext form-control-sm">
+                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Corresponding LIPID MAPS&REG; entries, based on the normalized lipid name. May contain synonyms.">LIPID MAPS&REG; Entries&nbsp;</abbr></label>
+                                    <div class="col-sm-9" th:if="${validationResult.lipidMapsReferences.isPresent()}">
+                                        <div readonly="true" class="form-control-plaintext form-control-sm form-control-dbhits">
                                             <th:block th:if="${validationResult.lipidMapsReferences.get().isEmpty()}"><abbr title="Not Available">N.A.</abbr></th:block>
-                                            <th:block th:unless="${validationResult.lipidMapsReferences.get().isEmpty()}" th:each="lipidMapsEntry, itemStat : ${validationResult.lipidMapsReferences.get()}">
-                                                <a target="_blank" th:href="@{${lipidMapsEntry.databaseUrl}+${lipidMapsEntry.databaseElementId}}" th:title="${lipidMapsEntry.getDatabaseElementId()}"><span th:if="${lipidMapsEntry.getNativeAbbreviation()!=null && !lipidMapsEntry.getNativeAbbreviation().isEmpty()}" th:text="${lipidMapsEntry.getNativeAbbreviation()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
-                                            </th:block>
+                                            <ul class="list-group list-group-flush" th:unless="${validationResult.lipidMapsReferences.get().isEmpty()}" th:each="lipidMapsEntry, itemStat : ${validationResult.lipidMapsReferences.get()}">
+                                                <li class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${lipidMapsEntry.databaseUrl}+${lipidMapsEntry.databaseElementId}}" th:title="${lipidMapsEntry.getDatabaseElementId()}"><span th:if="${lipidMapsEntry.getNativeAbbreviation()!=null && !lipidMapsEntry.getNativeAbbreviation().isEmpty()}" th:text="${lipidMapsEntry.getNativeAbbreviation()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
                                 <div th:if="${validationResult.swissLipidsReferences!=null && validationResult.swissLipidsReferences.isPresent()}" class="form-group row">
-                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Corresponding SwissLipids entries, based on the normalized lipid name.">SwissLipids Entries&nbsp;</abbr></label>
-                                    <div class="input-group col-sm-9" th:if="${validationResult.swissLipidsReferences.isPresent()}">
-                                        <div readonly="true" class="form-control-plaintext form-control-sm">
+                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Corresponding SwissLipids entries, based on the normalized lipid name. May contain synonyms.">SwissLipids Entries&nbsp;</abbr></label>
+                                    <div class="col-sm-9" th:if="${validationResult.swissLipidsReferences.isPresent()}">
+                                        <div readonly="true" class="form-control-plaintext form-control-sm form-control-dbhits">
                                             <th:block th:if="${validationResult.swissLipidsReferences.get().isEmpty()}"><abbr title="Not Available">N.A.</abbr></th:block>
-                                            <th:block th:unless="${validationResult.swissLipidsReferences.get().isEmpty()}" th:each="swissLipidsEntry, itemStat : ${validationResult.swissLipidsReferences.get()}">
-                                                <a target="_blank" th:href="@{${swissLipidsEntry.databaseUrl}+${swissLipidsEntry.databaseElementId}}" th:title="${swissLipidsEntry.getDatabaseElementId()}"><span th:if="${swissLipidsEntry.getNativeAbbreviation()!=null && !swissLipidsEntry.getNativeAbbreviation().isEmpty()}" th:text="${swissLipidsEntry.getNativeAbbreviation()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
-                                            </th:block>
+                                            <ul class="list-group list-group-flush" th:unless="${validationResult.swissLipidsReferences.get().isEmpty()}" th:each="swissLipidsEntry, itemStat : ${validationResult.swissLipidsReferences.get()}">
+                                                <li class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${swissLipidsEntry.databaseUrl}+${swissLipidsEntry.databaseElementId}}" th:title="${swissLipidsEntry.getDatabaseElementId()}"><span th:if="${swissLipidsEntry.getNativeAbbreviation()!=null && !swissLipidsEntry.getNativeAbbreviation().isEmpty()}" th:text="${swissLipidsEntry.getNativeAbbreviation()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
@@ -126,15 +126,15 @@
                                     </div>
                                 </div>
                                 <div class="form-group row" th:if="${validationResult.mass>0}">
-                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Exact Mass. May include lipid and adduct mass.">Exact Mass&nbsp;</abbr></label>
+                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Calculated exact mass. May include lipid and adduct mass.">Exact Mass&nbsp;</abbr></label>
                                     <div class="col-sm-9">
                                         <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="${#numbers.formatDecimal(validationResult.mass, 1, 4)}"></input>
                                     </div>
                                 </div>
                                 <div class="form-group row" th:if="${validationResult.sumFormula!=null and !validationResult.sumFormula.isEmpty()}">
-                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Sum Formula. May include lipid and adduct elements.">Formula&nbsp;</abbr></label>
+                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Calculated sum formula. May include lipid and adduct elements.">Formula&nbsp;</abbr></label>
                                     <div class="col-sm-9">
-                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="${validationResult.sumFormula}"></input>
+                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm sum-formula" th:value="${validationResult.sumFormula}"></input>
                                     </div>
                                 </div>
                                 <div class="form-group row" th:unless="${validationResult.fattyAcids != null and !validationResult.fattyAcids.isEmpty()}">
@@ -150,7 +150,7 @@
                                     <div class="col-sm-9">
                                         <table class="table table-striped table-sm table-responsive-sm table-fa">
                                             <thead>
-                                            <th>Name</th>
+                                            <th><abbr title="The name of the FA chain. Numbering starts from 1 and proceeds from left to right, e.g. FA1, FA2, ... . Long-chain-base sphingoid backbones are abbreviated as LCB. The next FA after an LCB would be FA1.">Name</abbr></th>
                                             <th><abbr title="The sn position of the FA chain w.r.t. the lipid head group">Position</abbr></th>
                                             <th><abbr title="The number of Carbon atoms within this FA chain"># C atoms</abbr></th>
                                             <th><abbr title="The number of double bonds within this FA chain"># Double bonds</abbr></th>
@@ -211,7 +211,7 @@
                             </div>
                             <div class="col-sm-12">
                                 <small id="fileHelpBlock" class="form-text text-muted">
-                                    Select a local file to upload and validate. <!-- Size limit is <span th:text="${uploadLimit}"></span>. -->
+                                    Select a local file to upload and validate.<th:block th:if="${page!=null}"> Size limit is <span th:text="${page.maxFileSize}"></span><th:block>.
                                 </small>
                             </div>
                         </div>

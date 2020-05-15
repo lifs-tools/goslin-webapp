@@ -59,9 +59,6 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-//        registry.addResourceHandler("swagger-ui.html").
-//            addResourceLocations("classpath:/META-INF/resources/");
-
         registry.addResourceHandler("/webjars/**").
                 addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
@@ -120,7 +117,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     private ApiInfo apiEndPointsInfo() {
         return new ApiInfoBuilder().title("Goslin REST API")
                 .description("Services for lipid shorthand name parsing, translation and mapping to structural hierarchies.")
-                .contact(new springfox.documentation.service.Contact("Nils Hoffmann", "https://lifs.isas.de", "lifs-support@isas.de"))
+                .contact(new springfox.documentation.service.Contact("LIFS", "https://lifs.isas.de", "lifs-support@isas.de"))
                 .license("Apache 2.0")
                 .licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html")
                 .version(appInfo().getVersionNumber())

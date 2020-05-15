@@ -11,7 +11,7 @@
                             <div class="card timeline-card">
                                 <div class="timeline-arrow"></div>
                                 <div class="card-header" th:id="${'news'+itemStat.index}">
-                                        <button type="button" class="btn btn-link" role="button" data-toggle="collapse" th:attr="data-target='#newsEntry'+${itemStat.index},aria-controls='newsEntry'+${itemStat.index}" aria-expanded="true" th:text="${newsEntry.title}">Added adducts, masses and sum formulas</button><a class="btn btn-link float-right" role="button" href="#" th:href="@{${newsEntry.link}}"><span th:text="${newsEntry.date}">v1.0.19 - May 12th, 2020</span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
+                                    <button type="button" class="btn btn-link" role="button" data-toggle="collapse" th:attr="data-target='#newsEntry'+${itemStat.index},aria-controls='newsEntry'+${itemStat.index}" aria-expanded="true" th:text="${newsEntry.title}">Added adducts, masses and sum formulas</button><a class="btn btn-link float-right" role="button" href="#" th:href="@{${newsEntry.link}}"><span th:text="${newsEntry.date}">v1.0.19 - May 12th, 2020</span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
                                 </div>
                                 <div th:id="${'newsEntry'+itemStat.index}" class="collapse" th:classappend="${itemStat.index==0?'show':''}" th:attr="aria-labelledby='news'+${itemStat.index}"><!-- data-parent="#timeline">-->
                                     <div class="card-body">
@@ -34,6 +34,18 @@
                 </div>
             </div>
         </div>
+        <div th:fragment="contributing">
+            <div class="card my-2">
+                <div class="card-body">
+                    <h4>Contributing</h4>
+                    <p>If you find that Goslin does not report a lipid name correctly, or is missing some information, please <a class="text-muted" href="https://github.com/lifs-tools/goslin-webapp" target="_blank">file a bug report or pull-request at our GitHub repository&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>.</p>
+                    <p>Please see the <a class="text-muted" href="https://github.com/lifs-tools/goslin">Goslin GitHub repository&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a> for the other programming language implementations and for the lipid-list.csv file, which contains information on which lipid head groups Goslin currently supports.</p>
+                    
+                    <h4>Using the Goslin implementations</h4>
+                    <p>The Goslin grammars are supported by parser implementations in multiple programming languages and use a similar object model. For details, please see the <a class="text-muted" target="_blank" href="https://github.com/lifs-tools/goslin/docs">documentation at GitHub</a>.</p>
+                </div>
+            </div>
+        </div>
         <div th:fragment="citing">
             <div class="card my-2">
                 <div class="card-body">
@@ -48,13 +60,46 @@
             <div class="card my-2">
                 <div class="card-body">
                     <h4>Acknowledgements</h4>
-                    <p>In order to test lipid name parsing, sum formula calculation and cross-linking to reported lipids, the following resources were crucial for Goslin and the Goslin web application:</p>
+                    <p>In order to test lipid name parsing, sum formula calculation and cross-linking to reported lipids, the following resources were crucial during development and testing of Goslin and the Goslin web application:</p>
                     <ol class="text-muted small">
                         <li><a class="text-muted" href="https://www.swisslipids.org" target="_blank">SwissLipids database&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
                         <li><a class="text-muted" href="https://www.lipidmaps.org" target="_blank">LIPID MAPS&REG; database&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
                         <li><a class="text-muted" href="https://hmdb.ca/" target="_blank">HMDB database&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
                     </ol>
                     <p>Please see the <a class="text-muted" href="https://github.com/lifs-tools/goslin">Goslin GitHub repository&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a> for details on the database versions, dates and data that we used for development and testing.</p>
+                </div>
+            </div>
+        </div>
+        <div th:fragment="lipidclasses">
+            <div class="card my-2">
+                <div class="card-body">
+                    <h4>Lipid Classes supported by Goslin and the web application</h4>
+                    <table id="lipidClassesTable" class="table table-striped table-hover pt-1 px-0 table-sm table-responsive" width="100%" th:unless="${#lists.isEmpty(lipidClasses)}">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Lipid Category</th>
+                                <th>LIPID MAPS Class Name</th>
+                                <th>Allowed #s of FAs</th>
+                                <th>Maximum # of FAs</th>
+                                <th>Sum Formula (Head Group)</th>
+                                <th>Mass (Head Group)</th>
+                                <th>Synonyms</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="lipidClass : ${lipidClasses}">
+                                <td th:text="${lipidClass.category}"></td>
+                                <td th:text="${lipidClass.lipidMapsClassName}"></td>
+                                <td th:text="${lipidClass.allowedNumFa}"></td>
+                                <td th:text="${lipidClass.maxNumFa}"></td>
+                                <td th:if="${lipidClass.sumFormula==null || lipidClass.sumFormula.isEmpty()}"><abbr title="Not Defined">N.D.</abbr></td>
+                                <td th:unless="${lipidClass.sumFormula==null || lipidClass.sumFormula.isEmpty()}" th:text="${lipidClass.sumFormula}"></td>
+                                <td th:if="${lipidClass.getElements().getMass()>0}" th:text="${#numbers.formatDecimal(lipidClass.getElements().getMass(), 1, 4)}"></td>
+                                <td th:unless="${lipidClass.getElements().getMass()>0}"><abbr title="Not Defined">N.D.</abbr></td>
+                                <td th:text="${lipidClass.synonyms}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

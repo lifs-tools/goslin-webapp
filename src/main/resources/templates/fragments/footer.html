@@ -12,14 +12,8 @@
             </figure>
           </div>
           <div class="col-md-4 align-middle">
-<!--            <figure class="figure float-left m-2 p-2">
-              <a href="https://fz-borstel.de" target="_blank"><img src="/static/img/fz-borstel-en.jpg" th:src="@{/img/fz-borstel-en.jpg}" height="67px" class="figure-img img-fluid" alt="FZ Borstel Logo"/></a>
-            </figure>-->
           </div>
           <div class="col-md-2 align-middle">
-<!--            <figure class="figure float-right m-2 p-2">
-              <a href="https://www.mpi-cbg.de/home/" target="_blank"><img src="/static/img/mpi-logo.png" th:src="@{/img/mpi-logo.png}" height="67px" class="figure-img img-fluid" alt="MPI CBG Logo"/></a>
-            </figure>-->
           </div>
           <div class="col-md-3 align-middle">
             <figure class="figure float-right m-2 p-2">
@@ -31,6 +25,7 @@
         <div class="row">
           <div class="col-md-4 text-left">
               <small class="text-muted">&nbsp;&copy;&nbsp;<span th:text="${#dates.year(#dates.createNow())}">2018</span>&nbsp;ISAS e.V.</small>
+              <small class="text-muted">Based on <a href="https://github.com/lifs-tools/jgoslin">jgoslin</a> <span th:if="${page!=null and page.jgoslinVersion != null}" th:text="${page.jgoslinVersion}"></span></small>
           </div>
           <div class="col-md-8 text-right">
             <small class="text-muted" th:if="${page!=null and page.scmCommitId != null and page.buildDate != null and page.scmBranch != null}">Built on <span th:text="${page.buildDate}"></span> from commit <a th:href="${'https://gitlab.isas.de/lifs/lifs-apps/commit/'+page.scmCommitId}" target="_blank" href="https://gitlab.isas.de/lifs/lifs-apps/commit/"><span th:text="${page.scmCommitId}"></span></a> on branch <span th:text="${page.scmBranch}"></span></small>

@@ -34,6 +34,7 @@ import de.isas.lipidomics.domain.LipidClass;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -88,7 +89,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 @Controller
 public class LipidNameValidationController {
-    
+
     private final AppInfo appInfo;
     private final StorageService storageService;
     private final SessionIdGenerator sessionIdGenerator;
@@ -96,7 +97,7 @@ public class LipidNameValidationController {
     private final LocaleResolver localeResolver;
     private final Resource lipidnames;
     private final NewsPropertyConfig newsPropertyConfig;
-    
+
     @Autowired
     public LipidNameValidationController(LipidNameValidationService lipidNameValidationService, StorageService storageService,
             AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames, NewsPropertyConfig newsPropertyConfig) {
@@ -108,7 +109,7 @@ public class LipidNameValidationController {
         this.lipidnames = lipidnames;
         this.newsPropertyConfig = newsPropertyConfig;
     }
-    
+
     @GetMapping("/")
     public ModelAndView handleHome(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (language != null) {
@@ -122,19 +123,26 @@ public class LipidNameValidationController {
         model.addObject("validationFileRequest", new ValidationFileRequest());
         return model;
     }
-    
-    @GetMapping("/info")
+
+    @GetMapping("/documentation")
     public ModelAndView handleInfo(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (language != null) {
             localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
         }
         log.info("Retrieved the following news items: {}", newsPropertyConfig.getNews());
-        ModelAndView model = new ModelAndView("info");
+        ModelAndView model = new ModelAndView("documentation");
         model.addObject("page", createPage("Goslin Webapp Information"));
         model.addObject("news", newsPropertyConfig.getNews());
+        model.addObject("lipidClasses", Arrays.asList(LipidClass.values()).stream().sorted((t, t1) -> {
+            int cmp = t.getCategory().name().compareTo(t1.getCategory().name());
+            if (cmp != 0) {
+                return cmp;
+            }
+            return t.getLipidMapsClassName().compareTo(t1.getLipidMapsClassName());
+        }).collect(Collectors.toList()));
         return model;
     }
-    
+
     @PostMapping("/validatefile")
     public RedirectView validate(@Valid @ModelAttribute("validationFileRequest") ValidationFileRequest validationFileRequest, BindingResult bindingResult,
             RedirectAttributes redirectAttributes, HttpServletRequest request,
@@ -146,7 +154,7 @@ public class LipidNameValidationController {
         redirectAttributes.addFlashAttribute("validationRequest", validationRequest);
         return new RedirectView("/validate", true);
     }
-    
+
     @RequestMapping(path = {"/validate"}, method = {RequestMethod.GET,
         RequestMethod.POST})
     public ModelAndView validate(@Valid @ModelAttribute("validationRequest") ValidationRequest validationRequest, BindingResult bindingResult,
@@ -184,7 +192,7 @@ public class LipidNameValidationController {
         }
         return mav;
     }
-    
+
     @GetMapping("/download/{sessionId:.+}/{storageServiceSlot:.+}")
     @ResponseBody
     public ResponseEntity<Resource> getResults(
@@ -239,15 +247,7 @@ public class LipidNameValidationController {
             throw new FileNotFoundException("No such file!");
         }
     }
-    
-    @GetMapping("/documentation")
-    public ModelAndView handleDocumentation() throws IOException {
-        ModelAndView mav = new ModelAndView("documentation");
-        mav.addObject("page", new Page("documentation", appInfo));
-//        mav.addObject("exampleFiles", exampleFiles.getExampleFile());
-        return mav;
-    }
-    
+
     private String toTable(ValidationResults vr) {
         StringBuilder sb = new StringBuilder();
         HashSet<String> keys = new LinkedHashSet<>();
@@ -294,14 +294,14 @@ public class LipidNameValidationController {
         }
         return sb.toString();
     }
-    
+
     @GetMapping("/login")
     public ModelAndView login() {
         ModelAndView mav = new ModelAndView("login");
         mav.addObject("page", createPage("Login"));
         return mav;
     }
-    
+
     @ExceptionHandler(Exception.class)
     public ModelAndView handleError(HttpServletRequest req, Exception exception)
             throws Exception {
@@ -316,7 +316,7 @@ public class LipidNameValidationController {
         mav.setViewName("error");
         return mav;
     }
-    
+
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ModelAndView handleUnmapped(HttpServletRequest req) {
@@ -330,9 +330,9 @@ public class LipidNameValidationController {
         mav.setViewName("error");
         return mav;
     }
-    
+
     protected Page createPage(String title) {
         return new Page(title, appInfo);
     }
-    
+
 }

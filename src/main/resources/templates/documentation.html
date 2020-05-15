@@ -1,156 +1,34 @@
 <!DOCTYPE HTML>
 <html html-lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/layout}" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      layout:decorate="~{layouts/layout}">
     <head>
     <th:block th:include="fragments/html-head :: html-head"></th:block>
 </head>
-<body>
+<body data-spy="scroll" data-target="#toc">
     <div class="container">
 
         <div class="row">
 
             <div class="container">
                 <th:block th:include="fragments/nav :: nav"></th:block>
-
-                <main role="main" class="my-3"> <!-- sec:authorize="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')"> -->
-                    <!--<th:block th:include="fragments/examples :: examples"></th:block>-->
-                    <div class="card my-2">
-                        <div class="card-header">
-                            <ul class="nav nav-tabs card-header-tabs" id="docTab" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="lipidNomenclature" data-toggle="tab" href="#lipidNomenclatureContent" role="tab" aria-controls="lipidNomenclatureContent" aria-selected="true">Supported Lipid Nomenclature</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="restApi" data-toggle="tab" href="#restApiContent" role="tab" aria-controls="restApiContent" aria-selected="false">Programmatic Usage</a>
-                                </li>
-                            </ul>
+                <main role="main" class="my-3 col-md-12">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <th:block th:include="fragments/overview :: overview"></th:block>
+                            <th:block th:include="fragments/news :: news"></th:block>
+                            <th:block th:include="fragments/manual :: manual"></th:block>
+                            <th:block th:include="fragments/news :: lipidclasses"></th:block>
+                            <th:block th:include="fragments/news :: contributing"></th:block>
+                            <th:block th:include="fragments/news :: citing"></th:block>
+                            <th:block th:include="fragments/news :: acknowledgements"></th:block>
                         </div>
-                        <div class="tab-content" id="lipidNomenclatureTab">
-                            <div class="tab-pane fade show active" id="lipidNomenclatureContent" role="tabpanel" aria-labelledby="lipidNomenclatureContent-tab">
-
-                                <div class="card-body">
-                                    <!--                                    <h4 class="card-title">LUX Score</h4>-->
-                                    <h5><a name="inputData">Input Data</a></h5>
-<!--                                    <p>LUX Score requires its input data to follow a project layout. You can download one of the example datasets above to get an idea of this layout and the required files.</p>
-
-                                    <p>The "Lipidomes" folder within these examples contains the following files:</p>
-                                    <ul>
-                                        <li>lipidomes files (no file ending)</li>
-                                        <li>UserSMILES.tab</li>
-                                    </ul>
-
-                                    <h5>The "lipidomes files":</h5>
-                                    <p>They contain all quantified lipidomes data, in this format:</p>
-                                    <pre><code>LipidClass[space]NumberOf(C)Atoms[:]NumberOfDoubleBonds[tab]Concentration</code></pre>
-                                    Example (a real file would contain multiple lines):
-                                    <pre><code>TAG 12:0/14:1/16:1 0.0401</code></pre>
-                                    <h5>The "UserSMILES.tab" file:</h5>
-                                    <p>The UserSMILES.tab contains User_defined_SMILES for lipid species. The format is:</p>
-                                    <pre><code>SMILE[tab]LipidClass[space]NumberOf(C)Atoms[:]NumberOfDoubleBonds[;]NumberOfHydroxylation</code></pre>
-                                    <p>Example (a real file can contain multiple lines):</p>
-                                    <pre><code>C(C(C(CCCCCCCCCCCCCC)O)O)(N)COP(=O)(O)O LCBP 18:0;3</code></pre>
-                                    <h4>Input Data Example and Lipidomes Converter:</h4>
-                                    <p>As you can see in the folder "Lipidomes" of the <a href="/examples/SC.zip" th:href="@{/examples/SC.zip}"><i>Saccharomyces cerevisiae</i> example dataset</a>, there are a total of 11 files with the following names:</p>
-                                    <ol>
-                                        <li>BY4741_24</li>
-                                        <li>BY4741_37</li>
-                                        <li>Elo1_24</li>
-                                        <li>Elo1_37</li>
-                                        <li>Elo2_24</li>
-                                        <li>Elo2_37</li>
-                                        <li>Elo3_24</li>
-                                        <li>Elo3_37</li>
-                                        <li>UserSMILES.tab</li>
-                                    </ol>
-                                    <p>Files 1-8 are real lipidome data (Esjing et. al 2010 PNAS) included here for illustration.</p>
-                                    <p>Files 9, 10 and 11 are special files that have to be included in all new folders you create. First column is the name of the lipid. Second column is the concentration of that lipid. If you do not have concentrations, put '0's into the concentration column - DO NOT LEAVE THAT COLUMN EMPTY.</p>
-                                    <h6>Check Lipid Names</h6>
-                                    <p>Naming of each lipid follows a format. More than 20 classes of lipids are used in example lipidome datasets (files 1-8). Use those examples if you have to name a new lipid. Spacing and punctuation marks are important in writing lipid names.</p>
-                                    <h6>Check the lipidomes input files for formatting errors</h6>
-                                    <p>Make sure there are no empty rows in any of the input files. Our programs do not check for empty rows/columns. Having empty rows/columns will lead to incorrect results.</p>
-                                    <h5><a name="lipidomesConverter">Lipidomes Converter</a></h5>
-                                    <p>Using the python Script ConvertToLuxscore.py in \LUXscoreProjectFolder\bin within version 1.1 of the <a href="https://lifs.isas.de/lux-score.html" title="LUX Score download">standalone LUX Score distribution</a>, you can convert your input lipidomes from LipidXplorer output into the required format. On the command line, type:</p>
-                                    <pre><code>python ConvertToLuxscore.py InputLipidomesfileName.csv</code></pre>
-                                    <p>The format of the csv file (<a href="/examples/lung-lipidomes.csv" th:href="@{/examples/lung-lipidomes.csv}">Example for the Lungs dataset</a>) should be a comma-separated, tabular file with the following structure (row names=samples, columns names=lipids, values=lipid amount in sample):</p>
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th></th>
-                                                <th>CL 57:3</th>
-                                                <th>LPE 17:0</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Sample1</td>
-                                                <td>821.231</td>
-                                                <td>NA</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Sample2</td>
-                                                <td>712.852</td>
-                                                <td>127.876</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <p>Lipid category and species/FA species names should follow the <a href="https://www.ncbi.nlm.nih.gov/pubmed/23549332">Liebisch notation</a>. Please note that lipid names can only contain ' ', '[', ']', '/', '_', ':' and ';' following that shorthand notation. Missing values must be reported as 'NA'. Numbers must use the US-English number format, e.g. 1.2, meaning "one and two tenths".</p>
-                                    <p>Please note that LUX Score does not use grouping information, but instead calculates a grouping automatically based on the similarities of the SMILES associated to each of the reported lipids.</p>-->
-                                </div>
-                            </div>
-                            <div class="tab-pane fade show" id="restApiContent" role="tabpanel" aria-labelledby="restApiContent-tab">
-
-                                <div class="card-body">
-                                    <!--<h4 class="card-title">Error Modeling</h4>-->
-                                    <h5>PaLiNom REST API</h5>
-                                    <h5>JAVA - jgoslin</h5>
-                                    <h6>Command Line</h6>
-                                    <h6>API</h6>
-                                    <h6>Docker Image</h6>
-                                    <h5>C++ - cppgoslin</h5>
-                                    <h5>R - rgoslin</h5>
-                                    <h5>Python 3 - pygoslin</h5>
-<!--                                    <p>The error model can be used to modify the presence and quantity low abundant lipids to estimate the robustness for the LUX score clustering.
-                                        For example, it can show if the common lipid count does comprise a sufficiently robust tree topology and groups lipidomes systematically different. 
-                                        Additionally, applying such an experiment may show you that the compositional differences itself are useful to assign a phenotype while comparison purely based on quantities are dominated by changes of abundant lipids. </p>
-
-                                    <h5>How does it work?</h5>
-                                    <p>An error model for lipidome analysis is computed by iterating over all lipid quantities <var>x</var> of the original data set according to the following algorithm:</p>
-                                    <pre><code>
-for each lipid with abundance <em>x</em>
-
-  <var>x'</var> = <var>x</var> + <em>numpy.random.normal(&mu;,&sigma;)</em>
-
-  if <var>x'</var> &gt; <var>t<sub>detect</sub></var> (threshold)
-    return <var>x</var>'
-
-</code></pre>
-                                    <p>where:</p>
-                                    <ul>
-                                        <li><var>x'</var> is the adjusted value of <var>x</var> with a Gaussian random value added.</li>
-                                        <li>numpy is a fundamental library for scientific computing used for the Python programming language</li>
-                                        <li>random.normal is numpy's random number generator for the Gaussian distribution with parameters &sigma; (the standard deviation) and  &mu; (the mean, usually &mu;=0)</li>
-                                        <li><var>t<sub>detect</sub></var> is the threshold which refers to the detection threshold to accept or reject lipids after adding the Gaussian noise</li>
-                                    </ul>
-
-                                    <h5>How to use it?</h5>
-                                    <p>As input you need to specify the following parameters:</p>
-                                    <ul>
-                                        <li>&sigma; indicates the standard deviation parameter (related to the width) of the Gaussian distribution</li>
-                                        <li>&mu; is the mean value of the Gaussian distribution and it is always <var>0</var></li>
-                                        <li>The <var>t<sub>detect</sub></var>  or <em>threshold</em> parameter refers to the detection threshold to accept or reject lipids after adding the Gaussian noise</li>
-                                        <li>Iterations refers to the number of repeating the previous experiment N times which gives at the end a tree for each iteration</li>
-                                    </ul>
-                                    <p>Finally, the system counts the number of bipartitions found in a series of lipidomes (Trees) that are generated by each iteration.</p>-->
-                                </div>
-                            </div>
+                        <div class="col-sm-3">
+                            <nav id="toc" data-toggle="toc" class="sticky-top"></nav>
                         </div>
                     </div>
 
-
                 </main>
-<!--                <main role="main" class="my-3" sec:authorize="not hasRole('ROLE_USER') and not hasRole('ROLE_ADMIN')">
-                    <th:block th:include="fragments/login :: login-card"></th:block>
-                </main>-->
+
                 <th:block th:include="fragments/footer :: footer"></th:block>
 
             </div>

@@ -103,3 +103,28 @@ pre {
 .pl-e, .pl-en {
     color: #6f42c1;
 }
+
+.form-control-dbhits {
+    height: auto;
+}
+
+.list-item-dbhits {
+    padding: 0;
+}
+
+.sum-formula {
+    font-variant-numeric: oldstyle-nums;
+}
+.callout {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #eee;
+    border-left-color: rgb(238, 238, 238);
+    border-left-width: 1px;
+    border-left-width: .25rem;
+    border-radius: .25rem;
+}
+
+.callout-info {
+    border-left-color: #bee5eb;
+}

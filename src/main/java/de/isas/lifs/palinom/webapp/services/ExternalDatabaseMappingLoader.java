@@ -50,6 +50,7 @@ public class ExternalDatabaseMappingLoader {
         for (ExternalDatabaseReference edr : loadObjectList(ExternalDatabaseReference.class, "lipidmaps-normalized.tsv", '\t')) {
             this.lipidMapsReferences.put(edr.getNormalizedName(), edr);
             this.lipidMapsReferences.put(edr.getNativeAbbreviation(), edr);
+            this.lipidMapsReferences.put(edr.getNativeName(), edr);
             lipidMapsEntries++;
         }
         log.info("Loaded {} records for Lipid MAPS!", lipidMapsEntries);
@@ -57,6 +58,7 @@ public class ExternalDatabaseMappingLoader {
         for (ExternalDatabaseReference edr : loadObjectList(ExternalDatabaseReference.class, "swiss-lipids-normalized.tsv", '\t')) {
             this.swissLipidsReferences.put(edr.getNormalizedName(), edr);
             this.swissLipidsReferences.put(edr.getNativeAbbreviation(), edr);
+            this.swissLipidsReferences.put(edr.getNativeName(), edr);
             swissLipidsEntries++;
         }
         

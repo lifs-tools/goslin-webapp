@@ -31,6 +31,8 @@ public class Page {
     private String scmCommitId;
     private String scmBranch;
     private String lifsUserUrl;
+    private String jgoslinVersion;
+    private String maxFileSize;
 
     public Page(String title, AppInfo appInfo) {
         this.title = title;
@@ -44,5 +46,7 @@ public class Page {
         this.scmCommitId = appInfo.getScmCommitId();
         this.scmBranch = appInfo.getScmBranch();
         this.lifsUserUrl = appInfo.getLifsUserUrl();
+        this.jgoslinVersion = appInfo.getJgoslinVersionNumber();
+        this.maxFileSize = appInfo.getMaxFileSize();
     }
 }
