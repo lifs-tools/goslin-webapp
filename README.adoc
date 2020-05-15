@@ -12,6 +12,8 @@ This project provides a webapplication for the jgoslin library.
 - https://github.com/lifs-tools/pygoslin[Python implementation]
 - https://github.com/lifs-tools/rgoslin[R implementation]
 
+Further documentation about the projects is available https://github.com/lifs-tools/goslin/tree/master/docs[here].
+
 == Building the project from the command-line
 
 In order to build the project and run the unit tests, execute the following command from a terminal:
