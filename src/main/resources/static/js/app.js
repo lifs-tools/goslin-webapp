@@ -51,7 +51,7 @@ function addLipidName(name) {
             "</div>" +
             "</div>";
     $("#lipidsInput").append(lipidNameInputRow);
-    $("#lipidNames"+newIndex).val(name);
+    $("#lipidNames"+newIndex).val(name.trim());
 }
 
 //function findByName(lipidName) {

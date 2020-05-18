@@ -150,6 +150,8 @@ public class LipidNameValidationController {
         ValidationRequest validationRequest = new ValidationRequest();
         validationRequest.setLipidNames(new String(validationFileRequest.getFile().getBytes(), StandardCharsets.UTF_8).lines().filter((t) -> {
             return !t.isEmpty();
+        }).map((t) -> {
+            return t.trim();
         }).collect(Collectors.toList()));
         redirectAttributes.addFlashAttribute("validationRequest", validationRequest);
         return new RedirectView("/validate", true);
@@ -258,7 +260,7 @@ public class LipidNameValidationController {
             m.put("Grammar", t.getGrammar().name());
             m.put("Adduct", t.getLipidAdduct().getAdduct().getAdductString());
             m.put("Lipid Maps Category", t.getLipidAdduct().getLipid().getLipidCategory().getFullName() + " [" + t.getLipidAdduct().getLipid().getLipidCategory().name() + "]");
-            LipidClass lclass = t.getLipidAdduct().getLipid().getLipidClass().orElse(LipidClass.UNDEFINED);
+            LipidClass lclass = t.getLipidAdduct().getLipid().getLipidClass();
             m.put("Lipid Maps Main Class", lclass.getLipidMapsClassName());
             m.put("Lipid Maps References", t.getLipidMapsReferences().stream().flatMap(Collection::stream).map((r) -> {
                 return r.getDatabaseUrl() + r.getDatabaseElementId();
@@ -280,6 +282,7 @@ public class LipidNameValidationController {
                 m.put(fa.getName() + " #OH", fa.getNHydroxy() + "");
                 m.put(fa.getName() + " #DB", fa.getNDoubleBonds() + "");
                 m.put(fa.getName() + " Bond Type", fa.getLipidFaBondType() + "");
+                m.put(fa.getName() + " Modifications", fa.getModifications() + "");
             }
             keys.addAll(m.keySet());
             return m;

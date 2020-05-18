@@ -55,26 +55,27 @@ public class LipidNameValidator implements ConstraintValidator<ValidLipidName, S
             return false;
         }
         SyntaxErrorListener listener = new SyntaxErrorListener();
+        String lipidNameToValidate = lipidName.trim();
         try {
-            LipidAdduct la = new GoslinVisitorParser().parse(lipidName, listener);
+            LipidAdduct la = new GoslinVisitorParser().parse(lipidNameToValidate, listener);
             return true;
         } catch (ParsingException ex) {
-            log.warn("Caught exception while parsing " + lipidName + " with Goslin grammar: ", ex);
-            return parseWithGoslinFragmentsParser(lipidName);
+            log.warn("Caught exception while parsing " + lipidNameToValidate + " with Goslin grammar: ", ex);
+            return parseWithGoslinFragmentsParser(lipidNameToValidate);
         } catch (ValidationException vex) {
-            log.warn("Caught validation exception while parsing " + lipidName + " with Goslin grammar: ", vex);
+            log.warn("Caught validation exception while parsing " + lipidNameToValidate + " with Goslin grammar: ", vex);
             this.context.disableDefaultConstraintViolation();
             listener.getSyntaxErrors().forEach((t) -> {
                 context.buildConstraintViolationWithTemplate(t.getMessage()).addConstraintViolation();
             });
             return false;
         } catch (NullPointerException npe) {
-            log.warn("Caught null pointer exception while parsing " + lipidName + " with Goslin grammar: ", npe);
+            log.warn("Caught null pointer exception while parsing " + lipidNameToValidate + " with Goslin grammar: ", npe);
             this.context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Unsupported name: " + lipidName).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Unsupported name: " + lipidNameToValidate).addConstraintViolation();
             return false;
         } catch (RuntimeException re) {
-            log.warn("Caught runtime exception while parsing " + lipidName + " with Goslin grammar: ", re);
+            log.warn("Caught runtime exception while parsing " + lipidNameToValidate + " with Goslin grammar: ", re);
             this.context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(re.getLocalizedMessage()).addConstraintViolation();
             return false;

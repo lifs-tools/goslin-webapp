@@ -18,9 +18,7 @@ package de.isas.lifs.palinom.webapp.services;
 import de.isas.lifs.palinom.webapp.domain.ValidationResult;
 import de.isas.lifs.webapps.common.service.AnalyticsTracker;
 import de.isas.lipidomics.domain.LipidAdduct;
-import de.isas.lipidomics.domain.LipidClass;
 import de.isas.lipidomics.domain.LipidLevel;
-import de.isas.lipidomics.domain.LipidSpeciesInfo;
 import de.isas.lipidomics.palinom.lipidmaps.LipidMapsVisitorParser;
 import de.isas.lipidomics.palinom.goslin.GoslinVisitorParser;
 import de.isas.lipidomics.palinom.SyntaxErrorListener;
@@ -30,6 +28,7 @@ import de.isas.lipidomics.palinom.goslinfragments.GoslinFragmentsVisitorParser;
 import de.isas.lipidomics.palinom.hmdb.HmdbVisitorParser;
 import de.isas.lipidomics.palinom.swisslipids.SwissLipidsVisitorParser;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
@@ -66,14 +65,14 @@ public class LipidNameValidationService {
     public List<ValidationResult> validate(List<String> lipidNames) {
         tracker.count(UUID.randomUUID(), getClass().getSimpleName(), "validate");
         return lipidNames.stream().map((lipidName) -> {
-            return parseWith(lipidName, new ArrayDeque<ValidationResult.Grammar>(defaultGrammars));
+            return parseWith(lipidName.trim(), new ArrayDeque<ValidationResult.Grammar>(defaultGrammars));
         }).collect(Collectors.toList());
     }
 
     public List<ValidationResult> validate(List<String> lipidNames, List<ValidationResult.Grammar> grammars) {
-        tracker.count(UUID.randomUUID(), getClass().getSimpleName(), "validate");
+        tracker.count(UUID.randomUUID(), getClass().getSimpleName(), "validate-with-grammars");
         return lipidNames.stream().map((lipidName) -> {
-            return parseWith(lipidName, new ArrayDeque<ValidationResult.Grammar>(grammars));
+            return parseWith(lipidName.trim(), new ArrayDeque<ValidationResult.Grammar>(grammars));
         }).collect(Collectors.toList());
     }
 
@@ -106,17 +105,26 @@ public class LipidNameValidationService {
             result.setLipidName(lipidName);
             result.setLipidAdduct(la);
             result.setGrammar(grammar);
-            result.setMessages(toStringMessages(listener));
+            ArrayList<String> messages = new ArrayList<>(toStringMessages(listener));
+            if (la != null) {
+                long fasWithModifications = la.getLipid().getFa().entrySet().stream().filter((t) -> {
+                    return !t.getValue().getModifications().isEmpty();
+                }).count();
+                if (fasWithModifications > 0) {
+                    messages.add(lipidName + " contains modifications. At the moment, Goslin only supports proper handling of hydroxylations concerning the number of hydroxylations, sum formula and mass. This will be resolved as soon as the next update to the lipid shorthand nomenclature is published, which will include all LIPID MAPS and SwissLipids modifications.");
+                }
+            }
+            result.setMessages(messages);
             result.setLipidMapsCategory(la.getLipid().getLipidCategory().name());
             String speciesName = la.getLipid().getLipidString(LipidLevel.SPECIES);
             Double mass = la.getMass();
-            if(mass==0.0) {
+            if (mass == 0.0) {
                 mass = Double.NaN;
             }
             result.setMass(mass);
             result.setSumFormula(la.getSumFormula());
             result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
-            result.setLipidSpeciesInfo(la.getLipid().getInfo().orElse(LipidSpeciesInfo.NONE));
+            result.setLipidSpeciesInfo(la.getLipid().getInfo());
             try {
                 String normalizedName = la.getLipid().getNormalizedLipidString();
                 result.setGoslinName(normalizedName);
@@ -136,7 +144,7 @@ public class LipidNameValidationService {
                 result.setMessages(toStringMessages(listener));
                 return result;
             } else {
-                return parseWith(lipidName, grammars);
+                return parseWith(lipidName.trim(), grammars);
             }
         }
     }
@@ -148,7 +156,7 @@ public class LipidNameValidationService {
     }
 
     private String getLipidMapsClassAbbreviation(LipidAdduct la) {
-        String lipidMapsClass = la.getLipid().getLipidClass().orElse(LipidClass.UNDEFINED).getLipidMapsClassName();
+        String lipidMapsClass = la.getLipid().getLipidClass().getLipidMapsClassName();
         Pattern lmcRegexp = Pattern.compile(LIPIDMAPS_CLASS_REGEXP);
         Matcher lmcMatcher = lmcRegexp.matcher(lipidMapsClass);
         if (lmcMatcher.matches() && lmcMatcher.groupCount() == 1) {
