@@ -11,7 +11,7 @@
                             <div class="card timeline-card">
                                 <div class="timeline-arrow"></div>
                                 <div class="card-header" th:id="${'news'+itemStat.index}">
-                                    <button type="button" class="btn btn-link" role="button" data-toggle="collapse" th:attr="data-target='#newsEntry'+${itemStat.index},aria-controls='newsEntry'+${itemStat.index}" aria-expanded="true" th:text="${newsEntry.title}">Added adducts, masses and sum formulas</button><a class="btn btn-link float-right" role="button" href="#" th:href="@{${newsEntry.link}}"><span th:text="${newsEntry.date}">v1.0.19 - May 12th, 2020</span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
+                                    <button type="button" class="btn btn-link" role="button" data-toggle="collapse" th:attr="data-target='#newsEntry'+${itemStat.index},aria-controls='newsEntry'+${itemStat.index}" aria-expanded="true" th:text="${newsEntry.title}">Added adducts, masses and sum formulas</button><a class="btn btn-link float-right" role="button" href="#" th:href="@{${newsEntry.link}}" target="_blank"><span th:text="${newsEntry.date}">v1.0.19 - May 12th, 2020</span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
                                 </div>
                                 <div th:id="${'newsEntry'+itemStat.index}" class="collapse" th:classappend="${itemStat.index==0?'show':''}" th:attr="aria-labelledby='news'+${itemStat.index}"><!-- data-parent="#timeline">-->
                                     <div class="card-body">
@@ -20,16 +20,6 @@
                                 </div>
                             </div>
                         </li>
-                        <!--                        <li>
-                                                    <div class="card timeline-card">
-                                                        <div class="card-header">
-                                                            <a href="https://github.com/lifs-tools/goslin-webapp/releases/tag/v1.0.18" target="_blank" class="float-right">v1.0.18 - April 21st, 2014&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
-                                                        </div>
-                                                        <div class="card-body">
-                                                            <h6 class="card-title">Initial version published</h6>
-                                                            <p>Initial public release version of the Goslin web application. This release contains support for automatic linking of normalized lipid names to SwissLipids and LIPID MAPS&REG; entries. This requires preprocessing of a subset of the LIPID MAPS&REG; structure database (LMSD) and the SwissLipids 'lipids' database. Each lipid name and abbreviations thereof, if available, are parsed with the parser specific to the database and normalized. This normalized lipid name is the used as a dynamic lookup by the goslin web application to retrieve the matching entry URIs from the preprocessed database tables.</p>
-                                                        </div>
-                                                </li>-->
                     </ul>
                 </div>
             </div>

@@ -73,6 +73,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -258,6 +259,7 @@ public class LipidNameValidationController {
             m.put("Normalized Name", t.getGoslinName());
             m.put("Original Name", t.getLipidName());
             m.put("Grammar", t.getGrammar().name());
+            m.put("Validation Messages", t.getMessages().stream().collect(Collectors.joining(" | ")));
             m.put("Adduct", t.getLipidAdduct().getAdduct().getAdductString());
             m.put("Lipid Maps Category", t.getLipidAdduct().getLipid().getLipidCategory().getFullName() + " [" + t.getLipidAdduct().getLipid().getLipidCategory().name() + "]");
             LipidClass lclass = t.getLipidAdduct().getLipid().getLipidClass();
@@ -282,6 +284,9 @@ public class LipidNameValidationController {
                 m.put(fa.getName() + " #OH", fa.getNHydroxy() + "");
                 m.put(fa.getName() + " #DB", fa.getNDoubleBonds() + "");
                 m.put(fa.getName() + " Bond Type", fa.getLipidFaBondType() + "");
+                m.put(fa.getName() + " DB Positions", fa.getDoubleBondPositions().entrySet().stream().map((dbPosEntry) -> {
+                    return dbPosEntry.getKey()+""+dbPosEntry.getValue();
+                }).collect(Collectors.toList()) + "");
                 m.put(fa.getName() + " Modifications", fa.getModifications() + "");
             }
             keys.addAll(m.keySet());
@@ -302,6 +307,22 @@ public class LipidNameValidationController {
     public ModelAndView login() {
         ModelAndView mav = new ModelAndView("login");
         mav.addObject("page", createPage("Login"));
+        return mav;
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ModelAndView handleMaxUploadSizeExceeded(HttpServletRequest req,
+            HttpServletResponse resp, Exception exception) throws Exception {
+        log.error("Caught exception: ", exception);
+        ModelAndView mav = new ModelAndView();
+        Page page = createPage("Error");
+        mav.addObject("page", page);
+        mav.addObject("title", "Uploaded file is too large!");
+        mav.addObject("error", "The file you tried to upload was larger than the current limit: " + page.getMaxFileSize());
+        mav.addObject("url", req.getRequestURL());
+        mav.addObject("timestamp", new Date().toString());
+        mav.addObject("status", 500);
+        mav.setViewName("error");
         return mav;
     }
 
