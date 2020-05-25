@@ -32,7 +32,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @SpringBootApplication
 @EnableSwagger2
-@EnableConfigurationProperties(value = {StorageProperties.class, NewsPropertyConfig.class})
+@EnableConfigurationProperties(value = {StorageProperties.class,
+    NewsPropertyConfig.class})
 @EnableScheduling
 @ComponentScan(basePackages = {"de.isas.lifs.webapps", "de.isas.lifs.palinom"})
 public class Application {
@@ -51,4 +52,5 @@ public class Application {
         }
 
     }
+
 }

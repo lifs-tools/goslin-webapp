@@ -22,7 +22,9 @@ import de.isas.lifs.webapps.common.service.storage.FileSystemStorageService;
 import de.isas.lifs.webapps.common.service.storage.StorageProperties;
 import java.util.Locale;
 import java.util.concurrent.Executor;
+import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -123,7 +125,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
                 .version(appInfo().getVersionNumber())
                 .build();
     }
-    
+
     @Bean
     public StorageService storageService(@Autowired StorageProperties storageProperties) {
         return new FileSystemStorageService(storageProperties);

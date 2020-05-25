@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.isas.lifs</groupId>
     <artifactId>lifs-goslin-webapp</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2</version>
     <packaging>jar</packaging>
     <description>Grammar of Succinct Lipid Nomenclature - Webapplication and REST service for parsing, validation and normalization of lipid names.</description>
     <name>LIFS Goslin webapp.</name>	
@@ -59,7 +59,7 @@
         <!--<java.version>1.8</java.version>-->
         <application.version.number>${project.version}</application.version.number>
         <springfox.version>2.9.2</springfox.version>
-        <spring.boot.version>2.1.13.RELEASE</spring.boot.version>
+        <spring.boot.version>2.1.14.RELEASE</spring.boot.version>
         <docker.image.prefix>lifs</docker.image.prefix>
         <dockerfile.plugin.version>1.4.10</dockerfile.plugin.version>
         <lombok.version>1.18.10</lombok.version>
@@ -71,7 +71,7 @@
         <junit.platform.version>1.0.3</junit.platform.version>
         <swagger.version>1.5.21</swagger.version>
         <jersey.version>2.22.2</jersey.version>
-        <jackson.version>2.10.3</jackson.version>
+        <jackson.version>2.10.4</jackson.version>
         <jodatime.version>2.9.9</jodatime.version>
         <hibernate.validator.version>6.0.14.Final</hibernate.validator.version>
         <slf4j.version>1.7.25</slf4j.version>
@@ -86,7 +86,7 @@
         <guava.version>27.1-jre</guava.version>
         <stomp.version>2.3.3</stomp.version>
         <javax.ws.rs.version>2.1.1</javax.ws.rs.version>
-        <jgoslin.version>1.1.2-SNAPSHOT</jgoslin.version>
+        <jgoslin.version>1.1.2</jgoslin.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
         <app.name>goslin</app.name>
         <contextPath>/goslin</contextPath>
@@ -281,6 +281,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -302,11 +308,6 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
         </dependency>
-        <!--        <dependency>
-            <groupId>ognl</groupId>
-            <artifactId>ognl</artifactId>
-            <version>3.0.21</version>
-        </dependency>-->
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
