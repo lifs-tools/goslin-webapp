@@ -115,25 +115,27 @@ public class LipidNameValidationService {
                 }
             }
             result.setMessages(messages);
-            result.setLipidMapsCategory(la.getLipid().getLipidCategory().name());
-            String speciesName = la.getLipid().getLipidString(LipidLevel.SPECIES);
-            Double mass = la.getMass();
-            if (mass == 0.0) {
-                mass = Double.NaN;
+            if (la != null) {
+                result.setLipidMapsCategory(la.getLipid().getLipidCategory().name());
+                String speciesName = la.getLipid().getLipidString(LipidLevel.SPECIES);
+                Double mass = la.getMass();
+                if (mass == 0.0) {
+                    mass = Double.NaN;
+                }
+                result.setMass(mass);
+                result.setSumFormula(la.getSumFormula());
+                result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
+                result.setLipidSpeciesInfo(la.getLipid().getInfo());
+                try {
+                    String normalizedName = la.getLipid().getNormalizedLipidString();
+                    result.setGoslinName(normalizedName);
+                    result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName));
+                    result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
+                } catch (RuntimeException re) {
+                    log.debug("Parsing error for {}!", lipidName);
+                }
+                result.setFattyAcids(la.getLipid().getFa());
             }
-            result.setMass(mass);
-            result.setSumFormula(la.getSumFormula());
-            result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
-            result.setLipidSpeciesInfo(la.getLipid().getInfo());
-            try {
-                String normalizedName = la.getLipid().getNormalizedLipidString();
-                result.setGoslinName(normalizedName);
-                result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName));
-                result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
-            } catch (RuntimeException re) {
-                log.debug("Parsing error for {}!", lipidName);
-            }
-            result.setFattyAcids(la.getLipid().getFa());
             return result;
         } catch (ParsingException ex) {
             log.debug("Caught exception while parsing " + lipidName + " with " + parser.getClass().getName() + " for grammar " + grammar + ": ", ex);
