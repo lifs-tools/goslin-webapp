@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.isas.lifs</groupId>
     <artifactId>lifs-goslin-webapp</artifactId>
-    <version>1.1.4-SNAPSHOT</version>
+    <version>1.1.4</version>
     <packaging>jar</packaging>
     <description>Grammar of Succinct Lipid Nomenclature - Webapplication and REST service for parsing, validation and normalization of lipid names.</description>
     <name>LIFS Goslin webapp.</name>	
@@ -336,7 +336,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>lifs-webapps-common</artifactId>
-            <version>1.0.14</version>
+            <version>1.0.15</version>
         </dependency>
     </dependencies>
 
