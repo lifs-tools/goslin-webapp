@@ -33,12 +33,9 @@ public class TomcatCustomizer implements
     @Override
     public void customize(TomcatServletWebServerFactory factory) {
 
-        factory.addConnectorCustomizers(new TomcatConnectorCustomizer() {
-            @Override
-            public void customize(Connector connector) {
-                if (connector.getProtocolHandler() instanceof AbstractHttp11Protocol) {
-                    ((AbstractHttp11Protocol<?>) connector.getProtocolHandler()).setMaxSwallowSize(-1);
-                }
+        factory.addConnectorCustomizers((TomcatConnectorCustomizer) (Connector connector) -> {
+            if (connector.getProtocolHandler() instanceof AbstractHttp11Protocol) {
+                ((AbstractHttp11Protocol<?>) connector.getProtocolHandler()).setMaxSwallowSize(-1);
             }
         });
     }

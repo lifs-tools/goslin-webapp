@@ -15,48 +15,28 @@
  */
 package de.isas.lifs.palinom.webapp.domain;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import de.isas.lifs.webapps.common.domain.DefaultAppInfo;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 /**
  *
  * @author nilshoffmann
  */
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class AppInfo {
-
-    @Value("${app.build.date}")
-    private String buildDate;
-
-    @Value("${app.scm.commit.id}")
-    private String scmCommitId;
-
-    @Value("${app.scm.branch}")
-    private String scmBranch;
-
-    @Value("${app.version.number}")
-    private String versionNumber;
-
-    @Value("${ga.id}")
-    private String gaId;
+public class AppInfo extends DefaultAppInfo {
     
-    @Value("${lifs.user.url}")
-    private String lifsUserUrl;
-    
-    @Value("${jgoslin.version.number}")
-    private String jgoslinVersionNumber;
-    
-    @Value("${spring.servlet.multipart.max-file-size}")
     private String maxFileSize;
-    
-    public String getBuildDate() {
-        if(buildDate!=null && !buildDate.isEmpty()) {
-            LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(buildDate)), ZoneId.of("Z"));
-            return ldt.toString();
-        }
-        return "<unknown date>";
+
+    public AppInfo(DefaultAppInfo.DefaultAppInfoBuilder<?, ?> b) {
+        super(b);
     }
+
+    public AppInfo(String buildDate, String scmCommitId, String scmBranch, String scmUrl, String supportUrl, String versionNumber, String toolTitle, String toolDescription, String toolAuthor, String toolLicense, String toolLicenseUrl, String toolVersionNumber, String toolUrl, String toolContact, String gaId, String authServerBaseUrl, String authServerRealm) {
+        super(buildDate, scmCommitId, scmBranch, scmUrl, supportUrl, versionNumber, toolTitle, toolDescription, toolAuthor, toolLicense, toolLicenseUrl, toolVersionNumber, toolUrl, toolContact, gaId, authServerBaseUrl, authServerRealm);
+    }
+
 }

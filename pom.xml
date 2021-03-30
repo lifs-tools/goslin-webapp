@@ -18,9 +18,9 @@
     <developers>
         <developer>
             <name>Nils Hoffmann</name>
-            <email>nils.hoffmann@isas.de</email>
-            <organization>ISAS e.V.</organization>
-            <organizationUrl>https://www.isas.de</organizationUrl>
+            <email>nils.hoffmann@cebitec.uni-bielefelde.de</email>
+            <organization>Center For Biotechnology</organization>
+            <organizationUrl>https://cebitec.uni-bielefeld.de</organizationUrl>
             <roles>
                 <role>developer</role>
             </roles>
@@ -28,17 +28,17 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:https://gitlab.isas.de/lifs/lifs-palinom-webapp.git</connection>
-        <developerConnection>scm:git:https://gitlab.isas.de/lifs/lifs-palinom-webapp.git</developerConnection>
-        <url>https://gitlab.isas.de/lifs/lifs-palinom-webapp</url>
+        <connection>scm:git:git@github.com:lifs-tools/goslin-webapp.git</connection>
+        <developerConnection>scm:git:git@github.com:lifs-tools/goslin-webapp.git</developerConnection>
+        <url>https://github.com/lifs-tools/goslin-webapp</url>
     </scm>
     <issueManagement>
-        <system>GitLab</system>
-        <url>>https://gitlab.isas.de/lifs/lifs-palinom-webapp/issues</url>
+        <system>GitHub</system>
+        <url>https://github.com/lifs-tools/goslin-webapp/issues</url>
     </issueManagement>
     <organization>
-        <name>Leibniz Institut f&uuml;r Analytische Wissenschaften - ISAS e.V.</name>
-        <url>https://www.isas.de</url>
+        <name>Lipidomics Informatics for Life Sciences</name>
+        <url>https://lifs-tools.org</url>
     </organization>
     
     <inceptionYear>2019</inceptionYear>
@@ -53,70 +53,68 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--<maven.compiler.source>1.8</maven.compiler.source>-->
-        <!--<maven.compiler.target>1.8</maven.compiler.target>-->
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <!--<java.version>1.8</java.version>-->
+        <!-- for spring boot -->
+        <java.version>11</java.version>
         <application.version.number>${project.version}</application.version.number>
-        <springfox.version>2.9.2</springfox.version>
-        <spring.boot.version>2.1.14.RELEASE</spring.boot.version>
         <docker.image.prefix>lifs</docker.image.prefix>
         <dockerfile.plugin.version>1.4.10</dockerfile.plugin.version>
         <lombok.version>1.18.10</lombok.version>
-        <junit.version>4.13.1</junit.version>
-        <hamcrest.version>1.3</hamcrest.version>
-        <javax.validation.version>2.0.0.Final</javax.validation.version>
-        <junit.jupiter.version>5.0.3</junit.jupiter.version>
-        <junit.vintage.version>4.12.3</junit.vintage.version>
-        <junit.platform.version>1.0.3</junit.platform.version>
-        <swagger.version>1.5.21</swagger.version>
-        <jersey.version>2.22.2</jersey.version>
-        <jackson.version>2.10.4</jackson.version>
-        <jodatime.version>2.9.9</jodatime.version>
-        <hibernate.validator.version>6.0.14.Final</hibernate.validator.version>
-        <slf4j.version>1.7.25</slf4j.version>
-        <javax.el.version>3.0.1-b09</javax.el.version>
-        <migbase.version>2.2</migbase.version>
-        <swagger2markup.version>1.3.3</swagger2markup.version>
-        <maven-plugin-version>1.0.0</maven-plugin-version>
-        <passay.version>1.5.0</passay.version>
-        <sockjsclient.version>1.0.2</sockjsclient.version>
+        <jackson.version>2.12.2</jackson.version>
         <bootstrap.version>4.3.1</bootstrap.version>
         <jquery.version>3.4.0</jquery.version>
-        <guava.version>27.1-jre</guava.version>
-        <stomp.version>2.3.3</stomp.version>
-        <javax.ws.rs.version>2.1.1</javax.ws.rs.version>
+        <spring.boot.version>2.4.3</spring.boot.version>
+        <springfox.version>3.0.0</springfox.version>
+        <lifs.webapps.common.version>1.0.19-SNAPSHOT</lifs.webapps.common.version>
         <jgoslin.version>1.1.2</jgoslin.version>
-        <keycloak.version>11.0.3</keycloak.version>
+        <keycloak.version>12.0.4</keycloak.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
         <app.name>goslin</app.name>
         <contextPath>/goslin</contextPath>
+        <start-class>de.isas.lifs.palinom.webapp.Application</start-class>
+        <spring.profiles.active></spring.profiles.active>
+        <!-- tracking info -->
         <ga.id></ga.id>
         <ga.url></ga.url>
         <ga.app.url></ga.app.url>
-        <start-class>de.isas.lifs.palinom.webapp.Application</start-class>
-        <spring.profiles.active></spring.profiles.active>
+        <!-- tool info -->
+        <tool.title>JGoslin</tool.title>
+        <tool.description></tool.description>
+        <tool.author>Nils Hoffmann, Dominik Kopczynski</tool.author>
+        <tool.license>Apache License v2</tool.license>
+        <tool.licenseUrl>https://www.apache.org/licenses/LICENSE-2.0</tool.licenseUrl>
+        <tool.version>${jgoslin.version}</tool.version>
+        <tool.contact>https://github.com/lifs-tools/jgoslin/issues</tool.contact>
+        <tool.url>https://github.com/lifs-tools/jgoslin</tool.url>
+        <!-- timestamp -->
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>${lombok.version}</version>
-                <scope>provided</scope>
+                <groupId>org.lifs-tools</groupId>
+                <artifactId>lifs-webapps-common</artifactId>
+                <version>${lifs.webapps.common.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
+                <version>4.13.1</version>
                 <scope>test</scope>
+                <type>jar</type>
             </dependency>
-            <dependency>
+<!--            <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
+                <version>1.5.24</version>
+                <type>jar</type>
+            </dependency>-->
 
             <!-- HTTP client: jersey-client -->
             <dependency>
@@ -150,6 +148,7 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
+                <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -160,6 +159,7 @@
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-csv</artifactId>
                 <version>${jackson.version}</version>
+                <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>joda-time</groupId>
@@ -210,39 +210,13 @@
             <artifactId>keycloak-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.ldap</groupId>
-            <artifactId>spring-ldap-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-ldap</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.unboundid</groupId>
-            <artifactId>unboundid-ldapsdk</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-ldap</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.passay</groupId>
-            <artifactId>passay</artifactId>
-            <version>${passay.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
         <!--SpringFox dependencies -->
         <dependency>
             <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${springfox.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
+            <artifactId>springfox-boot-starter</artifactId>
             <version>${springfox.version}</version>
         </dependency>
 
@@ -251,36 +225,24 @@
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
         </dependency>
-    
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-    
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
+        <!-- webjars -->
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>webjars-locator-core</artifactId>
         </dependency>
-        
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>jquery</artifactId>
             <version>${jquery.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>sockjs-client</artifactId>
-            <version>${sockjsclient.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>stomp-websocket</artifactId>
-            <version>${stomp.version}</version>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
@@ -301,39 +263,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.jaxrs</groupId>
-            <artifactId>jackson-jaxrs-base</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.jaxrs</groupId>
-            <artifactId>jackson-jaxrs-json-provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-jaxb-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-csv</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-            <version>${javax.ws.rs.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
         <dependency>
             <groupId>de.isas.lipidomics</groupId>
@@ -346,28 +278,65 @@
             <version>4.7.2</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.lifs-tools</groupId>
             <artifactId>lifs-webapps-common</artifactId>
-            <version>1.0.15</version>
+            <version>${lifs.webapps.common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.4</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>30.1-jre</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-csv</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
 
     <build>
         <resources>
+            <!-- filter only application*.properties files -->
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
                     <include>application.properties</include>
                     <include>application-dev.properties</include>
+                    <include>lifs.properties</include>
+                    <include>tool.properties</include>
+                    <include>tracking.properties</include>
                 </includes>
             </resource>
+            <!-- pick up all other properties files -->
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>false</filtering>
                 <excludes>
                     <exclude>application.properties</exclude>
                     <exclude>application-dev.properties</exclude>
+                    <exclude>lifs.properties</exclude>
+                    <exclude>tool.properties</exclude>
+                    <exclude>tracking.properties</exclude>
                 </excludes>
             </resource>
         </resources>
@@ -701,18 +670,18 @@
             </build>
         </profile>
     </profiles>
-    <repositories>
+    <!--    <repositories>
         <repository>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>lifs-artifactory-releases</id>
+            <id>lifs-central</id>
             <name>libs-release</name>
             <url>https://apps.lifs.isas.de/artifactory/libs-release</url>
         </repository>
         <repository>
             <snapshots />
-            <id>lifs-artifactory-snapshots</id>
+            <id>lifs-snapshots</id>
             <name>libs-snapshot</name>
             <url>https://apps.lifs.isas.de/artifactory/libs-snapshot</url>
         </repository>
@@ -759,5 +728,5 @@
             <name>jcenter</name>
             <url>https://jcenter.bintray.com</url>
         </pluginRepository>
-    </pluginRepositories>
+    </pluginRepositories>-->
 </project>

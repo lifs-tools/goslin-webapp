@@ -33,7 +33,7 @@ public class CustomBasicAuthenticationEntryPoint extends BasicAuthenticationEntr
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authEx)
-            throws IOException, ServletException {
+            throws IOException {
         response.addHeader("WWW-Authenticate", "Basic realm=" + getRealmName() + "");
         response.setContentType("application/json; charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
@@ -43,7 +43,7 @@ public class CustomBasicAuthenticationEntryPoint extends BasicAuthenticationEntr
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         setRealmName("LIFS");
         super.afterPropertiesSet();
     }

@@ -15,38 +15,59 @@
  */
 package de.isas.lifs.palinom.webapp.domain;
 
+import de.isas.lifs.webapps.common.domain.DefaultPage;
+import java.util.Collections;
+import java.util.List;
+import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 /**
  *
  * @author Nils Hoffmann &lt;nils.hoffmann@isas.de&gt;
  */
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class Page {
+public class Page extends DefaultPage {
 
-    private String title;
-    private String appVersion;
-    private String gaId;
-    private String buildDate;
-    private String scmCommitId;
-    private String scmBranch;
-    private String lifsUserUrl;
-    private String jgoslinVersion;
+    @Builder.Default
+    private String userName = "";
+    @Builder.Default
+    private List<String> userRoles = Collections.emptyList();
+
+    private String systemMessage;
+    private String systemMessageLevel;
+
     private String maxFileSize;
 
     public Page(String title, AppInfo appInfo) {
-        this.title = title;
-        this.appVersion = appInfo.getVersionNumber();
-        String gaId = appInfo.getGaId();
-        if (gaId != null) {
-            gaId = (gaId.isEmpty() ? null : gaId);
-        }
-        this.gaId = gaId;
-        this.buildDate = appInfo.getBuildDate();
-        this.scmCommitId = appInfo.getScmCommitId();
-        this.scmBranch = appInfo.getScmBranch();
-        this.lifsUserUrl = appInfo.getLifsUserUrl();
-        this.jgoslinVersion = appInfo.getJgoslinVersionNumber();
-        this.maxFileSize = appInfo.getMaxFileSize();
+        this(
+                title,
+                appInfo.getVersionNumber(),
+                appInfo.getGaId(),
+                appInfo.getToolDescription(),
+                appInfo.getToolAuthor(),
+                appInfo.getBuildDate(),
+                appInfo.getScmCommitId(),
+                appInfo.getScmBranch(),
+                appInfo.getScmUrl(),
+                appInfo.getSupportUrl(),
+                appInfo.getToolTitle(),
+                appInfo.getToolDescription(),
+                appInfo.getToolAuthor(),
+                appInfo.getToolLicense(),
+                appInfo.getToolLicenseUrl(),
+                appInfo.getToolVersionNumber(),
+                appInfo.getToolUrl(),
+                appInfo.getToolContact(),
+                appInfo.getAuthServerBaseUrl(),
+                appInfo.getAuthServerRealm()
+        );
+    }
+
+    public Page(String title, String appVersion, String gaId, String description, String author, String buildDate, String scmCommitId, String scmBranch, String scmUrl, String supportUrl, String toolTitle, String toolDescription, String toolAuthor, String toolLicense, String toolLicenseUrl, String toolVersionNumber, String toolUrl, String toolContact, String authServerBaseUrl, String authServerRealm) {
+        super(title, appVersion, gaId, description, author, buildDate, scmCommitId, scmBranch, scmUrl, supportUrl, toolTitle, toolDescription, toolAuthor, toolLicense, toolLicenseUrl, toolVersionNumber, toolUrl, toolContact, authServerBaseUrl, authServerRealm);
     }
 }

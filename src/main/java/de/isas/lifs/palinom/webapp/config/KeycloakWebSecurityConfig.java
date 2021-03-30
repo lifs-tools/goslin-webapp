@@ -26,7 +26,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -43,13 +42,11 @@ import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 @Configuration
 @EnableWebSecurity
 @ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
-@Profile("keycloak")
 class KeycloakWebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
     @Autowired
     public void configureGlobal(
             AuthenticationManagerBuilder auth) throws Exception {
-
         KeycloakAuthenticationProvider keycloakAuthenticationProvider
                 = keycloakAuthenticationProvider();
         SimpleAuthorityMapper sam = new SimpleAuthorityMapper();
@@ -74,8 +71,8 @@ class KeycloakWebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
-        http.
-                csrf()
+        http
+                .csrf()
                 .csrfTokenRepository(new HttpSessionCsrfTokenRepository()).and().authorizeRequests()
                 .antMatchers(
                         "/",

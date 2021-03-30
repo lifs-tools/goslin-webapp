@@ -25,6 +25,7 @@ import de.isas.lifs.palinom.webapp.domain.ValidationRequest;
 import de.isas.lifs.palinom.webapp.domain.ValidationResult;
 import de.isas.lifs.palinom.webapp.domain.ValidationResults;
 import de.isas.lifs.palinom.webapp.services.LipidNameValidationService;
+import de.isas.lifs.palinom.webapp.services.PageBuilderService;
 import de.isas.lifs.webapps.common.domain.StorageServiceSlot;
 import de.isas.lifs.webapps.common.domain.UserSessionFile;
 import de.isas.lifs.webapps.common.service.SessionIdGenerator;
@@ -34,10 +35,10 @@ import de.isas.lipidomics.domain.LipidClass;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -48,6 +49,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -58,12 +60,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,11 +72,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import springfox.documentation.annotations.ApiIgnore;
@@ -95,16 +92,18 @@ public class LipidNameValidationController {
     private final StorageService storageService;
     private final SessionIdGenerator sessionIdGenerator;
     private final LipidNameValidationService lipidNameValidationService;
+    private final PageBuilderService pageBuilderService;
     private final LocaleResolver localeResolver;
     private final Resource lipidnames;
     private final NewsPropertyConfig newsPropertyConfig;
 
     @Autowired
-    public LipidNameValidationController(LipidNameValidationService lipidNameValidationService, StorageService storageService,
+    public LipidNameValidationController(LipidNameValidationService lipidNameValidationService, StorageService storageService, PageBuilderService pageBuilderService,
             AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames, NewsPropertyConfig newsPropertyConfig) {
         this.appInfo = appInfo;
         this.lipidNameValidationService = lipidNameValidationService;
         this.storageService = storageService;
+        this.pageBuilderService = pageBuilderService;
         this.sessionIdGenerator = sessionIdGenerator;
         this.localeResolver = localeResolver;
         this.lipidnames = lipidnames;
@@ -112,12 +111,12 @@ public class LipidNameValidationController {
     }
 
     @GetMapping("/")
-    public ModelAndView handleHome(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ModelAndView handleHome(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response, Principal principal) throws IOException {
         if (language != null) {
             localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
         }
         ModelAndView model = new ModelAndView("index");
-        model.addObject("page", createPage("Translate Lipid Names"));
+        model.addObject("page", createPage("Translate Lipid Names", Optional.ofNullable(principal)));
         ValidationRequest vr = new ValidationRequest();
         vr.setLipidNames(Streams.asString(lipidnames.getInputStream(), "UTF8").lines().collect(Collectors.toList()));
         model.addObject("validationRequest", vr);
@@ -125,14 +124,20 @@ public class LipidNameValidationController {
         return model;
     }
 
+    @GetMapping(path = "/logout")
+    public String logout(HttpServletRequest request) throws ServletException {
+        request.logout();
+        return "redirect:/";
+    }
+
     @GetMapping("/documentation")
-    public ModelAndView handleInfo(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ModelAndView handleInfo(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response, Principal principal) throws IOException {
         if (language != null) {
             localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
         }
         log.info("Retrieved the following news items: {}", newsPropertyConfig.getNews());
         ModelAndView model = new ModelAndView("documentation");
-        model.addObject("page", createPage("Goslin Webapp Information"));
+        model.addObject("page", createPage("Goslin Webapp Information", Optional.ofNullable(principal)));
         model.addObject("news", newsPropertyConfig.getNews());
         model.addObject("lipidClasses", Arrays.asList(LipidClass.values()).stream().sorted((t, t1) -> {
             int cmp = t.getCategory().name().compareTo(t1.getCategory().name());
@@ -147,7 +152,7 @@ public class LipidNameValidationController {
     @PostMapping("/validatefile")
     public RedirectView validate(@Valid @ModelAttribute("validationFileRequest") ValidationFileRequest validationFileRequest, BindingResult bindingResult,
             RedirectAttributes redirectAttributes, HttpServletRequest request,
-            HttpSession session) throws IOException {
+            HttpSession session, Principal principal) throws IOException {
         ValidationRequest validationRequest = new ValidationRequest();
         validationRequest.setLipidNames(new String(validationFileRequest.getFile().getBytes(), StandardCharsets.UTF_8).lines().filter((t) -> {
             return !t.isEmpty();
@@ -162,18 +167,18 @@ public class LipidNameValidationController {
         RequestMethod.POST})
     public ModelAndView validate(@Valid @ModelAttribute("validationRequest") ValidationRequest validationRequest, BindingResult bindingResult,
             RedirectAttributes redirectAttributes, HttpServletRequest request,
-            HttpSession session) {
+            HttpSession session, Principal principal) {
         if (bindingResult.hasErrors()) {
             log.warn("Binding result has errors: {}", bindingResult);
             ModelAndView modelAndView = new ModelAndView("index");
-            modelAndView.addObject("page", createPage("Translate Lipid Names"));
+            modelAndView.addObject("page", createPage("Translate Lipid Names", Optional.ofNullable(principal)));
             modelAndView.addObject("validationRequest", validationRequest);
             modelAndView.addObject("hasBeenSubmitted", true);
             modelAndView.addObject("validationFileRequest", new ValidationFileRequest());
             return modelAndView;
         }
         ModelAndView mav = new ModelAndView("validationResult");
-        mav.addObject("page", createPage("Lipid Name Validation Results"));
+        mav.addObject("page", createPage("Lipid Name Validation Results", Optional.ofNullable(principal)));
         List<ValidationResult> validationResults = lipidNameValidationService.validate(Optional.ofNullable(validationRequest.getLipidNames()).orElse(Collections.emptyList()));
         log.info("Received {} validation results!", validationResults.size());
         ValidationResults results = new ValidationResults();
@@ -201,7 +206,7 @@ public class LipidNameValidationController {
     public ResponseEntity<Resource> getResults(
             @PathVariable String sessionId, @PathVariable String storageServiceSlot,
             HttpServletRequest request,
-            HttpSession session) throws FileNotFoundException {
+            HttpSession session, Principal principal) throws FileNotFoundException {
         UUID resultSessionId = UUID.fromString(sessionId);
         if ("OUTPUT_TSV_FILE".equals(storageServiceSlot)) {
             MediaType mediaType = MediaType.ALL;
@@ -285,7 +290,7 @@ public class LipidNameValidationController {
                 m.put(fa.getName() + " #DB", fa.getNDoubleBonds() + "");
                 m.put(fa.getName() + " Bond Type", fa.getLipidFaBondType() + "");
                 m.put(fa.getName() + " DB Positions", fa.getDoubleBondPositions().entrySet().stream().map((dbPosEntry) -> {
-                    return dbPosEntry.getKey()+""+dbPosEntry.getValue();
+                    return dbPosEntry.getKey() + "" + dbPosEntry.getValue();
                 }).collect(Collectors.toList()) + "");
                 m.put(fa.getName() + " Modifications", fa.getModifications() + "");
             }
@@ -303,60 +308,8 @@ public class LipidNameValidationController {
         return sb.toString();
     }
 
-    @GetMapping("/login")
-    public ModelAndView login() {
-        ModelAndView mav = new ModelAndView("login");
-        mav.addObject("page", createPage("Login"));
-        return mav;
-    }
-
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ModelAndView handleMaxUploadSizeExceeded(HttpServletRequest req,
-            HttpServletResponse resp, Exception exception) throws Exception {
-        log.error("Caught exception: ", exception);
-        ModelAndView mav = new ModelAndView();
-        Page page = createPage("Error");
-        mav.addObject("page", page);
-        mav.addObject("title", "Uploaded file is too large!");
-        mav.addObject("error", "The file you tried to upload was larger than the current limit: " + page.getMaxFileSize());
-        mav.addObject("url", req.getRequestURL());
-        mav.addObject("timestamp", new Date().toString());
-        mav.addObject("status", 500);
-        mav.setViewName("error");
-        return mav;
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ModelAndView handleError(HttpServletRequest req, Exception exception)
-            throws Exception {
-        log.error("Caught exception: ", exception);
-        ModelAndView mav = new ModelAndView();
-        mav.addObject("page", createPage("Error"));
-        mav.addObject("title", "Oops, this shouldn't have happened!");
-        mav.addObject("error", exception);
-        mav.addObject("url", req.getRequestURL());
-        mav.addObject("timestamp", new Date().toString());
-        mav.addObject("status", 500);
-        mav.setViewName("error");
-        return mav;
-    }
-
-    @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ModelAndView handleUnmapped(HttpServletRequest req) {
-        ModelAndView mav = new ModelAndView();
-        mav.addObject("page", createPage("Error"));
-        mav.addObject("title", "Sorry... the requested resource does not exist.");
-        mav.addObject("error", "Resource not found!");
-        mav.addObject("url", req.getRequestURL());
-        mav.addObject("timestamp", new Date().toString());
-        mav.addObject("status", 404);
-        mav.setViewName("error");
-        return mav;
-    }
-
-    protected Page createPage(String title) {
-        return new Page(title, appInfo);
+    protected Page createPage(String title, Optional<Principal> principal) {
+        return pageBuilderService.addPrincipalInfo(pageBuilderService.createPage(title), principal);
     }
 
 }
