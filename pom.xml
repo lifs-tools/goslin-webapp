@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.isas.lifs</groupId>
     <artifactId>lifs-goslin-webapp</artifactId>
-    <version>1.1.5</version>
+    <version>1.1.6</version>
     <packaging>jar</packaging>
     <description>Grammar of Succinct Lipid Nomenclature - Webapplication and REST service for parsing, validation and normalization of lipid names.</description>
     <name>LIFS Goslin webapp.</name>	
-    <url>https://gitlab.isas.de/lifs/lifs-palinom-webapp</url>	
+    <url>https://github.com/lifs-tool/goslin-webapp</url>	
     <licenses>
         <license>
             <name>The Apache License, Version 2.0</name>
@@ -28,8 +28,8 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git@github.com:lifs-tools/goslin-webapp.git</connection>
-        <developerConnection>scm:git:git@github.com:lifs-tools/goslin-webapp.git</developerConnection>
+        <connection>scm:git:ssh://github.com:lifs-tools/goslin-webapp.git</connection>
+        <developerConnection>scm:git:ssh://github.com:lifs-tools/goslin-webapp.git</developerConnection>
         <url>https://github.com/lifs-tools/goslin-webapp</url>
     </scm>
     <issueManagement>
@@ -45,10 +45,15 @@
     
     <distributionManagement>
         <repository>
-            <id>lifs-artifactory-releases</id>
-            <name>LIFS Artifactory-releases</name>
-            <url>https://apps.lifs.isas.de/artifactory/libs-release-local</url>
+            <id>lifstools-jfrog</id>
+            <name>lifstools-release</name>
+            <url>https://lifstools.jfrog.io/artifactory/lifs-libs-release-local</url>
         </repository>
+        <snapshotRepository>
+            <id>lifstools-jfrog</id>
+            <name>lifstools-snapshot</name>
+            <url>https://lifstools.jfrog.io/artifactory/lifs-libs-snapshot-local</url>
+        </snapshotRepository>
     </distributionManagement>
     
     <properties>
@@ -67,7 +72,7 @@
         <jquery.version>3.4.0</jquery.version>
         <spring.boot.version>2.4.3</spring.boot.version>
         <springfox.version>3.0.0</springfox.version>
-        <lifs.webapps.common.version>1.0.19-SNAPSHOT</lifs.webapps.common.version>
+        <lifs.webapps.common.version>1.0.23</lifs.webapps.common.version>
         <jgoslin.version>1.1.2</jgoslin.version>
         <keycloak.version>12.0.4</keycloak.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
@@ -109,7 +114,7 @@
                 <scope>test</scope>
                 <type>jar</type>
             </dependency>
-<!--            <dependency>
+            <!--            <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>1.5.24</version>
@@ -670,63 +675,20 @@
             </build>
         </profile>
     </profiles>
-    <!--    <repositories>
+    <repositories>
         <repository>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>lifs-central</id>
-            <name>libs-release</name>
-            <url>https://apps.lifs.isas.de/artifactory/libs-release</url>
+            <id>lifs-new-central</id>
+            <name>lifs-libs-release</name>
+            <url>https://lifstools.jfrog.io/artifactory/lifs-libs-release</url>
         </repository>
         <repository>
             <snapshots />
-            <id>lifs-snapshots</id>
-            <name>libs-snapshot</name>
-            <url>https://apps.lifs.isas.de/artifactory/libs-snapshot</url>
-        </repository>
-        <repository>
-            <name>Sonatype Snapshot Repository</name>
-            <id>oss-sonatype-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>jcenter-releases</id>
-            <name>jcenter</name>
-            <url>https://jcenter.bintray.com</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>ebi-releases</id>
-            <name>ebi</name>
-            <url>https://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo</url>
+            <id>lifs-new-snapshots</id>
+            <name>lifs-libs-snapshot</name>
+            <url>https://lifstools.jfrog.io/artifactory/lifs-libs-snapshot</url>
         </repository>
     </repositories>
-    
-    <pluginRepositories>
-        <pluginRepository>
-            <id>oss-sonatype-snapshots</id>
-            <name>Sonatype Snapshot Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots> 
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>jcenter-releases</id>
-            <name>jcenter</name>
-            <url>https://jcenter.bintray.com</url>
-        </pluginRepository>
-    </pluginRepositories>-->
 </project>

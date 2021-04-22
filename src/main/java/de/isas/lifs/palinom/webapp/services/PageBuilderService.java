@@ -61,7 +61,8 @@ public class PageBuilderService {
                 toolLicenseUrl(appInfo.getToolLicenseUrl()).
                 toolTitle(appInfo.getToolTitle()).
                 toolUrl(appInfo.getToolUrl()).
-                toolVersionNumber(appInfo.getToolVersionNumber()).build();
+                toolVersionNumber(appInfo.getToolVersionNumber()).
+                maxFileSize(appInfo.getMaxFileSize()).build();
     }
 
     public Page addPrincipalInfo(Page page, Optional<Principal> optionalPrincipal) {

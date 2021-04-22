@@ -28,15 +28,16 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class AppInfo extends DefaultAppInfo {
-    
+
     private String maxFileSize;
 
-    public AppInfo(DefaultAppInfo.DefaultAppInfoBuilder<?, ?> b) {
+    public AppInfo(DefaultAppInfoBuilder<?, ?> b) {
         super(b);
     }
 
-    public AppInfo(String buildDate, String scmCommitId, String scmBranch, String scmUrl, String supportUrl, String versionNumber, String toolTitle, String toolDescription, String toolAuthor, String toolLicense, String toolLicenseUrl, String toolVersionNumber, String toolUrl, String toolContact, String gaId, String authServerBaseUrl, String authServerRealm) {
+    public AppInfo(String buildDate, String scmCommitId, String scmBranch, String scmUrl, String supportUrl, String versionNumber, String toolTitle, String toolDescription, String toolAuthor, String toolLicense, String toolLicenseUrl, String toolVersionNumber, String toolUrl, String toolContact, String gaId, String authServerBaseUrl, String authServerRealm, String maxFileSize) {
         super(buildDate, scmCommitId, scmBranch, scmUrl, supportUrl, versionNumber, toolTitle, toolDescription, toolAuthor, toolLicense, toolLicenseUrl, toolVersionNumber, toolUrl, toolContact, gaId, authServerBaseUrl, authServerRealm);
+        this.maxFileSize = maxFileSize;
     }
 
 }
