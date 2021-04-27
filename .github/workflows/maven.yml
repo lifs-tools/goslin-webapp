@@ -53,7 +53,7 @@ jobs:
     - name: Tag and Push docker image
       run: |
         docker tag ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }} ${{ env.REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }} && \
-        docker tag ${{ env.REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }} ${{ env.REGISTRY_NAME }}//${{ env.IMAGE_NAME }}:latest && \
+        docker tag ${{ env.REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }} ${{ env.REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:latest && \
         docker push ${{ env.REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }} && \
         docker push ${{ env.REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:latest
 
