@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.isas.lifs</groupId>
     <artifactId>lifs-goslin-webapp</artifactId>
-    <version>1.1.6</version>
+    <version>1.1.7</version>
     <packaging>jar</packaging>
     <description>Grammar of Succinct Lipid Nomenclature - Webapplication and REST service for parsing, validation and normalization of lipid names.</description>
     <name>LIFS Goslin webapp.</name>	
@@ -72,7 +72,7 @@
         <jquery.version>3.4.0</jquery.version>
         <spring.boot.version>2.4.3</spring.boot.version>
         <springfox.version>3.0.0</springfox.version>
-        <lifs.webapps.common.version>1.0.23</lifs.webapps.common.version>
+        <lifs.webapps.common.version>1.0.24</lifs.webapps.common.version>
         <jgoslin.version>1.1.2</jgoslin.version>
         <keycloak.version>12.0.4</keycloak.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
@@ -315,6 +315,10 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
     </dependencies>
 
