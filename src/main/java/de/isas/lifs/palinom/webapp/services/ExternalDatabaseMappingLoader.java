@@ -84,7 +84,7 @@ public class ExternalDatabaseMappingLoader {
             CsvMapper mapper = new CsvMapper();
             InputStream fileIs = new ClassPathResource(fileName).getInputStream();
             MappingIterator<T> readValues
-                    = mapper.reader(type).with(bootstrapSchema).readValues(fileIs);
+                    = mapper.readerFor(type).with(bootstrapSchema).readValues(fileIs);
             return readValues.readAll();
         } catch (Exception e) {
             log.error("Error occurred while loading object list from file " + fileName, e);

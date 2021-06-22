@@ -135,7 +135,7 @@ public class LipidNameValidationController {
         if (language != null) {
             localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
         }
-        log.info("Retrieved the following news items: {}", newsPropertyConfig.getNews());
+        log.debug("Retrieved the following news items: {}", newsPropertyConfig.getNews());
         ModelAndView model = new ModelAndView("documentation");
         model.addObject("page", createPage("Goslin Webapp Information", Optional.ofNullable(principal)));
         model.addObject("news", newsPropertyConfig.getNews());

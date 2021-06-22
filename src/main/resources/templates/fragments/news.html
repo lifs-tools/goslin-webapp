@@ -15,7 +15,7 @@
                                 </div>
                                 <div th:id="${'newsEntry'+itemStat.index}" class="collapse" th:classappend="${itemStat.index==0?'show':''}" th:attr="aria-labelledby='news'+${itemStat.index}"><!-- data-parent="#timeline">-->
                                     <div class="card-body">
-                                        <p th:utext="${newsEntry.content}">This release adds support for adducts, currently limited to those supported by <a href="https://lifs.isas.de/lipidcreator" target="_blank">LipidCreator</a>. Thus, any lipid shorthand notation name can now be combined with an adduct. Please note that adduct charges need to be explicit, thus '[M+H]+' needs to be provided as '[M+H]1+'.</p>
+                                        <p th:utext="${newsEntry.content}">This release adds support for adducts, currently limited to those supported by <a href="https://lifs-tools.org/lipidcreator" target="_blank">LipidCreator</a>. Thus, any lipid shorthand notation name can now be combined with an adduct. Please note that adduct charges need to be explicit, thus '[M+H]+' needs to be provided as '[M+H]1+'.</p>
                                     </div>
                                 </div>
                             </div>
