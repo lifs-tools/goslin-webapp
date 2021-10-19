@@ -18,7 +18,7 @@ package de.isas.lifs.palinom.webapp.services;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import de.isas.lipidomics.domain.ExternalDatabaseReference;
+import de.isas.lifs.palinom.webapp.domain.ExternalDatabaseReference;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;

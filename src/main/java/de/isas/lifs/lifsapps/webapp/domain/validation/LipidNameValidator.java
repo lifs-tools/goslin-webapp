@@ -18,15 +18,8 @@ package de.isas.lifs.lifsapps.webapp.domain.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import de.isas.lifs.lifsapps.webapp.domain.annotations.ValidLipidName;
-import de.isas.lipidomics.domain.LipidAdduct;
-import de.isas.lipidomics.palinom.lipidmaps.LipidMapsVisitorParser;
-import de.isas.lipidomics.palinom.goslin.GoslinVisitorParser;
-import de.isas.lipidomics.palinom.SyntaxErrorListener;
-import de.isas.lipidomics.palinom.exceptions.ParsingException;
-import de.isas.lipidomics.palinom.goslinfragments.GoslinFragmentsVisitorParser;
-import de.isas.lipidomics.palinom.swisslipids.SwissLipidsVisitorParser;
-import javax.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.lifstools.jgoslin.parser.LipidParser;
 
 /**
  *
@@ -35,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LipidNameValidator implements ConstraintValidator<ValidLipidName, String> {
 
+    private static LipidParser lipidParser = new LipidParser();
     private ConstraintValidatorContext context;
 
     @Override
@@ -54,118 +48,14 @@ public class LipidNameValidator implements ConstraintValidator<ValidLipidName, S
             context.buildConstraintViolationWithTemplate("Lipid name must not be null!").addConstraintViolation();
             return false;
         }
-        SyntaxErrorListener listener = new SyntaxErrorListener();
-        String lipidNameToValidate = lipidName.trim();
+        String lipidNameToValidate = lipidName.trim().replaceAll("\\s+", " ");
         try {
-            LipidAdduct la = new GoslinVisitorParser().parse(lipidNameToValidate, listener);
+            lipidParser.parse(lipidName);
             return true;
-        } catch (ParsingException ex) {
-            log.warn("Caught exception while parsing " + lipidNameToValidate + " with Goslin grammar: ", ex);
-            return parseWithGoslinFragmentsParser(lipidNameToValidate);
-        } catch (ValidationException vex) {
-            log.warn("Caught validation exception while parsing " + lipidNameToValidate + " with Goslin grammar: ", vex);
+        } catch (Exception lpe) {
+            log.warn("Caught exception while parsing " + lipidNameToValidate + ": ", lpe);
             this.context.disableDefaultConstraintViolation();
-            listener.getSyntaxErrors().forEach((t) -> {
-                context.buildConstraintViolationWithTemplate(t.getMessage()).addConstraintViolation();
-            });
-            return false;
-        } catch (NullPointerException npe) {
-            log.warn("Caught null pointer exception while parsing " + lipidNameToValidate + " with Goslin grammar: ", npe);
-            this.context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Unsupported name: " + lipidNameToValidate).addConstraintViolation();
-            return false;
-        } catch (RuntimeException re) {
-            log.warn("Caught runtime exception while parsing " + lipidNameToValidate + " with Goslin grammar: ", re);
-            this.context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(re.getLocalizedMessage()).addConstraintViolation();
-            return false;
-        }
-    }
-
-    protected boolean parseWithGoslinFragmentsParser(String lipidName) {
-        SyntaxErrorListener lmListener = new SyntaxErrorListener();
-        try {
-            LipidAdduct lma = new GoslinFragmentsVisitorParser().parse(lipidName, lmListener);
-            return true;
-        } catch (ParsingException ex1) {
-            log.warn("Caught exception while parsing " + lipidName + " with GoslinFragments grammar: ", ex1);
-            return parseWithSwissLipidsParser(lipidName);
-        } catch (ValidationException vex) {
-            log.warn("Caught validation exception while parsing " + lipidName + " with GoslinFragments grammar: ", vex);
-            this.context.disableDefaultConstraintViolation();
-            lmListener.getSyntaxErrors().forEach((t) -> {
-                context.buildConstraintViolationWithTemplate(t.getMessage()).addConstraintViolation();
-            });
-            return false;
-        } catch (NullPointerException npe) {
-            log.warn("Caught null pointer exception while parsing " + lipidName + " with GoslinFragments grammar: ", npe);
-            this.context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Unsupported name: " + lipidName).addConstraintViolation();
-            return false;
-        } catch (RuntimeException re) {
-            log.warn("Caught exception while parsing " + lipidName + " with GoslinFragments grammar: ", re);
-            this.context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(re.getLocalizedMessage()).addConstraintViolation();
-            return false;
-        }
-    }
-
-    protected boolean parseWithSwissLipidsParser(String lipidName) {
-        SyntaxErrorListener lmListener = new SyntaxErrorListener();
-        try {
-            LipidAdduct lma = new SwissLipidsVisitorParser().parse(lipidName, lmListener);
-            return true;
-        } catch (ParsingException ex1) {
-            log.warn("Caught exception while parsing " + lipidName + " with SwissLipids grammar: ", ex1);
-            return parseWithLipidMapsParser(lipidName);
-        } catch (ValidationException vex) {
-            log.warn("Caught validation exception while parsing " + lipidName + " with SwissLipids grammar: ", vex);
-            this.context.disableDefaultConstraintViolation();
-            lmListener.getSyntaxErrors().forEach((t) -> {
-                context.buildConstraintViolationWithTemplate(t.getMessage()).addConstraintViolation();
-            });
-            return false;
-        } catch (NullPointerException npe) {
-            log.warn("Caught null pointer exception while parsing " + lipidName + " with SwissLipids grammar: ", npe);
-            this.context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Unsupported name: " + lipidName).addConstraintViolation();
-            return false;
-        } catch (RuntimeException re) {
-            log.warn("Caught exception while parsing " + lipidName + " with SwissLipids grammar: ", re);
-            this.context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(re.getLocalizedMessage()).addConstraintViolation();
-            return false;
-        }
-    }
-
-    protected boolean parseWithLipidMapsParser(String lipidName) {
-        SyntaxErrorListener lmListener = new SyntaxErrorListener();
-        try {
-            LipidAdduct lma = new LipidMapsVisitorParser().parse(lipidName, lmListener);
-            return true;
-        } catch (ParsingException ex1) {
-            log.warn("Caught exception while parsing " + lipidName + " with LipidMaps grammar: ", ex1);
-            this.context.disableDefaultConstraintViolation();
-            lmListener.getSyntaxErrors().forEach((t) -> {
-                context.buildConstraintViolationWithTemplate(t.getMessage()).addConstraintViolation();
-            });
-            return false;
-        } catch (ValidationException vex) {
-            log.warn("Caught validation exception while parsing " + lipidName + " with LipidMaps grammar: ", vex);
-            this.context.disableDefaultConstraintViolation();
-            lmListener.getSyntaxErrors().forEach((t) -> {
-                context.buildConstraintViolationWithTemplate(t.getMessage()).addConstraintViolation();
-            });
-            return false;
-        } catch (NullPointerException npe) {
-            log.warn("Caught null pointer exception while parsing " + lipidName + " with LipidMaps grammar: ", npe);
-            this.context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Unsupported name: " + lipidName).addConstraintViolation();
-            return false;
-        } catch (RuntimeException re) {
-            log.warn("Caught exception while parsing " + lipidName + " with LipidMaps grammar: ", re);
-            this.context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(re.getLocalizedMessage()).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate(lpe.getLocalizedMessage()).addConstraintViolation();
             return false;
         }
     }
