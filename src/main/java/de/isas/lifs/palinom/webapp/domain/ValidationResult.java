@@ -15,16 +15,15 @@
  */
 package de.isas.lifs.palinom.webapp.domain;
 
-import de.isas.lipidomics.domain.ExternalDatabaseReference;
-import de.isas.lipidomics.domain.FattyAcid;
-import de.isas.lipidomics.domain.LipidAdduct;
-import de.isas.lipidomics.domain.LipidSpeciesInfo;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.Data;
+import org.lifstools.jgoslin.domain.FattyAcid;
+import org.lifstools.jgoslin.domain.LipidAdduct;
+import org.lifstools.jgoslin.domain.LipidSpeciesInfo;
 
 /**
  *
@@ -34,7 +33,8 @@ import lombok.Data;
 public class ValidationResult {
 
     public static enum Grammar {
-        GOSLIN, GOSLIN_FRAGMENTS, SWISSLIPIDS, LIPIDMAPS, HMDB
+        GOSLIN, //GOSLIN_FRAGMENTS, 
+        LIPIDMAPS, SWISSLIPIDS, HMDB, SHORTHAND, FATTY_ACID // NONE
     };
 
     private String lipidName;
@@ -52,9 +52,9 @@ public class ValidationResult {
     private String lipidMapsCategory;
 
     private String lipidMapsClass;
-    
+
     private Double mass;
-    
+
     private String sumFormula;
 
     private Optional<Collection<ExternalDatabaseReference>> lipidMapsReferences;
