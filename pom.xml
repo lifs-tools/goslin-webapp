@@ -723,20 +723,4 @@
             </build>
         </profile>
     </profiles>
-    <repositories>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>lifs-new-central</id>
-            <name>lifs-libs-release</name>
-            <url>https://lifstools.jfrog.io/artifactory/lifs-libs-release</url>
-        </repository>
-        <repository>
-            <snapshots />
-            <id>lifs-new-snapshots</id>
-            <name>lifs-libs-snapshot</name>
-            <url>https://lifstools.jfrog.io/artifactory/lifs-libs-snapshot</url>
-        </repository>
-    </repositories>
 </project>
