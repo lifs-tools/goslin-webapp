@@ -45,7 +45,7 @@ jobs:
       env:
         USERNAME: ${{ github.actor }}
         PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-      run: ./mvnw -B package -Pdocker --file pom.xml
+      run: ./mvnw -B deploy -Pdocker --file pom.xml
     - name: Login to LIFS Tools registry
       uses: docker/login-action@v1
       with:
