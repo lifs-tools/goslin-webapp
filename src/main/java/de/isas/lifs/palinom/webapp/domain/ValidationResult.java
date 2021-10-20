@@ -47,7 +47,7 @@ public class ValidationResult {
 
     private LipidSpeciesInfo lipidSpeciesInfo;
 
-    private String goslinName;
+    private String normalizedName;
 
     private String lipidMapsCategory;
 
