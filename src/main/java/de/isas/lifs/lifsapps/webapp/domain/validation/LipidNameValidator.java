@@ -28,7 +28,7 @@ import org.lifstools.jgoslin.parser.LipidParser;
 @Slf4j
 public class LipidNameValidator implements ConstraintValidator<ValidLipidName, String> {
 
-    private static LipidParser lipidParser = new LipidParser();
+    private static final LipidParser lipidParser = new LipidParser();
     private ConstraintValidatorContext context;
 
     @Override

@@ -19,7 +19,6 @@ import de.isas.lifs.palinom.webapp.domain.ValidationResult;
 import de.isas.lifs.palinom.webapp.domain.ValidationResult.Grammar;
 import de.isas.lifs.webapps.common.service.AnalyticsTracker;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
@@ -27,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -57,71 +57,45 @@ public class LipidNameValidationService {
     private final AnalyticsTracker tracker;
     private final ExternalDatabaseMappingLoader dbLoader;
     private final List<ValidationResult.Grammar> defaultGrammars;
-    private final Map<Grammar, Parser<LipidAdduct>> parserMap;
     private final LipidClasses lipidClasses = LipidClasses.get_instance();
 
     @Autowired
     public LipidNameValidationService(AnalyticsTracker tracker, ExternalDatabaseMappingLoader dbLoader) {
         this.tracker = tracker;
         this.dbLoader = dbLoader;
-        this.defaultGrammars = Collections.unmodifiableList(Arrays.asList(ValidationResult.Grammar.values()));
-        this.parserMap = new HashMap<>();
+        this.defaultGrammars = Collections.unmodifiableList(Arrays.asList(Grammar.SHORTHAND, Grammar.FATTY_ACID, Grammar.GOSLIN, Grammar.LIPIDMAPS, Grammar.SWISSLIPIDS, Grammar.HMDB));
     }
 
     public List<ValidationResult> validate(List<String> lipidNames) {
-        tracker.count(UUID.randomUUID(), getClass().getSimpleName(), "validate");
-        return lipidNames.stream().map((lipidName) -> {
-            return parseWith(lipidName.trim(), new ArrayDeque<ValidationResult.Grammar>(defaultGrammars));
-        }).collect(Collectors.toList());
+        return validate(lipidNames, defaultGrammars);
     }
 
     public List<ValidationResult> validate(List<String> lipidNames, List<ValidationResult.Grammar> grammars) {
         tracker.count(UUID.randomUUID(), getClass().getSimpleName(), "validate-with-grammars");
-        return lipidNames.stream().map((lipidName) -> {
+        return lipidNames.parallelStream().map((lipidName) -> {
             return parseWith(lipidName.trim(), new ArrayDeque<ValidationResult.Grammar>(grammars));
         }).collect(Collectors.toList());
     }
 
     private Parser<LipidAdduct> parserFor(ValidationResult.Grammar grammar) {
-        if (parserMap.isEmpty()) {
-            for (Grammar g : ValidationResult.Grammar.values()) {
-                switch (g) {
-                    case FATTY_ACID:
-                        parserMap.put(g, new FattyAcidParser());
-                        break;
-                    case SHORTHAND:
-                        parserMap.put(g, new ShorthandParser());
-                        break;
-                    case GOSLIN:
-                        parserMap.put(g, new GoslinParser());
-                        break;
-                    //            case GOSLIN_FRAGMENTS:
-                    //                return new GoslinFragmentsVisitorParser();
-                    //break;
-                    case LIPIDMAPS:
-                        parserMap.put(g, new LipidMapsParser());
-                        break;
-                    case SWISSLIPIDS:
-                        parserMap.put(g, new SwissLipidsParser());
-                        break;
-                    case HMDB:
-                        parserMap.put(g, new HmdbParser());
-                        break;
-                }
-            }
-        }
         switch (grammar) {
             case FATTY_ACID:
+                return FattyAcidParser.newInstance();
             case SHORTHAND:
+                return ShorthandParser.newInstance();
             case GOSLIN:
+                return GoslinParser.newInstance();
+            //            case GOSLIN_FRAGMENTS:
+            //                return new GoslinFragmentsVisitorParser();
+            //break;
             case LIPIDMAPS:
+                return LipidMapsParser.newInstance();
             case SWISSLIPIDS:
+                return SwissLipidsParser.newInstance();
             case HMDB:
-                return parserMap.get(grammar);
-            default:
-                throw new RuntimeException("No parser implementation available for grammar '" + grammar + "'!");
+                return HmdbParser.newInstance();
         }
-
+        throw new RuntimeException("No parser implementation available for grammar '" + grammar + "'!");
     }
 
     private ValidationResult parseWith(String lipidName, Deque<ValidationResult.Grammar> grammars) {
@@ -135,7 +109,10 @@ public class LipidNameValidationService {
             result.setLipidName(lipidName);
             result.setLipidAdduct(la);
             result.setGrammar(grammar);
-            List<String> messages = Arrays.asList(parser.get_error_message());
+            List<String> messages = Collections.emptyList();
+            if (parser.get_error_message() != null && !parser.get_error_message().isEmpty()) {
+                messages = Arrays.asList(parser.get_error_message());
+            }
             //            if (la != null) {
             //                long fasWithModifications = la.lipid.getFa().entrySet().stream().filter((t) -> {
             //                    return !t.getValue().getModifications().isEmpty();
@@ -158,7 +135,7 @@ public class LipidNameValidationService {
                 result.setLipidSpeciesInfo(la.lipid.getInfo());
                 try {
                     String normalizedName = la.lipid.get_lipid_string();
-                    result.setGoslinName(normalizedName);
+                    result.setNormalizedName(normalizedName);
                     result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName));
                     result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
                 } catch (RuntimeException re) {
