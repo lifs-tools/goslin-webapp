@@ -63,7 +63,15 @@ public class LipidNameValidationService {
     public LipidNameValidationService(AnalyticsTracker tracker, ExternalDatabaseMappingLoader dbLoader) {
         this.tracker = tracker;
         this.dbLoader = dbLoader;
-        this.defaultGrammars = Collections.unmodifiableList(Arrays.asList(Grammar.SHORTHAND, Grammar.FATTY_ACID, Grammar.GOSLIN, Grammar.LIPIDMAPS, Grammar.SWISSLIPIDS, Grammar.HMDB));
+        this.defaultGrammars = Collections.unmodifiableList(Arrays.asList(
+                Grammar.SHORTHAND, 
+                Grammar.FATTY_ACID, 
+                Grammar.GOSLIN, 
+                Grammar.LIPIDMAPS, 
+                Grammar.SWISSLIPIDS, 
+                Grammar.HMDB
+            )
+        );
     }
 
     public List<ValidationResult> validate(List<String> lipidNames) {
@@ -79,10 +87,10 @@ public class LipidNameValidationService {
 
     private Parser<LipidAdduct> parserFor(ValidationResult.Grammar grammar) {
         switch (grammar) {
-            case FATTY_ACID:
-                return FattyAcidParser.newInstance();
             case SHORTHAND:
                 return ShorthandParser.newInstance();
+            case FATTY_ACID:
+                return FattyAcidParser.newInstance();
             case GOSLIN:
                 return GoslinParser.newInstance();
             //            case GOSLIN_FRAGMENTS:
@@ -100,11 +108,11 @@ public class LipidNameValidationService {
 
     private ValidationResult parseWith(String lipidName, Deque<ValidationResult.Grammar> grammars) {
         log.debug("Grammars left: " + grammars.size());
-        ValidationResult.Grammar grammar = grammars.pop();
+        ValidationResult.Grammar grammar = grammars.pollFirst();
         Parser<LipidAdduct> parser = parserFor(grammar);
         log.info("Using grammar " + grammar + " with parser: " + parser.getClass().getSimpleName());
         LipidAdduct la = parser.parse(lipidName, false);
-        if (la != null) {
+        if (la != null && parser.get_error_message().isEmpty()) {
             ValidationResult result = new ValidationResult();
             result.setLipidName(lipidName);
             result.setLipidAdduct(la);
@@ -122,27 +130,26 @@ public class LipidNameValidationService {
             ////                }
             //            }
             result.setMessages(messages);
-            if (la != null) {
-                result.setLipidMapsCategory(la.lipid.getHeadgroup().lipid_category.name());
-                String speciesName = la.lipid.get_lipid_string(LipidLevel.SPECIES);
-                Double mass = la.get_mass();
-                if (mass == 0.0) {
-                    mass = Double.NaN;
-                }
-                result.setMass(mass);
-                result.setSumFormula(la.get_sum_formula());
-                result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
-                result.setLipidSpeciesInfo(la.lipid.getInfo());
-                try {
-                    String normalizedName = la.lipid.get_lipid_string();
-                    result.setNormalizedName(normalizedName);
-                    result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName));
-                    result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
-                } catch (RuntimeException re) {
-                    log.debug("Parsing error for {}!", lipidName);
-                }
-                result.setFattyAcids(la.lipid.getFa());
+            
+            result.setLipidMapsCategory(la.lipid.getHeadgroup().lipid_category.name());
+            String speciesName = la.lipid.get_lipid_string(LipidLevel.SPECIES);
+            Double mass = la.get_mass();
+            if (mass == 0.0) {
+                mass = Double.NaN;
             }
+            result.setMass(mass);
+            result.setSumFormula(la.get_sum_formula());
+            result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
+            result.setLipidSpeciesInfo(la.lipid.getInfo());
+            try {
+                String normalizedName = la.lipid.get_lipid_string();
+                result.setNormalizedName(normalizedName);
+                result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName));
+                result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
+            } catch (RuntimeException re) {
+                log.debug("Parsing error for {}!", lipidName);
+            }
+            result.setFattyAcids(la.lipid.getFa());
             return result;
         } else {
             log.debug("Could not parse " + lipidName + " with " + parser.getClass().getName() + " for grammar " + grammar + "! Message: " + parser.get_error_message());
@@ -150,7 +157,11 @@ public class LipidNameValidationService {
                 ValidationResult result = new ValidationResult();
                 result.setLipidName(lipidName);
                 result.setGrammar(grammar);
-                result.setMessages(Arrays.asList(parser.get_error_message()));
+                if(parser.get_error_message()==null || parser.get_error_message().isEmpty()) {
+                    result.setMessages(Arrays.asList("Could not parse "+lipidName+" with any parser. Please check that the headgroup is supported!"));
+                } else {
+                    result.setMessages(Arrays.asList(parser.get_error_message()));
+                }
                 return result;
             } else {
                 return parseWith(lipidName.trim(), grammars);
