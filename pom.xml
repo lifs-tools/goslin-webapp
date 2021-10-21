@@ -607,6 +607,7 @@
                         <image>${docker.image.prefix}/${project.artifactId}</image>
                         <tags>
                             <tag>${project.version}</tag>
+                            <tag>latest</tag>
                             <!-- <tag>${project.version}${deploy.env}</tag> -->
                         </tags>
                     </to>
