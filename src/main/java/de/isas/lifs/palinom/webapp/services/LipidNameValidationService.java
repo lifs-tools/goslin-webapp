@@ -57,7 +57,7 @@ public class LipidNameValidationService {
     private final AnalyticsTracker tracker;
     private final ExternalDatabaseMappingLoader dbLoader;
     private final List<ValidationResult.Grammar> defaultGrammars;
-    private final LipidClasses lipidClasses = LipidClasses.get_instance();
+    private final LipidClasses lipidClasses = LipidClasses.getInstance();
 
     @Autowired
     public LipidNameValidationService(AnalyticsTracker tracker, ExternalDatabaseMappingLoader dbLoader) {
@@ -131,18 +131,18 @@ public class LipidNameValidationService {
             //            }
             result.setMessages(messages);
             
-            result.setLipidMapsCategory(la.lipid.getHeadgroup().lipid_category.name());
-            String speciesName = la.lipid.get_lipid_string(LipidLevel.SPECIES);
-            Double mass = la.get_mass();
+            result.setLipidMapsCategory(la.lipid.getHeadgroup().lipidCategory.name());
+            String speciesName = la.lipid.getLipidString(LipidLevel.SPECIES);
+            Double mass = la.getMass();
             if (mass == 0.0) {
                 mass = Double.NaN;
             }
             result.setMass(mass);
-            result.setSumFormula(la.get_sum_formula());
+            result.setSumFormula(la.getSumFormula());
             result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
             result.setLipidSpeciesInfo(la.lipid.getInfo());
             try {
-                String normalizedName = la.lipid.get_lipid_string();
+                String normalizedName = la.lipid.getLipidString();
                 result.setNormalizedName(normalizedName);
                 result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName));
                 result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
@@ -175,7 +175,7 @@ public class LipidNameValidationService {
 //        }).collect(Collectors.toList());
 //    }
     private String getLipidMapsClassAbbreviation(LipidAdduct la) {
-        String lipidMapsClass = lipidClasses.get(la.lipid.getHeadgroup().lipid_class).description;
+        String lipidMapsClass = lipidClasses.get(la.lipid.getHeadgroup().lipidClass).description;
         Pattern lmcRegexp = Pattern.compile(LIPIDMAPS_CLASS_REGEXP);
         Matcher lmcMatcher = lmcRegexp.matcher(lipidMapsClass);
         if (lmcMatcher.matches() && lmcMatcher.groupCount() == 1) {

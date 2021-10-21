@@ -88,7 +88,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 @Controller
 public class LipidNameValidationController {
-    
+
     private final AppInfo appInfo;
     private final StorageService storageService;
     private final SessionIdGenerator sessionIdGenerator;
@@ -97,8 +97,8 @@ public class LipidNameValidationController {
     private final LocaleResolver localeResolver;
     private final Resource lipidnames;
     private final NewsPropertyConfig newsPropertyConfig;
-    private final LipidClasses lipidClasses = LipidClasses.get_instance();
-    
+    private final LipidClasses lipidClasses = LipidClasses.getInstance();
+
     @Autowired
     public LipidNameValidationController(LipidNameValidationService lipidNameValidationService, StorageService storageService, PageBuilderService pageBuilderService,
             AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames, NewsPropertyConfig newsPropertyConfig) {
@@ -111,7 +111,7 @@ public class LipidNameValidationController {
         this.lipidnames = lipidnames;
         this.newsPropertyConfig = newsPropertyConfig;
     }
-    
+
     @GetMapping("/")
     public ModelAndView handleHome(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response, Principal principal) throws IOException {
         if (language != null) {
@@ -125,13 +125,13 @@ public class LipidNameValidationController {
         model.addObject("validationFileRequest", new ValidationFileRequest());
         return model;
     }
-    
+
     @GetMapping(path = "/logout")
     public String logout(HttpServletRequest request) throws ServletException {
         request.logout();
         return "redirect:/";
     }
-    
+
     @GetMapping("/documentation")
     public ModelAndView handleInfo(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response, Principal principal) throws IOException {
         if (language != null) {
@@ -141,16 +141,16 @@ public class LipidNameValidationController {
         ModelAndView model = new ModelAndView("documentation");
         model.addObject("page", createPage("Goslin Webapp Information", Optional.ofNullable(principal)));
         model.addObject("news", newsPropertyConfig.getNews());
-        model.addObject("lipidClasses", LipidClasses.get_instance().stream().sorted((t, t1) -> {
-            int cmp = t.lipid_category.name().compareTo(t1.lipid_category.name());
+        model.addObject("lipidClasses", LipidClasses.getInstance().stream().sorted((t, t1) -> {
+            int cmp = t.lipidCategory.name().compareTo(t1.lipidCategory.name());
             if (cmp != 0) {
                 return cmp;
             }
-            return t.class_name.compareTo(t1.class_name);
+            return t.className.compareTo(t1.className);
         }).collect(Collectors.toList()));
         return model;
     }
-    
+
     @PostMapping("/validatefile")
     public RedirectView validate(@Valid @ModelAttribute("validationFileRequest") ValidationFileRequest validationFileRequest, BindingResult bindingResult,
             RedirectAttributes redirectAttributes, HttpServletRequest request,
@@ -164,7 +164,7 @@ public class LipidNameValidationController {
         redirectAttributes.addFlashAttribute("validationRequest", validationRequest);
         return new RedirectView("/validate", true);
     }
-    
+
     @RequestMapping(path = {"/validate"}, method = {RequestMethod.GET,
         RequestMethod.POST})
     public ModelAndView validate(@Valid @ModelAttribute("validationRequest") ValidationRequest validationRequest, BindingResult bindingResult,
@@ -202,7 +202,7 @@ public class LipidNameValidationController {
         }
         return mav;
     }
-    
+
     @GetMapping("/download/{sessionId:.+}/{storageServiceSlot:.+}")
     @ResponseBody
     public ResponseEntity<Resource> getResults(
@@ -257,7 +257,7 @@ public class LipidNameValidationController {
             throw new FileNotFoundException("No such file!");
         }
     }
-    
+
     private String toTable(ValidationResults vr) {
         StringBuilder sb = new StringBuilder();
         HashSet<String> keys = new LinkedHashSet<>();
@@ -273,11 +273,11 @@ public class LipidNameValidationController {
                 if (t.getLipidAdduct() == null || t.getLipidAdduct().adduct == null) {
                     m.put("Adduct", "");
                 } else {
-                    m.put("Adduct", t.getLipidAdduct().adduct.get_lipid_string());
-                    log.info("{}", t.getLipidAdduct().get_lipid_string());
+                    m.put("Adduct", t.getLipidAdduct().adduct.getLipidString());
+                    log.info("{}", t.getLipidAdduct().getLipidString());
                 }
-                m.put("Lipid Maps Category", t.getLipidAdduct().lipid.getHeadgroup().lipid_category.getFullName() + " [" + t.getLipidAdduct().lipid.getHeadgroup().lipid_category.name() + "]");
-                LipidClassMeta lclass = lipidClasses.get(t.getLipidAdduct().lipid.getHeadgroup().lipid_class);
+                m.put("Lipid Maps Category", t.getLipidAdduct().lipid.getHeadgroup().lipidCategory.getFullName() + " [" + t.getLipidAdduct().lipid.getHeadgroup().lipidCategory.name() + "]");
+                LipidClassMeta lclass = lipidClasses.get(t.getLipidAdduct().lipid.getHeadgroup().lipidClass);
                 m.put("Lipid Maps Main Class", lclass.description);
                 m.put("Lipid Maps References", t.getLipidMapsReferences().stream().flatMap(Collection::stream).map((r) -> {
                     return r.getDatabaseUrl() + r.getDatabaseElementId();
@@ -285,25 +285,37 @@ public class LipidNameValidationController {
                 m.put("Swiss Lipids References", t.getSwissLipidsReferences().stream().flatMap(Collection::stream).map((r) -> {
                     return r.getDatabaseUrl() + r.getDatabaseElementId();
                 }).collect(Collectors.joining(" | ")));
-                m.put("Functional Class Abbr", "[" + lclass.class_name + "]");
+                m.put("Functional Class Abbr", "[" + lclass.className + "]");
                 m.put("Functional Class Synonyms", "[" + lclass.synonyms.stream().collect(Collectors.joining(", ")) + "]");
                 m.put("Level", t.getLipidSpeciesInfo().level.toString());
-                m.put("Total #C", t.getLipidSpeciesInfo().num_carbon + "");
-                m.put("Total Modifications", t.getLipidSpeciesInfo().functional_groups + "");
-    //            m.put("Total #OH", t.getLipidSpeciesInfo().getNHydroxy() + "");
-                m.put("Total #DB", t.getLipidSpeciesInfo().double_bonds.num_double_bonds + "");
+                m.put("Total #C", t.getLipidSpeciesInfo().numCarbon + "");
+                m.put("Total Modifications", t.getLipidSpeciesInfo().functionalGroups.entrySet().stream().map((entry) -> {
+                    return entry.getKey()+"=["+entry.getValue().stream().map((functionalGroup) -> {
+                        return functionalGroup.toString(t.getLipidSpeciesInfo().level);
+                    }).collect(Collectors.joining(","))+"]";
+                }).collect(Collectors.joining(",", "[", "]")) + "");
+                //            m.put("Total #OH", t.getLipidSpeciesInfo().getNHydroxy() + "");
+                m.put("Total #DB", t.getLipidSpeciesInfo().doubleBonds.numDoubleBonds + "");
                 m.put("Exact Mass", String.format("%.4f", t.getMass()));
                 m.put("Formula", t.getSumFormula());
                 for (FattyAcid fa : t.getFattyAcids().values()) {
-                    m.put(fa.name + " SN Position", fa.position + "");
-                    m.put(fa.name + " #C", fa.num_carbon + "");
-    //                m.put(fa.name + " #OH", fa.getNHydroxy() + "");
-                    m.put(fa.name + " #DB", fa.double_bonds.num_double_bonds + "");
-                    m.put(fa.name + " Bond Type", fa.lipid_FA_bond_type + "");
-                    m.put(fa.name + " DB Positions", fa.double_bonds.double_bond_positions.entrySet().stream().map((dbPosEntry) -> {
-                        return dbPosEntry.getKey() + "" + dbPosEntry.getValue();
-                    }).collect(Collectors.toList()) + "");
-                    m.put(fa.name + " Modifications", fa.functional_groups + "");
+                    if (fa.numCarbon > 0) {
+                        m.put(fa.name + " SN Position", fa.position + "");
+                        m.put(fa.name + " #C", fa.numCarbon + "");
+                        //                m.put(fa.name + " #OH", fa.getNHydroxy() + "");
+                        m.put(fa.name + " #DB", fa.doubleBonds.numDoubleBonds + "");
+                        m.put(fa.name + " Bond Type", fa.lipidFaBondType + "");
+                        m.put(fa.name + " DB Positions", fa.doubleBonds.doubleBondPositions.entrySet().stream().map((dbPosEntry) -> {
+                            return dbPosEntry.getKey() + "" + dbPosEntry.getValue();
+                        }).collect(Collectors.toList()) + "");
+
+                        fa.functionalGroups.entrySet().stream().forEachOrdered((entry) -> {
+                            m.put(fa.name + " " + entry.getKey(),
+                                    entry.getValue().stream().map((functionalGroup) -> {
+                                        return functionalGroup.toString(t.getLipidSpeciesInfo().level);
+                                    }).collect(Collectors.joining(",", "[", "]")));
+                        });
+                    }
                 }
             }
             keys.addAll(m.keySet());
@@ -319,9 +331,9 @@ public class LipidNameValidationController {
         }
         return sb.toString();
     }
-    
+
     protected Page createPage(String title, Optional<Principal> principal) {
         return pageBuilderService.addPrincipalInfo(pageBuilderService.createPage(title), principal);
     }
-    
+
 }

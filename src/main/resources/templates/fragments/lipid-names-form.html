@@ -43,15 +43,15 @@
                                 <div th:if="${validationResult.lipidAdduct.adduct!=null}" class="form-group row">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Adduct.">Adduct</abbr></label>
                                     <div class="input-group col-sm-9">
-                                        <input th:unless="${validationResult.lipidAdduct.adduct.get_lipid_string().isEmpty()}" type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="${validationResult.lipidAdduct.adduct.get_lipid_string()}"></input>
-                                        <input th:if="${validationResult.lipidAdduct.adduct.get_lipid_string().isEmpty()}" type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="[M]"></input>
+                                        <input th:unless="${validationResult.lipidAdduct.adduct.getLipidString().isEmpty()}" type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="${validationResult.lipidAdduct.adduct.getLipidString()}"></input>
+                                        <input th:if="${validationResult.lipidAdduct.adduct.getLipidString().isEmpty()}" type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="[M]"></input>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Category within the LIPID MAPS&REG; hierarchy.">LIPID MAPS&REG; Category&nbsp;</abbr></label>
                                     <div class="input-group col-sm-9" th:if="${validationResult.lipidMapsCategory!=null and validationResult.lipidMapsCategory!='UNDEFINED'}">
                                         <div readonly="true" class="form-control-plaintext form-control-sm">
-                                            <a target="_blank" th:href="@{'https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM'+${validationResult.lipidMapsCategory}}" th:title="${'LM' + validationResult.lipidMapsCategory}"><span th:text="*{headgroup.lipid_category.fullName+'&nbsp;['+headgroup.lipid_category.name+']'}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
+                                            <a target="_blank" th:href="@{'https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM'+${validationResult.lipidMapsCategory}}" th:title="${'LM' + validationResult.lipidMapsCategory}"><span th:text="*{headgroup.lipidCategory.fullName+'&nbsp;['+headgroup.lipidCategory.name+']'}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
                                         </div>
                                         <!--                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{lipidCategory.fullName+'&nbsp;['+lipidCategory+']'}"></input>
                                                                                 <div class="input-group-append">
@@ -59,7 +59,7 @@
                                                                                 </div>-->
                                     </div>
                                     <div class="col-sm-9" th:if="${validationResult.lipidMapsCategory==null or validationResult.lipidMapsCategory=='UNDEFINED'}">
-                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{headgroup.lipid_category.fullName+'&nbsp;['+headgroup.lipid_category.name+']'}"></input>
+                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{headgroup.lipidCategory.fullName+'&nbsp;['+headgroup.lipidCategory.name+']'}"></input>
                                     </div>
                                 </div>
 <!--                                <div th:if="${validationResult.lipidAdduct.lipid.lipidClass!=null}" class="form-group row">
@@ -115,10 +115,10 @@
                                         <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="#{*{level}}"></input>
                                     </div>
                                 </div>
-                                <div class="form-group row" th:if="*{num_carbon>0}">
+                                <div class="form-group row" th:if="*{numCarbon>0}">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The total number of carbon atoms of all FA chains."># of C atoms&nbsp;</abbr></label>
                                     <div class="col-sm-9">
-                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{num_carbon}"></input>
+                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{numCarbon}"></input>
                                     </div>
                                 </div>
 <!--                                <div class="form-group row" th:if="*{nCarbon>0 && nHydroxy>=0}">
@@ -127,10 +127,10 @@
                                         <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{nHydroxy}"></input>
                                     </div>
                                 </div>-->
-                                <div class="form-group row" th:if="*{num_carbon>0 && double_bonds.num_double_bonds>=0}">
+                                <div class="form-group row" th:if="*{numCarbon>0 && doubleBonds>=0}">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The total number of double bonds of all FA chains. May be the adjusted value in case of Plasmenyls."># of double bonds&nbsp;</abbr></label>
                                     <div class="col-sm-9">
-                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{double_bonds.num_double_bonds}"></input>
+                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{doubleBonds}"></input>
                                     </div>
                                 </div>
                                 <div class="form-group row" th:if="${validationResult.mass>0}">
