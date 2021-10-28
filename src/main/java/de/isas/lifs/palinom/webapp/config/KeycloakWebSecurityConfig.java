@@ -15,6 +15,7 @@
  */
 package de.isas.lifs.palinom.webapp.config;
 
+import javax.servlet.http.HttpServletRequest;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
@@ -34,6 +35,8 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
  *
@@ -73,6 +76,7 @@ class KeycloakWebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         super.configure(http);
         http
                 .csrf()
+                .ignoringAntMatchers("/rest/**")
                 .csrfTokenRepository(new HttpSessionCsrfTokenRepository()).and().authorizeRequests()
                 .antMatchers(
                         "/",
