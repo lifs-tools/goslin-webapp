@@ -274,7 +274,7 @@ public class LipidNameValidationController {
                     m.put("Adduct", "");
                 } else {
                     m.put("Adduct", t.getLipidAdduct().adduct.getLipidString());
-                    log.info("{}", t.getLipidAdduct().getLipidString());
+                    log.debug("Lipid name with adduct: {}", t.getLipidAdduct().getLipidString());
                 }
                 m.put("Lipid Maps Category", t.getLipidAdduct().lipid.getHeadgroup().lipidCategory.getFullName() + " [" + t.getLipidAdduct().lipid.getHeadgroup().lipidCategory.name() + "]");
                 LipidClassMeta lclass = lipidClasses.get(t.getLipidAdduct().lipid.getHeadgroup().lipidClass);
