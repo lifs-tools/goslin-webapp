@@ -51,7 +51,7 @@
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Category within the LIPID MAPS&REG; hierarchy.">LIPID MAPS&REG; Category&nbsp;</abbr></label>
                                     <div class="input-group col-sm-9" th:if="${validationResult.lipidMapsCategory!=null and validationResult.lipidMapsCategory!='UNDEFINED'}">
                                         <div readonly="true" class="form-control-plaintext form-control-sm">
-                                            <a target="_blank" th:href="@{'https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM'+${validationResult.lipidMapsCategory}}" th:title="${'LM' + validationResult.lipidMapsCategory}"><span th:text="*{headgroup.lipidCategory.fullName+'&nbsp;['+headgroup.lipidCategory.name+']'}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
+                                            <a target="_blank" th:href="@{'https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM'+${validationResult.lipidMapsCategory}}" th:title="${'LM' + validationResult.lipidMapsCategory}"><span th:text="*{headGroup.lipidCategory.fullName+'&nbsp;['+headGroup.lipidCategory.name+']'}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
                                         </div>
                                         <!--                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{lipidCategory.fullName+'&nbsp;['+lipidCategory+']'}"></input>
                                                                                 <div class="input-group-append">
@@ -59,7 +59,7 @@
                                                                                 </div>-->
                                     </div>
                                     <div class="col-sm-9" th:if="${validationResult.lipidMapsCategory==null or validationResult.lipidMapsCategory=='UNDEFINED'}">
-                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{headgroup.lipidCategory.fullName+'&nbsp;['+headgroup.lipidCategory.name+']'}"></input>
+                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{headGroup.lipidCategory.fullName+'&nbsp;['+headGroup.lipidCategory.name+']'}"></input>
                                     </div>
                                 </div>
 <!--                                <div th:if="${validationResult.lipidAdduct.lipid.lipidClass!=null}" class="form-group row">

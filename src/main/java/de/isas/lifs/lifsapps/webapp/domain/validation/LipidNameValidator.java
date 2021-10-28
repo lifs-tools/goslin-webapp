@@ -19,6 +19,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import de.isas.lifs.lifsapps.webapp.domain.annotations.ValidLipidName;
 import lombok.extern.slf4j.Slf4j;
+import org.lifstools.jgoslin.domain.LipidAdduct;
 import org.lifstools.jgoslin.parser.LipidParser;
 
 /**

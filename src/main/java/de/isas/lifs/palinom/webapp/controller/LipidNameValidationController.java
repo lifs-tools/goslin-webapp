@@ -34,7 +34,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -276,8 +275,8 @@ public class LipidNameValidationController {
                     m.put("Adduct", t.getLipidAdduct().adduct.getLipidString());
                     log.debug("Lipid name with adduct: {}", t.getLipidAdduct().getLipidString());
                 }
-                m.put("Lipid Maps Category", t.getLipidAdduct().lipid.getHeadgroup().lipidCategory.getFullName() + " [" + t.getLipidAdduct().lipid.getHeadgroup().lipidCategory.name() + "]");
-                LipidClassMeta lclass = lipidClasses.get(t.getLipidAdduct().lipid.getHeadgroup().lipidClass);
+                m.put("Lipid Maps Category", t.getLipidAdduct().lipid.getHeadGroup().lipidCategory.getFullName() + " [" + t.getLipidAdduct().lipid.getHeadGroup().lipidCategory.name() + "]");
+                LipidClassMeta lclass = lipidClasses.get(t.getLipidAdduct().lipid.getHeadGroup().lipidClass);
                 m.put("Lipid Maps Main Class", lclass.description);
                 m.put("Lipid Maps References", t.getLipidMapsReferences().stream().flatMap(Collection::stream).map((r) -> {
                     return r.getDatabaseUrl() + r.getDatabaseElementId();

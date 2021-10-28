@@ -24,8 +24,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -134,7 +132,7 @@ public class LipidNameValidationService {
             //            }
             result.setMessages(messages);
 
-            result.setLipidMapsCategory(la.lipid.getHeadgroup().lipidCategory.name());
+            result.setLipidMapsCategory(la.lipid.getHeadGroup().lipidCategory.name());
             String speciesName = la.lipid.getLipidString(LipidLevel.SPECIES);
             Double mass = la.getMass();
             if (mass == 0.0) {
@@ -178,7 +176,7 @@ public class LipidNameValidationService {
 //        }).collect(Collectors.toList());
 //    }
     private String getLipidMapsClassAbbreviation(LipidAdduct la) {
-        String lipidMapsClass = lipidClasses.get(la.lipid.getHeadgroup().lipidClass).description;
+        String lipidMapsClass = lipidClasses.get(la.lipid.getHeadGroup().lipidClass).description;
         Pattern lmcRegexp = Pattern.compile(LIPIDMAPS_CLASS_REGEXP);
         Matcher lmcMatcher = lmcRegexp.matcher(lipidMapsClass);
         if (lmcMatcher.matches() && lmcMatcher.groupCount() == 1) {
