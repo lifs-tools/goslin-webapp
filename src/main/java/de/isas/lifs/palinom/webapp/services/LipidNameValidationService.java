@@ -22,11 +22,10 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Future;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -34,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.lifstools.jgoslin.domain.LipidAdduct;
 import org.lifstools.jgoslin.domain.LipidClasses;
 import org.lifstools.jgoslin.domain.LipidLevel;
+import org.lifstools.jgoslin.parser.BaseParserEventHandler;
 import org.lifstools.jgoslin.parser.FattyAcidParser;
 import org.lifstools.jgoslin.parser.GoslinParser;
 import org.lifstools.jgoslin.parser.HmdbParser;
@@ -64,13 +64,13 @@ public class LipidNameValidationService {
         this.tracker = tracker;
         this.dbLoader = dbLoader;
         this.defaultGrammars = Collections.unmodifiableList(Arrays.asList(
-                Grammar.SHORTHAND, 
-                Grammar.FATTY_ACID, 
-                Grammar.GOSLIN, 
-                Grammar.LIPIDMAPS, 
-                Grammar.SWISSLIPIDS, 
+                Grammar.SHORTHAND,
+                Grammar.FATTY_ACID,
+                Grammar.GOSLIN,
+                Grammar.LIPIDMAPS,
+                Grammar.SWISSLIPIDS,
                 Grammar.HMDB
-            )
+        )
         );
     }
 
@@ -79,10 +79,12 @@ public class LipidNameValidationService {
     }
 
     public List<ValidationResult> validate(List<String> lipidNames, List<ValidationResult.Grammar> grammars) {
-        tracker.count(UUID.randomUUID(), getClass().getSimpleName(), "validate-with-grammars");
-        return lipidNames.parallelStream().map((lipidName) -> {
-            return parseWith(lipidName.trim(), new ArrayDeque<ValidationResult.Grammar>(grammars));
-        }).collect(Collectors.toList());
+        UUID requestId = UUID.randomUUID();
+        tracker.count(requestId, getClass().getSimpleName(), "validate-with-grammars");
+        List<ValidationResult> results = lipidNames.parallelStream().map((lipidName) -> {
+                        return parseWith(lipidName.trim(), new ArrayDeque<ValidationResult.Grammar>(grammars));
+                    }).collect(Collectors.toList());
+        return results;
     }
 
     private Parser<LipidAdduct> parserFor(ValidationResult.Grammar grammar) {
@@ -111,15 +113,16 @@ public class LipidNameValidationService {
         ValidationResult.Grammar grammar = grammars.pollFirst();
         Parser<LipidAdduct> parser = parserFor(grammar);
         log.info("Using grammar " + grammar + " with parser: " + parser.getClass().getSimpleName());
-        LipidAdduct la = parser.parse(lipidName, false);
-        if (la != null && parser.get_error_message().isEmpty()) {
+        BaseParserEventHandler<LipidAdduct> handler = parser.newEventHandler();
+        LipidAdduct la = parser.parse(lipidName, handler, false);
+        if (la != null && handler.getErrorMessage().isEmpty()) {
             ValidationResult result = new ValidationResult();
             result.setLipidName(lipidName);
             result.setLipidAdduct(la);
             result.setGrammar(grammar);
             List<String> messages = Collections.emptyList();
-            if (parser.get_error_message() != null && !parser.get_error_message().isEmpty()) {
-                messages = Arrays.asList(parser.get_error_message());
+            if (handler.getErrorMessage() != null && !handler.getErrorMessage().isEmpty()) {
+                messages = Arrays.asList(handler.getErrorMessage());
             }
             //            if (la != null) {
             //                long fasWithModifications = la.lipid.getFa().entrySet().stream().filter((t) -> {
@@ -130,7 +133,7 @@ public class LipidNameValidationService {
             ////                }
             //            }
             result.setMessages(messages);
-            
+
             result.setLipidMapsCategory(la.lipid.getHeadgroup().lipidCategory.name());
             String speciesName = la.lipid.getLipidString(LipidLevel.SPECIES);
             Double mass = la.getMass();
@@ -147,20 +150,20 @@ public class LipidNameValidationService {
                 result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName));
                 result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
             } catch (RuntimeException re) {
-                log.debug("Parsing error for {}!", lipidName);
+                log.debug("Error while trying to resolve database hits for {}!", lipidName);
             }
             result.setFattyAcids(la.lipid.getFa());
             return result;
         } else {
-            log.debug("Could not parse " + lipidName + " with " + parser.getClass().getName() + " for grammar " + grammar + "! Message: " + parser.get_error_message());
+            log.debug("Could not parse " + lipidName + " with " + parser.getClass().getName() + " for grammar " + grammar + "! Message: " + handler.getErrorMessage());
             if (grammars.isEmpty()) {
                 ValidationResult result = new ValidationResult();
                 result.setLipidName(lipidName);
                 result.setGrammar(grammar);
-                if(parser.get_error_message()==null || parser.get_error_message().isEmpty()) {
-                    result.setMessages(Arrays.asList("Could not parse "+lipidName+" with any parser. Please check that the headgroup is supported!"));
+                if (handler.getErrorMessage() == null || handler.getErrorMessage().isEmpty()) {
+                    result.setMessages(Arrays.asList("Could not parse " + lipidName + " with any parser. Please check that the headgroup is supported!"));
                 } else {
-                    result.setMessages(Arrays.asList(parser.get_error_message()));
+                    result.setMessages(Arrays.asList("Not a valid name after position " + handler.getErrorMessage().length() + ": " + handler.getErrorMessage()));
                 }
                 return result;
             } else {
