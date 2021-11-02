@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-    <head></head>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head><title/></head>
     <body>
         <div th:fragment="lipid-adduct-card (idx, validationResult, nresults)">
             <div class="card my-2"> <!-- sec:authorize="isAuthenticated()">-->
@@ -62,17 +62,17 @@
                                         <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{headGroup.lipidCategory.fullName+'&nbsp;['+headGroup.lipidCategory.name+']'}"></input>
                                     </div>
                                 </div>
-<!--                                <div th:if="${validationResult.lipidAdduct.lipid.lipidClass!=null}" class="form-group row">
+                                <div th:if="${validationResult.lipidMapsClass!=null}" class="form-group row">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Main or Subclass within the LIPID MAPS&REG; hierarchy.">LIPID MAPS&REG; Main or Sub Class&nbsp;</abbr></label>
                                     <div class="input-group col-sm-9" th:if="${validationResult.lipidMapsClass!=null}">
                                         <div readonly="true" class="form-control-plaintext form-control-sm">
-                                            <a target="_blank" th:href="@{'https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM'+${validationResult.lipidMapsClass}}" th:title="${validationResult.lipidMapsClass}"><span th:text="*{lipidClass.getLipidMapsClassName()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
+                                            <a target="_blank" th:href="@{'https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM'+${validationResult.lipidMapsClass}}" th:title="${validationResult.lipidMapsClass}"><span th:text="${T(org.lifstools.jgoslin.domain.LipidClasses).getInstance().get(validationResult.lipidAdduct.lipid.headGroup.lipidClass).description}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>
                                         </div>
                                     </div>
                                     <div class="col-sm-9" th:if="${validationResult.lipidMapsClass==null}">
                                         <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{lipidClass.getLipidMapsClassName()}"></input>
                                     </div>
-                                </div>-->
+                                </div>
                                 <div th:if="${validationResult.lipidMapsReferences!=null && validationResult.lipidMapsReferences.isPresent()}" class="form-group row">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Corresponding LIPID MAPS&REG; entries, based on the normalized lipid name. May contain synonyms.">LIPID MAPS&REG; Entries&nbsp;</abbr></label>
                                     <div class="col-sm-9" th:if="${validationResult.lipidMapsReferences.isPresent()}">
@@ -95,18 +95,18 @@
                                         </div>
                                     </div>
                                 </div>
-<!--                                <div th:if="${validationResult.lipidAdduct.lipid.lipidClass!=null}"class="form-group row">
-                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Abbreviated name of the lipid head group.">Functional Class Abbreviation&nbsp;</abbr></label>
-                                    <div class="col-sm-9">
-                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{lipidClass}"></input>
-                                    </div>
-                                </div>
-                                <div th:if="${validationResult.lipidAdduct.lipid.lipidClass!=null}"class="form-group row">
-                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Synonyms of the lipid head group.">Functional Class Synonyms&nbsp;</abbr></label>
-                                    <div class="col-sm-9">
-                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{lipidClass.getSynonyms()}"></input>
-                                    </div>
-                                </div>-->
+                                <!--                                <div th:if="${validationResult.lipidAdduct.lipid.lipidClass!=null}"class="form-group row">
+                                                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Abbreviated name of the lipid head group.">Functional Class Abbreviation&nbsp;</abbr></label>
+                                                                    <div class="col-sm-9">
+                                                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{lipidClass}"></input>
+                                                                    </div>
+                                                                </div>
+                                                                <div th:if="${validationResult.lipidAdduct.lipid.lipidClass!=null}"class="form-group row">
+                                                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Synonyms of the lipid head group.">Functional Class Synonyms&nbsp;</abbr></label>
+                                                                    <div class="col-sm-9">
+                                                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{lipidClass.getSynonyms()}"></input>
+                                                                    </div>
+                                                                </div>-->
                             </form>
                             <form th:if="${validationResult.lipidSpeciesInfo}" th:object="${validationResult.lipidSpeciesInfo}">
                                 <div class="form-group row">
@@ -121,16 +121,17 @@
                                         <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{numCarbon}"></input>
                                     </div>
                                 </div>
-<!--                                <div class="form-group row" th:if="*{nCarbon>0 && nHydroxy>=0}">
-                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The total number of hydroxyl groups of all FA chains."># of hydroxyl groups&nbsp;</abbr></label>
-                                    <div class="col-sm-9">
-                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{nHydroxy}"></input>
-                                    </div>
-                                </div>-->
-                                <div class="form-group row" th:if="*{numCarbon>0 && doubleBonds>=0}">
+                                <!-- modifications -->
+                                <!--                                <div class="form-group row" th:if="*{nCarbon>0 && nHydroxy>=0}">
+                                                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The total number of hydroxyl groups of all FA chains."># of hydroxyl groups&nbsp;</abbr></label>
+                                                                    <div class="col-sm-9">
+                                                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{nHydroxy}"></input>
+                                                                    </div>
+                                                                </div>-->
+                                <div class="form-group row" th:if="*{numCarbon>0 && nDoubleBonds>=0}">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The total number of double bonds of all FA chains. May be the adjusted value in case of Plasmenyls."># of double bonds&nbsp;</abbr></label>
                                     <div class="col-sm-9">
-                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{doubleBonds}"></input>
+                                        <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="*{nDoubleBonds}"></input>
                                     </div>
                                 </div>
                                 <div class="form-group row" th:if="${validationResult.mass>0}">
@@ -145,49 +146,50 @@
                                         <input type="text" readonly="true" class="form-control-plaintext form-control-sm sum-formula" th:value="${validationResult.sumFormula}"></input>
                                     </div>
                                 </div>
-<!--                                <div class="form-group row" th:unless="${validationResult.fattyAcids != null and !validationResult.fattyAcids.isEmpty()}">
+                                <div class="form-group row" th:unless="${validationResult.fattyAcids != null and !validationResult.fattyAcids.isEmpty()}">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The overall lipid to FA bond type.">FA bond type&nbsp;</abbr></label>
                                     <div class="col-sm-9">
                                         <input type="text" readonly="true" class="form-control-plaintext form-control-sm" th:value="#{*{lipidFaBondType}}"></input>
                                     </div>
-                                </div>-->
+                                </div>
                             </form>
                             <form th:if="${validationResult}" th:object="${validationResult}">
-<!--                                <div class="form-group row" th:if="${validationResult.fattyAcids != null and !validationResult.fattyAcids.isEmpty()}">
+                                <div class="form-group row" th:if="${validationResult.fattyAcids != null and !validationResult.fattyAcids.isEmpty()}">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The fatty acyls attached to the lipid head group.">Fatty Acyls</abbr></label>
                                     <div class="col-sm-9">
                                         <table class="table table-striped table-sm table-responsive-sm table-fa">
                                             <thead>
-                                            <th><abbr title="The name of the FA chain. Numbering starts from 1 and proceeds from left to right, e.g. FA1, FA2, ... . Long-chain-base sphingoid backbones are abbreviated as LCB. The next FA after an LCB would be FA1.">Name</abbr></th>
-                                            <th><abbr title="The sn position of the FA chain w.r.t. the lipid head group">Position</abbr></th>
-                                            <th><abbr title="The number of Carbon atoms within this FA chain"># C atoms</abbr></th>
-                                            <th><abbr title="The number of double bonds within this FA chain"># Double bonds</abbr></th>
-                                            <th><abbr title="The number of hydroxyl groups attached to this FA chain"># hydroxyl</abbr></th>
-                                            <th><abbr title="The type of link between head group and FA chain.">HG&nbsp;<span class="oi oi-link-intact"></span>&nbsp;FA</abbr></th>
-                                            <th><abbr title="Whether this FA is a long chain base.">Long Chain Base</abbr></th>
-                                            <th><abbr title="The double bond positions within this FA chain.">Double Bond Positions</abbr></th>
-                                            <th><abbr title="Modifications of the fatty acyl.">FA Modifications</abbr></th>
+                                                <th><abbr title="The name of the FA chain. Numbering starts from 1 and proceeds from left to right, e.g. FA1, FA2, ... . Long-chain-base sphingoid backbones are abbreviated as LCB. The next FA after an LCB would be FA1.">Name</abbr></th>
+                                                <th><abbr title="The sn position of the FA chain w.r.t. the lipid head group">Position</abbr></th>
+                                                <th><abbr title="The number of Carbon atoms within this FA chain"># C atoms</abbr></th>
+                                                <th><abbr title="The number of double bonds within this FA chain"># Double bonds</abbr></th>
+                                                <!--<th><abbr title="The number of hydroxyl groups attached to this FA chain"># hydroxyl</abbr></th>-->
+                                                <th><abbr title="The type of link between head group and FA chain.">HG&nbsp;<span class="oi oi-link-intact"></span>&nbsp;FA</abbr></th>
+                                                <!--<th><abbr title="Lipid to FA bond type.">Lipid FA Bond Type</abbr></th>-->
+                                                <th><abbr title="The double bond positions within this FA chain.">Double Bond Positions</abbr></th>
+                                                <th><abbr title="The functional groups of the fatty acyl.">FA Functional Groups</abbr></th>
                                             </thead>
                                             <tbody>
                                                 <tr th:each="element : *{fattyAcids} ">
                                                     <td th:text="${element.value.name}"></td>
                                                     <td th:if="${element.value.position==-1}"><abbr title="Not Defined">N.D.</abbr></td>
                                                     <td th:unless="${element.value.position==-1}" th:text="${'sn'+element.value.position}"></td>
-                                                    <td th:text="${element.value.nCarbon}"></td>
+                                                    <td th:text="${element.value.numCarbon}"></td>
                                                     <td th:text="${element.value.nDoubleBonds}"></td>
-                                                    <td th:text="${element.value.nHydroxy}"></td>
+                                                    <!--<td th:text="${element.value.nHydroxy}"></td>-->
                                                     <td th:text="#{${element.value.lipidFaBondType}}"></td>
-                                                    <td th:text="${element.value.lcb}"></td>
-                                                    <td th:unless="${element.value.type == T(de.isas.lipidomics.domain.FattyAcidType).ISOMERIC}"><abbr title="Not Defined">N.D.</abbr></td>
-                                                    <td th:if="${element.value.type == T(de.isas.lipidomics.domain.FattyAcidType).ISOMERIC && element.value.doubleBondPositions.isEmpty()}"><abbr title="Not Defined">N.D.</abbr></td>
-                                                    <td th:if="${element.value.type == T(de.isas.lipidomics.domain.FattyAcidType).ISOMERIC && !element.value.doubleBondPositions.isEmpty()}" th:text="${element.value.doubleBondPositions}"></td>
-                                                    <td th:if="${element.value.modifications.isEmpty()}"><abbr title="Not Defined">N.D.</abbr></td>
-                                                    <td th:unless="${element.value.modifications.isEmpty()}" th:text="${element.value.modifications}"></td>
+                                                    <!--<td th:text="${element.value.lcb}"></td>-->
+                                                    <!--<td th:unless="${element.value.type == T(org.lifstools.jgoslin.domain.FattyAcidType).ISOMERIC}"><abbr title="Not Defined">N.D.</abbr></td>-->
+                                                    <td th:if="${element.value.nDoubleBonds == 0}"><abbr title="Not Defined">N.D.</abbr></td>
+                                                    <td th:if="${element.value.nDoubleBonds > 0 && !element.value.doubleBonds.doubleBondPositions.isEmpty()}" th:text="${element.value.doubleBonds.doubleBondPositions}"></td>
+                                                    <td th:if="${element.value.nDoubleBonds > 0 && element.value.doubleBonds.doubleBondPositions.isEmpty()}"><abbr title="Not Defined">N.D.</abbr></td>
+                                                    <td th:if="${element.value.functionalGroups.isEmpty()}"><abbr title="Not Defined">N.D.</abbr></td>
+                                                    <td th:unless="${element.value.functionalGroups.isEmpty()}" th:text="${T(org.lifstools.jgoslin.webapp.domain.ValidationResult).toFunctionalGroupString(validationResult, element.key)}"></td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>-->
+                                </div>
                             </form>
                         </form>
                     </div>
@@ -221,9 +223,7 @@
                                 <input id="file" class="no-gutters form-control-file" name="file" type="file" th:field="*{file}" required/>
                             </div>
                             <div class="col-sm-12">
-                                <small id="fileHelpBlock" class="form-text text-muted">
-                                    Select a local file to upload and validate.<th:block th:if="${page!=null}"> Size limit is <span th:text="${page.maxFileSize}"></span><th:block>.
-                                            </small>
+                                <small id="fileHelpBlock" class="form-text text-muted">Select a local file to upload and validate.<th:block th:if="${page!=null}"> Size limit is <span th:text="${page.maxFileSize}"></span><th:block>.</small>
                                             </div>
                                             </div>
                                             <small id="usernameHelpBlock" class="form-text text-muted">
