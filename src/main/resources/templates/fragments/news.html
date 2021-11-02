@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-    <head></head>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head><title/></head>
     <body>
         <div th:fragment="news">
             <div class="card flex-md-row mb-2" th:if="${news != null && !news.isEmpty()}">
@@ -30,7 +30,7 @@
                     <h4>Contributing</h4>
                     <p>If you find that Goslin does not report a lipid name correctly, or is missing some information, please <a class="text-muted" href="https://github.com/lifs-tools/goslin-webapp" target="_blank">file a bug report or pull-request at our GitHub repository&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a>.</p>
                     <p>Please see the <a class="text-muted" href="https://github.com/lifs-tools/goslin">Goslin GitHub repository&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a> for the other programming language implementations and for the lipid-list.csv file, which contains information on which lipid head groups Goslin currently supports.</p>
-                    
+
                     <h4>Using the Goslin implementations</h4>
                     <p>The Goslin grammars are supported by parser implementations in multiple programming languages and use a similar object model. For details, please see the <a class="text-muted" target="_blank" href="https://github.com/lifs-tools/goslin/docs">documentation at GitHub</a>.</p>
                 </div>
@@ -93,6 +93,6 @@
                 </div>
             </div>
         </div>
-    </div>
-</body>
+        </div>
+    </body>
 </html>
