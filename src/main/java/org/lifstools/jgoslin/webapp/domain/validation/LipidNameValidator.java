@@ -51,7 +51,7 @@ public class LipidNameValidator implements ConstraintValidator<ValidLipidName, S
         }
         String lipidNameToValidate = lipidName.trim().replaceAll("\\s+", " ");
         try {
-            lipidParser.parse(lipidName);
+            lipidParser.parse(lipidNameToValidate);
             return true;
         } catch (Exception lpe) {
             log.warn("Caught exception while parsing " + lipidNameToValidate + ": ", lpe);

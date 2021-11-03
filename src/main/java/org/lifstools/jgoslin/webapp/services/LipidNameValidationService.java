@@ -80,7 +80,7 @@ public class LipidNameValidationService {
         UUID requestId = UUID.randomUUID();
         tracker.count(requestId, getClass().getSimpleName(), "validate-with-grammars");
         List<ValidationResult> results = lipidNames.parallelStream().map((lipidName) -> {
-                        return parseWith(lipidName.trim(), new ArrayDeque<ValidationResult.Grammar>(grammars));
+                        return parseWith(lipidName.trim().replaceAll("\\s+", " "), new ArrayDeque<ValidationResult.Grammar>(grammars));
                     }).collect(Collectors.toList());
         return results;
     }
@@ -110,7 +110,7 @@ public class LipidNameValidationService {
         log.debug("Grammars left: " + grammars.size());
         ValidationResult.Grammar grammar = grammars.pollFirst();
         Parser<LipidAdduct> parser = parserFor(grammar);
-        log.info("Using grammar " + grammar + " with parser: " + parser.getClass().getSimpleName());
+        log.debug("Using grammar " + grammar + " with parser: " + parser.getClass().getSimpleName());
         BaseParserEventHandler<LipidAdduct> handler = parser.newEventHandler();
         LipidAdduct la = parser.parse(lipidName, handler, false);
         if (la != null && handler.getErrorMessage().isEmpty()) {
