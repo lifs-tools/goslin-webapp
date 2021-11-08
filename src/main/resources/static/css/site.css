@@ -127,4 +127,10 @@ pre {
 
 .callout-info {
     border-left-color: #bee5eb;
+    background-color: #d1ecf1;
+}
+
+.callout-warn {
+    border-left-color: #ffeeba;
+    background-color: #fff3cd;
 }
