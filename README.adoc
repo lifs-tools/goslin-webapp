@@ -1,5 +1,5 @@
 = LIFS Goslin Webapplication
-Nils Hoffmann &lt;nils.hoffmann@isas.de&gt;
+Nils Hoffmann &lt;nils.hoffmann@cebitec.uni-bielefeld.de&gt;
 
 image:https://zenodo.org/badge/DOI/10.5281/zenodo.3829055.svg["DOI", link="https://doi.org/10.5281/zenodo.3829055"]
 //Build status: image:https://travis-ci.org/nilshoffmann/jmzTab-m-webapp.svg?branch=master["Build Status", link="https://travis-ci.org/nilshoffmann/jmzTab-m-webapp"]
