@@ -6,14 +6,14 @@
         <div th:fragment="user-warnings">
             <div th:if="${param.error}" class="alert alert-danger">    
                 Invalid credentials.<br />
-                Please <a href="https://lifs.isas.de/support.html" target="_blank" title="Contact LIFS Support">contact support</a> if you need help to resolve the issue.
+                Please <a href="https://lifs-tools.org/support.html" target="_blank" title="Contact LIFS Support">contact support</a> if you need help to resolve the issue.
             </div>
             <div th:if="${param.logout}" class="alert alert-success"> 
                 You have been logged out.
             </div>
             <div sec:authorize="isAuthenticated() and not hasRole('ROLE_USER')" class="alert alert-warning" role="alert">
                 You are correctly authenticated but lack the 'USER' role for this application.<br />
-                Please <a href="https://lifs.isas.de/support.html" target="_blank" title="Contact LIFS Support">contact support</a> to request access to this application.
+                Please <a href="https://lifs-tools.org/support.html" target="_blank" title="Contact LIFS Support">contact support</a> to request access to this application.
             </div>
         </div>
         <!-- Login View -->
@@ -43,7 +43,7 @@
                         </fieldset>
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">Log in</button>
-                            <a href="https://lifs.isas.de/support.html" class="btn btn-light float-right"><span class="oi oi-lock-unlocked" aria-hidden="true"></span>&nbsp;Request Access</a>
+                            <a href="https://lifs-tools.org/support.html" class="btn btn-light float-right"><span class="oi oi-lock-unlocked" aria-hidden="true"></span>&nbsp;Request Access</a>
                         </div>
                     </form>
                     <div sec:authorize="isAuthenticated()" class="alert alert-success">
@@ -53,7 +53,7 @@
                     </div>
                     <div sec:authorize="isAuthenticated() and not hasRole('ROLE_USER')" class="alert alert-warning">
                         You are correctly authenticated but lack the 'USER' role for this application.<br />
-                        Please <a href="https://lifs.isas.de/support.html" target="_blank" title="Contact LIFS Support">contact support</a> to request access to this application.
+                        Please <a href="https://lifs-tools.org/support.html" target="_blank" title="Contact LIFS Support">contact support</a> to request access to this application.
                     </div>
                 </div>
             </div>
