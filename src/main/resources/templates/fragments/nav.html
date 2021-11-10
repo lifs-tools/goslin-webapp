@@ -24,7 +24,7 @@
                             <a class="nav-link" th:href="${page.scmUrl}" href="https://github.com/lifs-tools/goslin-webapp" target="_blank" title="Source code"><span class="oi oi-code" aria-hidden="true"></span>&nbsp;Source</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="https://lifs.isas.de/further-information.html" target="_blank" title="Imprint and Privacy Policy"><span class="oi oi-shield" aria-hidden="true"></span>&nbsp;Imprint and Privacy Policy</a>
+                            <a class="nav-link" href="https://lifs-tools.org/further-information.html" target="_blank" title="Imprint and Privacy Policy"><span class="oi oi-shield" aria-hidden="true"></span>&nbsp;Imprint and Privacy Policy</a>
                         </li>
                     </ul>
 <!--                    <div class="login-menu btn-group float-right" role="group" sec:authorize="isAuthenticated()" th:if="${page != null}">
@@ -41,7 +41,7 @@
                     <div th:replace="fragments/nav-utils::nav-login"></div>
                     <div class="btn-group float-right" role="group">
                         <a type="button" class="btn btn-secondary float-right" href="https://lifs-tools.org" title="LIFS Application Portal"><span class="oi oi-grid-four-up" aria-hidden="true"></span></a>
-                        <a type="button" class="btn btn-info float-right" href="https://lifs.isas.de/support.html" target="_blank" title="Help"><span class="oi oi-question-mark" aria-hidden="true"></span></a>
+                        <a type="button" class="btn btn-info float-right" href="https://lifs-tools.org/support.html" target="_blank" title="Help"><span class="oi oi-question-mark" aria-hidden="true"></span></a>
                     </div>
                 </div> 
             </nav>
@@ -50,8 +50,8 @@
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close" id="tracking-optIn">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <iframe class="col-md-12" style="border: 0;" th:src="${'https://lifs.isas.de/piwik/index.php?module=CoreAdminHome&action=optOut&idsite='+page.gaId}"></iframe> 
-                <a class="btn btn-secondary" href="https://lifs.isas.de/further-information.html" target="_blank" title="Imprint and privacy policy" th:text="#{tracking.privacy}">Privacy Policy</a>
+                <iframe class="col-md-12" style="border: 0;" th:src="${'https://lifs-tools.org/matomo/index.php?module=CoreAdminHome&action=optOut&idsite='+page.gaId}"></iframe> 
+                <a class="btn btn-secondary" href="https://lifs-tools.org/further-information.html" target="_blank" title="Imprint and privacy policy" th:text="#{tracking.privacy}">Privacy Policy</a>
             </div>
             </noscript>
             <div th:replace="fragments/nav-utils::system-message"></div>
