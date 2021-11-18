@@ -18,10 +18,8 @@ package org.lifstools.jgoslin.webapp.domain;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.Data;
 import org.lifstools.jgoslin.domain.FattyAcid;
 import org.lifstools.jgoslin.domain.LipidAdduct;
 import org.lifstools.jgoslin.domain.LipidSpeciesInfo;
@@ -30,7 +28,6 @@ import org.lifstools.jgoslin.domain.LipidSpeciesInfo;
  *
  * @author nils.hoffmann
  */
-@Data
 public class ValidationResult {
 
     public static enum Grammar {
@@ -62,14 +59,141 @@ public class ValidationResult {
 
     private Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences;
 
-    private Map<String, FattyAcid> fattyAcids = Collections.emptyMap();
-    
-    public static String toFunctionalGroupString(ValidationResult validationResult, String faKey) {
-        return validationResult.fattyAcids.get(faKey).functionalGroups.entrySet().stream().map((t) -> {
-            return t.getKey() + "=" + t.getValue().stream().map((fg) -> {
-                return fg.toString(validationResult.lipidSpeciesInfo.level);
+    private List<FattyAcid> fattyAcids = Collections.emptyList();
+
+    public static String toFunctionalGroupString(LipidAdduct la, FattyAcid fa) {
+        return fa.getFunctionalGroups().entrySet().stream().map((entry) -> {
+            return entry.getValue().stream().map((functionalGroup) -> {
+                return functionalGroup.toString(la.getLipidLevel());
             }).collect(Collectors.joining(",", "[", "]"));
         }).collect(Collectors.joining(",", "{", "}"));
+    }
+
+    public ValidationResult() {
+
+    }
+
+    public ValidationResult(String lipidName, Grammar grammar, LipidAdduct lipidAdduct, LipidSpeciesInfo lipidSpeciesInfo, String normalizedName, String lipidMapsCategory, String lipidMapsClass, Double mass, String sumFormula, Optional<Collection<ExternalDatabaseReference>> lipidMapsReferences, Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences) {
+        this.lipidName = lipidName;
+        this.grammar = grammar;
+        this.lipidAdduct = lipidAdduct;
+        this.lipidSpeciesInfo = lipidSpeciesInfo;
+        this.normalizedName = normalizedName;
+        this.lipidMapsCategory = lipidMapsCategory;
+        this.lipidMapsClass = lipidMapsClass;
+        this.mass = mass;
+        this.sumFormula = sumFormula;
+        this.lipidMapsReferences = lipidMapsReferences;
+        this.swissLipidsReferences = swissLipidsReferences;
+    }
+
+    public String getLipidName() {
+        return lipidName;
+    }
+
+    public void setLipidName(String lipidName) {
+        this.lipidName = lipidName;
+    }
+
+    public Grammar getGrammar() {
+        return grammar;
+    }
+
+    public void setGrammar(Grammar grammar) {
+        this.grammar = grammar;
+    }
+
+    public List<String> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<String> messages) {
+        this.messages = messages;
+    }
+
+    public LipidAdduct getLipidAdduct() {
+        return lipidAdduct;
+    }
+
+    public void setLipidAdduct(LipidAdduct lipidAdduct) {
+        this.lipidAdduct = lipidAdduct;
+    }
+
+    public LipidSpeciesInfo getLipidSpeciesInfo() {
+        return lipidSpeciesInfo;
+    }
+
+    public void setLipidSpeciesInfo(LipidSpeciesInfo lipidSpeciesInfo) {
+        this.lipidSpeciesInfo = lipidSpeciesInfo;
+    }
+
+    public String getNormalizedName() {
+        return normalizedName;
+    }
+
+    public void setNormalizedName(String normalizedName) {
+        this.normalizedName = normalizedName;
+    }
+
+    public String getLipidMapsCategory() {
+        return lipidMapsCategory;
+    }
+
+    public void setLipidMapsCategory(String lipidMapsCategory) {
+        this.lipidMapsCategory = lipidMapsCategory;
+    }
+
+    public String getLipidMapsClass() {
+        return lipidMapsClass;
+    }
+
+    public void setLipidMapsClass(String lipidMapsClass) {
+        this.lipidMapsClass = lipidMapsClass;
+    }
+
+    public Double getMass() {
+        return mass;
+    }
+
+    public void setMass(Double mass) {
+        this.mass = mass;
+    }
+
+    public String getSumFormula() {
+        return sumFormula;
+    }
+
+    public void setSumFormula(String sumFormula) {
+        this.sumFormula = sumFormula;
+    }
+
+    public Optional<Collection<ExternalDatabaseReference>> getLipidMapsReferences() {
+        return lipidMapsReferences;
+    }
+
+    public void setLipidMapsReferences(Optional<Collection<ExternalDatabaseReference>> lipidMapsReferences) {
+        this.lipidMapsReferences = lipidMapsReferences;
+    }
+
+    public Optional<Collection<ExternalDatabaseReference>> getSwissLipidsReferences() {
+        return swissLipidsReferences;
+    }
+
+    public void setSwissLipidsReferences(Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences) {
+        this.swissLipidsReferences = swissLipidsReferences;
+    }
+
+    public List<FattyAcid> getFattyAcids() {
+        return fattyAcids;
+    }
+
+    public void setFattyAcids(List<FattyAcid> fattyAcids) {
+        this.fattyAcids = fattyAcids;
+    }
+
+    @Override
+    public String toString() {
+        return "ValidationResult{" + "lipidName=" + lipidName + ", grammar=" + grammar + ", messages=" + messages + ", lipidAdduct=" + lipidAdduct + ", lipidSpeciesInfo=" + lipidSpeciesInfo + ", normalizedName=" + normalizedName + ", lipidMapsCategory=" + lipidMapsCategory + ", lipidMapsClass=" + lipidMapsClass + ", mass=" + mass + ", sumFormula=" + sumFormula + ", lipidMapsReferences=" + lipidMapsReferences + ", swissLipidsReferences=" + swissLipidsReferences + ", fattyAcids=" + fattyAcids + '}';
     }
 
 }

@@ -18,18 +18,19 @@ package org.lifstools.jgoslin.webapp.domain.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import org.lifstools.jgoslin.webapp.domain.annotations.ValidLipidName;
-import lombok.extern.slf4j.Slf4j;
-import org.lifstools.jgoslin.domain.LipidAdduct;
 import org.lifstools.jgoslin.parser.LipidParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author nils.hoffmann
  */
-@Slf4j
 public class LipidNameValidator implements ConstraintValidator<ValidLipidName, String> {
 
-    private static final LipidParser lipidParser = new LipidParser();
+    private static final Logger log = LoggerFactory.getLogger(LipidNameValidator.class);
+
+    private static final LipidParser lipidParser = LipidParser.newInstance();
     private ConstraintValidatorContext context;
 
     @Override

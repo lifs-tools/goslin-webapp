@@ -171,20 +171,20 @@
                                             </thead>
                                             <tbody>
                                                 <tr th:each="element : *{fattyAcids} ">
-                                                    <td th:text="${element.value.name}"></td>
-                                                    <td th:if="${element.value.position==-1}"><abbr title="Not Defined">N.D.</abbr></td>
-                                                    <td th:unless="${element.value.position==-1}" th:text="${'sn'+element.value.position}"></td>
-                                                    <td th:text="${element.value.numCarbon}"></td>
-                                                    <td th:text="${element.value.nDoubleBonds}"></td>
-                                                    <!--<td th:text="${element.value.nHydroxy}"></td>-->
-                                                    <td th:text="#{${element.value.lipidFaBondType}}"></td>
-                                                    <!--<td th:text="${element.value.lcb}"></td>-->
-                                                    <!--<td th:unless="${element.value.type == T(org.lifstools.jgoslin.domain.FattyAcidType).ISOMERIC}"><abbr title="Not Defined">N.D.</abbr></td>-->
-                                                    <td th:if="${element.value.nDoubleBonds == 0}"><abbr title="Not Defined">N.D.</abbr></td>
-                                                    <td th:if="${element.value.nDoubleBonds > 0 && !element.value.doubleBonds.doubleBondPositions.isEmpty()}" th:text="${element.value.doubleBonds.doubleBondPositions}"></td>
-                                                    <td th:if="${element.value.nDoubleBonds > 0 && element.value.doubleBonds.doubleBondPositions.isEmpty()}"><abbr title="Not Defined">N.D.</abbr></td>
-                                                    <td th:if="${element.value.functionalGroups.isEmpty()}"><abbr title="Not Defined">N.D.</abbr></td>
-                                                    <td th:unless="${element.value.functionalGroups.isEmpty()}" th:text="${T(org.lifstools.jgoslin.webapp.domain.ValidationResult).toFunctionalGroupString(validationResult, element.key)}"></td>
+                                                    <td th:text="${element.name}"></td>
+                                                    <td th:if="${element.position==0}"><abbr title="Not Defined">N.D.</abbr></td>
+                                                    <td th:unless="${element.position==0}" th:text="${'sn'+element.position}"></td>
+                                                    <td th:text="${element.numCarbon}"></td>
+                                                    <td th:text="${element.nDoubleBonds}"></td>
+                                                    <!--<td th:text="${element.nHydroxy}"></td>-->
+                                                    <td th:text="#{${element.lipidFaBondType}}"></td>
+                                                    <!--<td th:text="${element.lcb}"></td>-->
+                                                    <!--<td th:unless="${element.type == T(org.lifstools.jgoslin.domain.FattyAcidType).ISOMERIC}"><abbr title="Not Defined">N.D.</abbr></td>-->
+                                                    <td th:if="${element.nDoubleBonds == 0}"><abbr title="Not Defined">N.D.</abbr></td>
+                                                    <td th:if="${element.nDoubleBonds > 0 && !element.doubleBonds.doubleBondPositions.isEmpty()}" th:text="${element.doubleBonds.doubleBondPositions}"></td>
+                                                    <td th:if="${element.nDoubleBonds > 0 && element.doubleBonds.doubleBondPositions.isEmpty()}"><abbr title="Not Defined">N.D.</abbr></td>
+                                                    <td th:if="${element.functionalGroups.isEmpty()}"><abbr title="Not Defined">N.D.</abbr></td>
+                                                    <td th:unless="${element.functionalGroups.isEmpty()}" th:text="${T(org.lifstools.jgoslin.webapp.domain.ValidationResult).toFunctionalGroupString(validationResult.lipidAdduct, element)}"></td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -202,112 +202,135 @@
                 <div class="card-header">
                     Parse, Translate &amp; Validate Lipid Names
                 </div>
-                <div id="lipidFileInputFormCard" class="card-body">
-                    <form class="needs-validation" enctype="multipart/form-data" name="uf" th:action="@{/validatefile}" th:object="${validationFileRequest}" method="POST">               
-                        <div class="card my-2" th:if="${#fields.hasGlobalErrors()}">
-                            <div class="card-header">Validation File Errors</div>
-                            <div class="card-body">
-                                <div th:each="e : ${#fields.detailedErrors()}" class="alert alert-danger my-2" role="alert">
-                                    <h4 class="alert-heading" th:text="${e.global}? '*' : ${e.fieldName}">The field name</h4>
-                                    <p th:text="${e.message}">The error message</p>
+                <ul class="nav nav-tabs mx-3 mt-4" id="inputTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <a class="nav-link active" id="lipidFileInputFormCard-tab" data-toggle="tab" href="#lipidFileInputFormCard" role="tab" aria-controls="lipidFileInputFormCard" aria-selected="true">Lipid File Input</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <a class="nav-link"  id="lipidNameInputFormCard-tab" data-toggle="tab" href="#lipidNameInputFormCard" role="tab" aria-controls="lipidNameInputFormCard" aria-selected="false">Lipid Name Input</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="inputTabContent">
+                    <div id="lipidFileInputFormCard" class="card-body tab-pane fade show active" role="tabpanel" aria-labelledby="lipidFileInputFormCard-tab">
+                        <form class="needs-validation" enctype="multipart/form-data" name="uf" th:action="@{/validatefile}" th:object="${validationFileRequest}" method="POST">               
+                            <div class="card my-2" th:if="${#fields.hasGlobalErrors()}">
+                                <div class="card-header">Validation File Errors</div>
+                                <div class="card-body">
+                                    <div th:each="e : ${#fields.detailedErrors()}" class="alert alert-danger my-2" role="alert">
+                                        <h4 class="alert-heading" th:text="${e.global}? '*' : ${e.fieldName}">The field name</h4>
+                                        <p th:text="${e.message}">The error message</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <!--<fieldset>-->
-                        <legend class="card-title">Upload a text file with one lipid name per row</legend>
-                        <div class="form-row">
-                            <div class="col-sm-5">  
-                                <label for="file" class="col-form-label">File with lipid names to validate</label>
+                            <!--<fieldset>-->
+                            <legend class="card-title">Upload a text file with one lipid name per row</legend>
+                            <div class="form-row">
+                                <div class="col-sm-5">  
+                                    <label for="file" class="col-form-label">File with lipid names to validate</label>
+                                </div>
+                                <div class="col-sm-7">
+                                    <input id="file" class="no-gutters form-control-file" name="file" type="file" th:field="*{file}" required/>
+                                </div>
+                                <div class="col-sm-12">
+                                    <small id="fileHelpBlock" class="form-text text-muted">Select a local file to upload and validate.<th:block th:if="${page!=null}"> Size limit is <span th:text="${page.maxFileSize}"></span><th:block>.</small>
+                                </div>
                             </div>
-                            <div class="col-sm-7">
-                                <input id="file" class="no-gutters form-control-file" name="file" type="file" th:field="*{file}" required/>
+                            <small id="usernameHelpBlock" class="form-text text-muted">
+                                <!--The lipid name, either on species or sub-species level, e.g. 'PC(32:0)', 'PC 32:0', 'PE 16:2/18:3;1', or 'PE(16:2(9Z,12Z)/18:1(6Z))' etc.-->
+                            </small>
+                            <hr />
+                            <!--</fieldset>-->
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
+                                <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
+                                <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
                             </div>
-                            <div class="col-sm-12">
-                                <small id="fileHelpBlock" class="form-text text-muted">Select a local file to upload and validate.<th:block th:if="${page!=null}"> Size limit is <span th:text="${page.maxFileSize}"></span><th:block>.</small>
-                                            </div>
-                                            </div>
-                                            <small id="usernameHelpBlock" class="form-text text-muted">
-                                                <!--The lipid name, either on species or sub-species level, e.g. 'PC(32:0)', 'PC 32:0', 'PE 16:2/18:3;1', or 'PE(16:2(9Z,12Z)/18:1(6Z))' etc.-->
-                                            </small>
-                                            <hr />
-                                            <!--</fieldset>-->
-                                            <div class="form-actions">
-                                                <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
-                                                <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
-                                                <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
-                                            </div>
-                                            </form>
-                                            </div>
-                                            <hr />
-                                            <div id="lipidNameInputFormCard" class="card-body">
-                                                <form th:if="${validationRequest != null}" class="needs-validation" enctype="multipart/form-data" name="uf" th:action="@{/validate}" th:object="${validationRequest}" method="POST">               
-                                                    <div class="card my-2" th:if="${#fields.hasGlobalErrors()}">
-                                                        <div class="card-header">Validation Errors</div>
-                                                        <div class="card-body">
-                                                            <div th:each="e : ${#fields.detailedErrors()}" class="alert alert-danger my-2" role="alert">
-                                                                <h4 class="alert-heading" th:text="${e.global}? '*' : ${e.fieldName}">The field name</h4>
-                                                                <p th:text="${e.message}">The error message</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <!--<fieldset>-->
-                                                    <legend class="card-title">Or enter individual lipid names</legend>
-                                                    <small id="pasteLipidsInputHelpBlock" class="form-text text-muted">
-                                                        Enter individual lipid names on species or subspecies level, or paste multiple lipid names, separated by a new line from your clipboard <b>by left-clicking here</b> and hitting CTRL+V.
-                                                    </small>
-                                                    <div id="lipidsInput">
-                                                        <div class="form-group lipids-input-row" th:each="lipidName, itemStat : *{lipidNames}">
+                        </form>
+                    </div>
+                <!--<hr />-->
+                    <div id="lipidNameInputFormCard" class="card-body tab-pane fade" role="tabpanel" aria-labelledby="lipidNameInputFormCard-tab">
+                        <form th:if="${validationRequest != null}" class="needs-validation" enctype="multipart/form-data" name="uf" th:action="@{/validate}" th:object="${validationRequest}" method="POST">               
+                            <div class="card my-2" th:if="${#fields.hasGlobalErrors()}">
+                                <div class="card-header">Validation Errors</div>
+                                <div class="card-body">
+                                    <div th:each="e : ${#fields.detailedErrors()}" class="alert alert-danger my-2" role="alert">
+                                        <h4 class="alert-heading" th:text="${e.global}? '*' : ${e.fieldName}">The field name</h4>
+                                        <p th:text="${e.message}">The error message</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--<fieldset>-->
+                            <legend class="card-title">Enter individual lipid names</legend>
+                            <!--</fieldset>-->
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
+                                <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
+                                <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
+                            </div>
+                            <hr />
+                            <div class="form-group">
+                                <button type="button" class="addLipidNameRow btn btn-sm btn-outline-primary" title="Add input row"><span class="oi oi-plus"></span></button>
+                                <button type="button" class="deleteLipidNameRow btn btn-sm btn-outline-danger" title="Remove input row"><span class="oi oi-minus"></span></button>
+                                <button type="button" class="clearLipidNameInputRows btn btn-sm btn-outline-danger" title="Remove Input Rows"><span class="oi oi-collapse-up"></span></button>
+                                <button type="button" class="reloadPage btn btn-sm btn-outline-primary" title="Reset to default Input Rows"><span class="oi oi-collapse-down"></span></button>
+                            </div>
+                            <small id="pasteLipidsInputHelpBlock" class="form-text text-muted">
+                                Enter individual lipid names on species or subspecies level, or paste multiple lipid names, separated by a new line from your clipboard <b>by left-clicking here</b> and hitting CTRL+V.
+                            </small>
+                            <div id="lipidsInput">
+                                <div class="form-group lipids-input-row" th:each="lipidName, itemStat : *{lipidNames}">
 
-                                                            <div>
-                                                                <input type="text" class="form-control form-control-sm" th:field="*{lipidNames[__${itemStat.index}__]}" th:classappend="${not #lists.isEmpty(#fields.errors('lipidNames[__${itemStat.index}__]'))} ? is-invalid" required="true" />
-                                                                <div th:if="${#fields.hasErrors('lipidNames[__${itemStat.index}__]')}" th:errors="*{lipidNames[__${itemStat.index}__]}" class="help-block invalid-feedback"></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <small id="usernameHelpBlock" class="form-text text-muted">
-                                                        The lipid name, either on species or sub-species level, e.g. 'PC(32:0)', 'PC 32:0', 'PE 16:2/18:3;1', or 'PE(16:2(9Z,12Z)/18:1(6Z))' etc.
-                                                    </small>
-                                                    <div class="form-group">
-                                                        <button id="addLipidNameRow" type="button" class="btn btn-sm btn-outline-primary" title="Add input row"><span class="oi oi-plus"></span></button>
-                                                        <button id="deleteLipidNameRow" type="button" class="btn btn-sm btn-outline-danger" title="Remove input row"><span class="oi oi-minus"></span></button>
-                                                        <button id="clearLipidNameInputRows" type="button" class="btn btn-sm btn-outline-danger" title="Remove Input Rows"><span class="oi oi-collapse-up"></span></button>
-                                                        <button id="reloadPage" type="button" class="btn btn-sm btn-outline-primary" title="Reset to default Input Rows"><span class="oi oi-collapse-down"></span></button>
-                                                    </div>
-                                                    <hr />
-                                                    <!--</fieldset>-->
-                                                    <div class="form-actions">
-                                                        <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
-                                                        <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
-                                                        <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                            </div>
-                                            </div>
-                                            <!-- Show validated lipid name results -->
-                                            <div th:fragment="validate-lipid-names-result-card">
-                                                <div class="card my-2"> <!-- sec:authorize="isAuthenticated()"> -->
-                                                    <div class="card-header">
-                                                        <span class="align-middle">Validated Lipid Names</span>
-                                                        <a th:unless="${validationResults.results==null || #lists.size(validationResults.results)==0}" href="#" th:href="@{/download/{userSessionId}/{validationResultsTsv}(userSessionId=${userSessionId},validationResultsTsv=${validationResultsTsv})}" id="downloadTsvTop" class="btn btn btn-primary btn-sm float-right" title="Save TSV"><span class="oi oi-data-transfer-download" aria-hidden="true"></span>&nbsp;Download</a>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <form th:if="${validationResults != null}" name="uf" th:object="${validationResults}" id="validationResultsCards">
-                                                            <div th:if="${validationResults.results==null || #lists.size(validationResults.results)==0}">
-                                                                <div class="alert alert-warning my-2" role="alert">
-                                                                    <span>No translated names were received. Please click on 'Dismiss' to return to the submission form.</span>
-                                                                </div>
-                                                            </div>
-                                                            <div th:each="validationResult, itemStat : *{results}">
-                                                                <div th:replace="::lipid-adduct-card (idx=${itemStat.index}, validationResult=${validationResult}, nresults=${#lists.size(validationResults.results)})"></div>
-                                                            </div>
-                                                            <div class="form-actions">
-                                                                <a th:unless="${validationResults.results==null || #lists.size(validationResults.results)==0}" href="#" th:href="@{/download/{userSessionId}/{validationResultsTsv}(userSessionId=${userSessionId},validationResultsTsv=${validationResultsTsv})}" id="downloadTsv" class="btn btn btn-primary" title="Save TSV"><span class="oi oi-data-transfer-download" aria-hidden="true"></span>&nbsp;Download</a>
-                                                                <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Dismiss</a>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            </body>
-                                            </html>
+                                    <div>
+                                        <input type="text" class="form-control form-control-sm" th:field="*{lipidNames[__${itemStat.index}__]}" th:classappend="${not #lists.isEmpty(#fields.errors('lipidNames[__${itemStat.index}__]'))} ? is-invalid" required="true" />
+                                        <div th:if="${#fields.hasErrors('lipidNames[__${itemStat.index}__]')}" th:errors="*{lipidNames[__${itemStat.index}__]}" class="help-block invalid-feedback"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <small id="usernameHelpBlock" class="form-text text-muted">
+                                The lipid name, either on species or sub-species level, e.g. 'PC(32:0)', 'PC 32:0', 'PE 16:2/18:3;1', or 'PE(16:2(9Z,12Z)/18:1(6Z))' etc.
+                            </small>
+                            <div class="form-group">
+                                <button type="button" class="addLipidNameRow btn btn-sm btn-outline-primary" title="Add input row"><span class="oi oi-plus"></span></button>
+                                <button type="button" class="deleteLipidNameRow btn btn-sm btn-outline-danger" title="Remove input row"><span class="oi oi-minus"></span></button>
+                                <button type="button" class="clearLipidNameInputRows btn btn-sm btn-outline-danger" title="Remove Input Rows"><span class="oi oi-collapse-up"></span></button>
+                                <button type="button" class="reloadPage btn btn-sm btn-outline-primary" title="Reset to default Input Rows"><span class="oi oi-collapse-down"></span></button>
+                            </div>
+                            <hr />
+                            <!--</fieldset>-->
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
+                                <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
+                                <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Show validated lipid name results -->
+        <div th:fragment="validate-lipid-names-result-card">
+            <div class="card my-2"> <!-- sec:authorize="isAuthenticated()"> -->
+                <div class="card-header">
+                    <span class="align-middle">Validated Lipid Names</span>
+                    <a th:unless="${validationResults.results==null || #lists.size(validationResults.results)==0}" href="#" th:href="@{/download/{userSessionId}/{validationResultsTsv}(userSessionId=${userSessionId},validationResultsTsv=${validationResultsTsv})}" id="downloadTsvTop" class="btn btn btn-primary btn-sm float-right" title="Save TSV"><span class="oi oi-data-transfer-download" aria-hidden="true"></span>&nbsp;Download</a>
+                </div>
+                <div class="card-body">
+                    <form th:if="${validationResults != null}" name="uf" th:object="${validationResults}" id="validationResultsCards">
+                        <div th:if="${validationResults.results==null || #lists.size(validationResults.results)==0}">
+                            <div class="alert alert-warning my-2" role="alert">
+                                <span>No translated names were received. Please click on 'Dismiss' to return to the submission form.</span>
+                            </div>
+                        </div>
+                        <div th:each="validationResult, itemStat : *{results}">
+                            <div th:replace="::lipid-adduct-card (idx=${itemStat.index}, validationResult=${validationResult}, nresults=${#lists.size(validationResults.results)})"></div>
+                        </div>
+                        <div class="form-actions">
+                            <a th:unless="${validationResults.results==null || #lists.size(validationResults.results)==0}" href="#" th:href="@{/download/{userSessionId}/{validationResultsTsv}(userSessionId=${userSessionId},validationResultsTsv=${validationResultsTsv})}" id="downloadTsv" class="btn btn btn-primary" title="Save TSV"><span class="oi oi-data-transfer-download" aria-hidden="true"></span>&nbsp;Download</a>
+                            <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Dismiss</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

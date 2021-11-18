@@ -15,9 +15,6 @@
  */
 package org.lifstools.jgoslin.webapp.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 /**
  * An external database reference for a lipid encodes the link to identify the
  * referenced lipid, contains its native abbreviation and name, the database's
@@ -25,8 +22,6 @@ import lombok.Data;
  *
  * @author nils.hoffmann
  */
-@Data
-@AllArgsConstructor
 public class ExternalDatabaseReference {
 
     private String databaseUrl;
@@ -38,4 +33,67 @@ public class ExternalDatabaseReference {
 
     public ExternalDatabaseReference() {
     }
+
+    public ExternalDatabaseReference(String databaseUrl, String databaseElementId, String lipidLevel, String nativeAbbreviation, String nativeName, String normalizedName) {
+        this.databaseUrl = databaseUrl;
+        this.databaseElementId = databaseElementId;
+        this.lipidLevel = lipidLevel;
+        this.nativeAbbreviation = nativeAbbreviation;
+        this.nativeName = nativeName;
+        this.normalizedName = normalizedName;
+    }
+
+    public String getDatabaseUrl() {
+        return databaseUrl;
+    }
+
+    public void setDatabaseUrl(String databaseUrl) {
+        this.databaseUrl = databaseUrl;
+    }
+
+    public String getDatabaseElementId() {
+        return databaseElementId;
+    }
+
+    public void setDatabaseElementId(String databaseElementId) {
+        this.databaseElementId = databaseElementId;
+    }
+
+    public String getLipidLevel() {
+        return lipidLevel;
+    }
+
+    public void setLipidLevel(String lipidLevel) {
+        this.lipidLevel = lipidLevel;
+    }
+
+    public String getNativeAbbreviation() {
+        return nativeAbbreviation;
+    }
+
+    public void setNativeAbbreviation(String nativeAbbreviation) {
+        this.nativeAbbreviation = nativeAbbreviation;
+    }
+
+    public String getNativeName() {
+        return nativeName;
+    }
+
+    public void setNativeName(String nativeName) {
+        this.nativeName = nativeName;
+    }
+
+    public String getNormalizedName() {
+        return normalizedName;
+    }
+
+    public void setNormalizedName(String normalizedName) {
+        this.normalizedName = normalizedName;
+    }
+
+    @Override
+    public String toString() {
+        return "ExternalDatabaseReference{" + "databaseUrl=" + databaseUrl + ", databaseElementId=" + databaseElementId + ", lipidLevel=" + lipidLevel + ", nativeAbbreviation=" + nativeAbbreviation + ", nativeName=" + nativeName + ", normalizedName=" + normalizedName + '}';
+    }
+
 }

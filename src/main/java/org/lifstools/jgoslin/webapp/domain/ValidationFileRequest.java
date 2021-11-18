@@ -15,18 +15,19 @@
  */
 package org.lifstools.jgoslin.webapp.domain;
 
-import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
  * @author nils.hoffmann
  */
-@Data
 public class ValidationFileRequest {
 
     private MultipartFile file = null;
-    
+
+    public ValidationFileRequest() {
+    }
+
     public MultipartFile getFile() {
         return file;
     }
@@ -34,4 +35,10 @@ public class ValidationFileRequest {
     public void setFile(MultipartFile file) {
         this.file = file;
     }
+
+    @Override
+    public String toString() {
+        return "ValidationFileRequest{" + "file=" + file + '}';
+    }
+    
 }

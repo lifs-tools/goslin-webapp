@@ -18,23 +18,14 @@ package org.lifstools.jgoslin.webapp.domain;
 import de.isas.lifs.webapps.common.domain.DefaultPage;
 import java.util.Collections;
 import java.util.List;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.SuperBuilder;
 
 /**
  *
  * @author Nils Hoffmann &lt;nils.hoffmann@isas.de&gt;
  */
-@SuperBuilder
-@EqualsAndHashCode(callSuper = true)
-@Data
 public class Page extends DefaultPage {
 
-    @Builder.Default
     private String userName = "";
-    @Builder.Default
     private List<String> userRoles = Collections.emptyList();
 
     private String systemMessage;
@@ -72,4 +63,50 @@ public class Page extends DefaultPage {
         super(title, appVersion, gaId, description, author, buildDate, scmCommitId, scmBranch, scmUrl, supportUrl, toolTitle, toolDescription, toolAuthor, toolLicense, toolLicenseUrl, toolVersionNumber, toolUrl, toolContact, authServerBaseUrl, authServerRealm);
         this.maxFileSize = maxFileSize;
     }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public List<String> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(List<String> userRoles) {
+        this.userRoles = userRoles;
+    }
+
+    public String getSystemMessage() {
+        return systemMessage;
+    }
+
+    public void setSystemMessage(String systemMessage) {
+        this.systemMessage = systemMessage;
+    }
+
+    public String getSystemMessageLevel() {
+        return systemMessageLevel;
+    }
+
+    public void setSystemMessageLevel(String systemMessageLevel) {
+        this.systemMessageLevel = systemMessageLevel;
+    }
+
+    public String getMaxFileSize() {
+        return maxFileSize;
+    }
+
+    public void setMaxFileSize(String maxFileSize) {
+        this.maxFileSize = maxFileSize;
+    }
+
+    @Override
+    public String toString() {
+        return "Page{" + "userName=" + userName + ", userRoles=" + userRoles + ", systemMessage=" + systemMessage + ", systemMessageLevel=" + systemMessageLevel + ", maxFileSize=" + maxFileSize + '}';
+    }
+    
 }
