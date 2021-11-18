@@ -26,9 +26,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -36,13 +37,14 @@ import org.springframework.stereotype.Service;
  *
  * @author nilshoffmann
  */
-@Slf4j
 @Service
 public class ExternalDatabaseMappingLoader {
-    
+
+    private static final Logger log = LoggerFactory.getLogger(ExternalDatabaseMappingLoader.class);
+
     private final MultiValuedMap<String, ExternalDatabaseReference> lipidMapsReferences;
     private final MultiValuedMap<String, ExternalDatabaseReference> swissLipidsReferences;
-    
+
     public ExternalDatabaseMappingLoader() {
         this.lipidMapsReferences = new ArrayListValuedHashMap<>();
         this.swissLipidsReferences = new ArrayListValuedHashMap<>();
@@ -61,10 +63,10 @@ public class ExternalDatabaseMappingLoader {
             this.swissLipidsReferences.put(edr.getNativeName(), edr);
             swissLipidsEntries++;
         }
-        
+
         log.info("Loaded {} records for Swiss Lipids!", swissLipidsEntries);
     }
-    
+
     public Optional<Collection<ExternalDatabaseReference>> findSwissLipidsEntry(String... names) {
         List<String> namesList = Arrays.asList(names);
         return Optional.of(namesList.stream().map((t) -> {
@@ -73,12 +75,12 @@ public class ExternalDatabaseMappingLoader {
             return t != null;
         }).distinct().collect(Collectors.toList()));
     }
-    
+
     public Optional<Collection<ExternalDatabaseReference>> findLipidMapsEntry(String lipidMapsNames) {
         return Optional.of(this.lipidMapsReferences.get(lipidMapsNames).stream().distinct().collect(Collectors.toList()));
     }
-    
-    protected <T> List<T> loadObjectList(Class<T> type, String fileName, char columnSeparator) {
+
+    protected final <T> List<T> loadObjectList(Class<T> type, String fileName, char columnSeparator) {
         try {
             CsvSchema bootstrapSchema = CsvSchema.emptySchema().withHeader().withColumnSeparator(columnSeparator);
             CsvMapper mapper = new CsvMapper();

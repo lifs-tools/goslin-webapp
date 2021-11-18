@@ -42,27 +42,7 @@ public class PageBuilderService {
     }
 
     public Page createPage(String title) {
-        return Page.builder().title(title).
-                appVersion(appInfo.getVersionNumber()).
-                authServerBaseUrl(appInfo.getAuthServerBaseUrl()).
-                authServerRealm(appInfo.getAuthServerRealm()).
-                author(appInfo.getToolAuthor()).
-                buildDate(appInfo.getBuildDate()).
-                description(appInfo.getToolDescription()).
-                gaId(appInfo.getGaId()).
-                scmBranch(appInfo.getScmBranch()).
-                scmCommitId(appInfo.getScmCommitId()).
-                scmUrl(appInfo.getScmUrl()).
-                supportUrl(appInfo.getSupportUrl()).
-                toolAuthor(appInfo.getToolAuthor()).
-                toolContact(appInfo.getToolContact()).
-                toolDescription(appInfo.getToolDescription()).
-                toolLicense(appInfo.getToolLicense()).
-                toolLicenseUrl(appInfo.getToolLicenseUrl()).
-                toolTitle(appInfo.getToolTitle()).
-                toolUrl(appInfo.getToolUrl()).
-                toolVersionNumber(appInfo.getToolVersionNumber()).
-                maxFileSize(appInfo.getMaxFileSize()).build();
+        return new Page(title, appInfo);
     }
 
     public Page addPrincipalInfo(Page page, Optional<Principal> optionalPrincipal) {

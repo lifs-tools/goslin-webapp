@@ -78,12 +78,12 @@
                         </thead>
                         <tbody>
                             <tr th:each="lipidClass : ${lipidClasses}">
-                                <td th:text="${lipidClass.category}"></td>
-                                <td th:text="${lipidClass.lipidMapsClassName}"></td>
-                                <td th:text="${lipidClass.allowedNumFa}"></td>
+                                <td th:text="${lipidClass.lipidCategory}"></td>
+                                <td th:text="${lipidClass.description}"></td>
+                                <td th:text="${lipidClass.possibleNumFa}"></td>
                                 <td th:text="${lipidClass.maxNumFa}"></td>
-                                <td th:if="${lipidClass.sumFormula==null || lipidClass.sumFormula.isEmpty()}"><abbr title="Not Defined">N.D.</abbr></td>
-                                <td th:unless="${lipidClass.sumFormula==null || lipidClass.sumFormula.isEmpty()}" th:text="${lipidClass.sumFormula}"></td>
+                                <td th:if="${lipidClass.getElements()==null}"><abbr title="Not Defined">N.D.</abbr></td>
+                                <td th:unless="${lipidClass.getElements()==null}" th:text="${lipidClass.getElements().getSumFormula()}"></td>
                                 <td th:if="${lipidClass.getElements().getMass()>0}" th:text="${#numbers.formatDecimal(lipidClass.getElements().getMass(), 1, 4)}"></td>
                                 <td th:unless="${lipidClass.getElements().getMass()>0}"><abbr title="Not Defined">N.D.</abbr></td>
                                 <td th:text="${lipidClass.synonyms}"></td>

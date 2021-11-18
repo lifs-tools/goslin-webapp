@@ -27,10 +27,12 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
+import org.lifstools.jgoslin.domain.KnownFunctionalGroups;
 import org.lifstools.jgoslin.domain.LipidAdduct;
 import org.lifstools.jgoslin.domain.LipidClasses;
 import org.lifstools.jgoslin.domain.LipidLevel;
+import org.lifstools.jgoslin.domain.StringFunctions;
+import static org.lifstools.jgoslin.domain.StringFunctions.DEFAULT_QUOTE;
 import org.lifstools.jgoslin.parser.BaseParserEventHandler;
 import org.lifstools.jgoslin.parser.FattyAcidParser;
 import org.lifstools.jgoslin.parser.GoslinParser;
@@ -38,7 +40,10 @@ import org.lifstools.jgoslin.parser.HmdbParser;
 import org.lifstools.jgoslin.parser.LipidMapsParser;
 import org.lifstools.jgoslin.parser.Parser;
 import org.lifstools.jgoslin.parser.ShorthandParser;
+import org.lifstools.jgoslin.parser.SumFormulaParser;
 import org.lifstools.jgoslin.parser.SwissLipidsParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,15 +51,18 @@ import org.springframework.stereotype.Service;
  *
  * @author nils.hoffmann
  */
-@Slf4j
 @Service
 public class LipidNameValidationService {
+
+    private static final Logger log = LoggerFactory.getLogger(LipidNameValidationService.class);
 
     public static final String LIPIDMAPS_CLASS_REGEXP = ".+\\[([A-Z0-9]+)\\]";
 
     private final AnalyticsTracker tracker;
     private final ExternalDatabaseMappingLoader dbLoader;
     private final List<ValidationResult.Grammar> defaultGrammars;
+    private final SumFormulaParser sfp = SumFormulaParser.newInstance();
+    private final KnownFunctionalGroups knownFunctionalGroups = new KnownFunctionalGroups(StringFunctions.getResourceAsStringList("functional-groups.csv"), sfp);
     private final LipidClasses lipidClasses = LipidClasses.getInstance();
 
     @Autowired
@@ -80,28 +88,28 @@ public class LipidNameValidationService {
         UUID requestId = UUID.randomUUID();
         tracker.count(requestId, getClass().getSimpleName(), "validate-with-grammars");
         List<ValidationResult> results = lipidNames.parallelStream().map((lipidName) -> {
-                        return parseWith(lipidName.trim().replaceAll("\\s+", " "), new ArrayDeque<ValidationResult.Grammar>(grammars));
-                    }).collect(Collectors.toList());
+            return parseWith(lipidName.trim().replaceAll("\\s+", " "), new ArrayDeque<ValidationResult.Grammar>(grammars));
+        }).collect(Collectors.toList());
         return results;
     }
 
     private Parser<LipidAdduct> parserFor(ValidationResult.Grammar grammar) {
         switch (grammar) {
             case SHORTHAND:
-                return ShorthandParser.newInstance();
+                return ShorthandParser.newInstance(knownFunctionalGroups, "Shorthand2020.g4", DEFAULT_QUOTE);
             case FATTY_ACID:
-                return FattyAcidParser.newInstance();
+                return FattyAcidParser.newInstance(knownFunctionalGroups, "FattyAcids.g4", DEFAULT_QUOTE);
             case GOSLIN:
-                return GoslinParser.newInstance();
+                return GoslinParser.newInstance(knownFunctionalGroups, "Goslin.g4", DEFAULT_QUOTE);
             //            case GOSLIN_FRAGMENTS:
             //                return new GoslinFragmentsVisitorParser();
             //break;
             case LIPIDMAPS:
-                return LipidMapsParser.newInstance();
+                return LipidMapsParser.newInstance(knownFunctionalGroups, "LipidMaps.g4", DEFAULT_QUOTE);
             case SWISSLIPIDS:
-                return SwissLipidsParser.newInstance();
+                return SwissLipidsParser.newInstance(knownFunctionalGroups, "SwissLipids.g4", DEFAULT_QUOTE);
             case HMDB:
-                return HmdbParser.newInstance();
+                return HmdbParser.newInstance(knownFunctionalGroups, "HMDB.g4", DEFAULT_QUOTE);
         }
         throw new RuntimeException("No parser implementation available for grammar '" + grammar + "'!");
     }
@@ -132,8 +140,8 @@ public class LipidNameValidationService {
             //            }
             result.setMessages(messages);
 
-            result.setLipidMapsCategory(la.lipid.getHeadGroup().lipidCategory.name());
-            String speciesName = la.lipid.getLipidString(LipidLevel.SPECIES);
+            result.setLipidMapsCategory(la.getLipid().getHeadGroup().getLipidCategory().name());
+            String speciesName = la.getLipid().getLipidString(LipidLevel.SPECIES);
             Double mass = la.getMass();
             if (mass == 0.0) {
                 mass = Double.NaN;
@@ -141,16 +149,16 @@ public class LipidNameValidationService {
             result.setMass(mass);
             result.setSumFormula(la.getSumFormula());
             result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
-            result.setLipidSpeciesInfo(la.lipid.getInfo());
+            result.setLipidSpeciesInfo(la.getLipid().getInfo());
             try {
-                String normalizedName = la.lipid.getLipidString();
+                String normalizedName = la.getLipid().getLipidString();
                 result.setNormalizedName(normalizedName);
                 result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName));
                 result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
             } catch (RuntimeException re) {
                 log.debug("Error while trying to resolve database hits for {}!", lipidName);
             }
-            result.setFattyAcids(la.lipid.getFa());
+            result.setFattyAcids(la.getLipid().getFaList());
             return result;
         } else {
             log.debug("Could not parse " + lipidName + " with " + parser.getClass().getName() + " for grammar " + grammar + "! Message: " + handler.getErrorMessage());
@@ -176,7 +184,7 @@ public class LipidNameValidationService {
 //        }).collect(Collectors.toList());
 //    }
     private String getLipidMapsClassAbbreviation(LipidAdduct la) {
-        String lipidMapsClass = lipidClasses.get(la.lipid.getHeadGroup().lipidClass).description;
+        String lipidMapsClass = lipidClasses.get(la.getLipid().getHeadGroup().getLipidClass()).description;
         Pattern lmcRegexp = Pattern.compile(LIPIDMAPS_CLASS_REGEXP);
         Matcher lmcMatcher = lmcRegexp.matcher(lipidMapsClass);
         if (lmcMatcher.matches() && lmcMatcher.groupCount() == 1) {

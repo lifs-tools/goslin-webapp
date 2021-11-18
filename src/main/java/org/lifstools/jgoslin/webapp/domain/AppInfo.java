@@ -16,17 +16,11 @@
 package org.lifstools.jgoslin.webapp.domain;
 
 import de.isas.lifs.webapps.common.domain.DefaultAppInfo;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.SuperBuilder;
 
 /**
  *
  * @author nilshoffmann
  */
-@SuperBuilder
-@EqualsAndHashCode(callSuper = true)
-@Data
 public class AppInfo extends DefaultAppInfo {
 
     private String maxFileSize;
@@ -38,6 +32,19 @@ public class AppInfo extends DefaultAppInfo {
     public AppInfo(String buildDate, String scmCommitId, String scmBranch, String scmUrl, String supportUrl, String versionNumber, String toolTitle, String toolDescription, String toolAuthor, String toolLicense, String toolLicenseUrl, String toolVersionNumber, String toolUrl, String toolContact, String gaId, String authServerBaseUrl, String authServerRealm, String maxFileSize) {
         super(buildDate, scmCommitId, scmBranch, scmUrl, supportUrl, versionNumber, toolTitle, toolDescription, toolAuthor, toolLicense, toolLicenseUrl, toolVersionNumber, toolUrl, toolContact, gaId, authServerBaseUrl, authServerRealm);
         this.maxFileSize = maxFileSize;
+    }
+
+    public String getMaxFileSize() {
+        return maxFileSize;
+    }
+
+    public void setMaxFileSize(String maxFileSize) {
+        this.maxFileSize = maxFileSize;
+    }
+
+    @Override
+    public String toString() {
+        return "AppInfo{" + "maxFileSize=" + maxFileSize + '}';
     }
 
 }

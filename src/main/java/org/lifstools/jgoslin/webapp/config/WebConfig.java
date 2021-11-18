@@ -155,17 +155,26 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Bean
     public AppInfo appInfo() {
-        return AppInfo.builder().
-                buildDate(this.lifsConfiguration.getBuildDate()).
-                gaId(this.trackingConfiguration.getId()).
-                toolVersionNumber(this.toolConfiguration.getVersion()).
-                //                lifsUserUrl(this.lifsUserUrl).
-                maxFileSize(this.maxFileSize).
-                scmBranch(this.lifsConfiguration.getScm().getBranch()).
-                scmCommitId(this.lifsConfiguration.getScm().getCommitId()).
-                authServerBaseUrl(this.authServerUrl).
-                authServerRealm(this.authServerRealm).
-                versionNumber(this.lifsConfiguration.getVersionNumber()).build();
+        AppInfo appInfo = new AppInfo(
+                this.lifsConfiguration.getBuildDate(),
+                this.lifsConfiguration.getScm().getCommitId(),
+                this.lifsConfiguration.getScm().getBranch(),
+                this.lifsConfiguration.getScm().getLocation(),
+                this.lifsConfiguration.getSupportUrl(),
+                this.lifsConfiguration.getVersionNumber(),
+                this.toolConfiguration.getTitle(),
+                this.toolConfiguration.getDescription(),
+                this.toolConfiguration.getAuthor(),
+                this.toolConfiguration.getLicense(),
+                this.toolConfiguration.getLicenseUrl(),
+                this.toolConfiguration.getVersion(),
+                this.toolConfiguration.getUrl(),
+                this.toolConfiguration.getContact(),
+                this.trackingConfiguration.getId(),
+                this.authServerUrl, 
+                this.authServerRealm, 
+                this.maxFileSize);
+        return appInfo;
     }
 
     @Override

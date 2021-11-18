@@ -18,19 +18,47 @@ package org.lifstools.jgoslin.webapp.domain;
 import org.lifstools.jgoslin.webapp.domain.annotations.ValidLipidName;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
-import lombok.Data;
 
 /**
  *
  * @author nils.hoffmann
  */
-@Data
 public class ValidationRequest {
 
     @ApiModelProperty(position = 1, required = true, example = "[\"Cer 18:1;2/16:0\",\"Cer(d18:1/16:0)\"]")
     private List<@ValidLipidName String> lipidNames;
-    
+
     @ApiModelProperty(position = 2, allowEmptyValue = true, required = false, example = "[\"GOSLIN\",\"LIPIDMAPS\"]")
     private List<ValidationResult.Grammar> grammars;
+
+    public ValidationRequest() {
+
+    }
+
+    public ValidationRequest(List<String> lipidNames, List<ValidationResult.Grammar> grammars) {
+        this.lipidNames = lipidNames;
+        this.grammars = grammars;
+    }
+
+    public List<String> getLipidNames() {
+        return lipidNames;
+    }
+
+    public void setLipidNames(List<String> lipidNames) {
+        this.lipidNames = lipidNames;
+    }
+
+    public List<ValidationResult.Grammar> getGrammars() {
+        return grammars;
+    }
+
+    public void setGrammars(List<ValidationResult.Grammar> grammars) {
+        this.grammars = grammars;
+    }
+
+    @Override
+    public String toString() {
+        return "ValidationRequest{" + "lipidNames=" + lipidNames + ", grammars=" + grammars + '}';
+    }
 
 }
