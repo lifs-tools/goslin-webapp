@@ -62,7 +62,7 @@ public class LipidNameValidationService {
     private final ExternalDatabaseMappingLoader dbLoader;
     private final List<ValidationResult.Grammar> defaultGrammars;
     private final SumFormulaParser sfp = SumFormulaParser.newInstance();
-    private final KnownFunctionalGroups knownFunctionalGroups = new KnownFunctionalGroups(StringFunctions.getResourceAsStringList("functional-groups.csv"), sfp);
+    private final KnownFunctionalGroups knownFunctionalGroups = new KnownFunctionalGroups();
     private final LipidClasses lipidClasses = LipidClasses.getInstance();
 
     @Autowired
