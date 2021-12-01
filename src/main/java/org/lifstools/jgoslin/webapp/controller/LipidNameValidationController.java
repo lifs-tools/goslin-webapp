@@ -289,7 +289,7 @@ public class LipidNameValidationController {
                 m.put("Functional Class Synonyms", "[" + lclass.getSynonyms().stream().collect(Collectors.joining(", ")) + "]");
                 m.put("Level", t.getLipidSpeciesInfo().getLevel().toString());
                 m.put("Total #C", t.getLipidSpeciesInfo().getNumCarbon() + "");
-                m.put("Total Modifications", t.getLipidSpeciesInfo().getFunctionalGroups().entrySet().stream().map((entry) -> {
+                m.put("Total Modifications", t.getLipidSpeciesInfo().getFunctionalGroups().entrySet().stream().filter(entry -> !entry.getKey().equals("[X]")).map((entry) -> {
                     return entry.getKey()+"=["+entry.getValue().stream().map((functionalGroup) -> {
                         return functionalGroup.toString(t.getLipidSpeciesInfo().getLevel());
                     }).collect(Collectors.joining(","))+"]";
@@ -310,10 +310,12 @@ public class LipidNameValidationController {
                         }).collect(Collectors.toList()) + "");
 
                         fa.getFunctionalGroups().entrySet().stream().forEachOrdered((entry) -> {
-                            m.put(fa.getName() + " " + entry.getKey(),
+                            if(!entry.getKey().equals("[X]")) {
+                                m.put(fa.getName() + " " + entry.getKey(),
                                     entry.getValue().stream().map((functionalGroup) -> {
                                         return functionalGroup.toString(t.getLipidSpeciesInfo().getLevel());
                                     }).collect(Collectors.joining(",", "[", "]")));
+                            }
                         });
                     }
                 }

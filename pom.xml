@@ -68,13 +68,13 @@
         <dockerfile.plugin.version>1.4.10</dockerfile.plugin.version>
         <docker.base.image>eclipse-temurin</docker.base.image>
         <docker.base.image.version>17-jdk-alpine</docker.base.image.version>
-<!--        <docker.base.image>adoptopenjdk/openjdk11</docker.base.image>
+        <!--        <docker.base.image>adoptopenjdk/openjdk11</docker.base.image>
         <docker.base.image.version>debianslim-jre</docker.base.image.version>-->
         <skip.docker>true</skip.docker>
         <app.port>8083</app.port>
         <!--<lombok.version>1.18.10</lombok.version>-->
         <jackson.version>2.12.2</jackson.version>
-        <bootstrap.version>4.3.1</bootstrap.version>
+        <bootstrap.version>4.6.1</bootstrap.version>
         <jquery.version>3.4.0</jquery.version>
         <spring.boot.version>2.5.6</spring.boot.version>
         <springfox.version>3.0.0</springfox.version>
@@ -106,6 +106,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <!--Import dependency management from Spring Boot--> 
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.lifs-tools</groupId>
                 <artifactId>lifs-webapps-common</artifactId>
@@ -189,14 +197,6 @@
                 <artifactId>swagger2markup</artifactId>
                 <version>${swagger2markup.version}</version>
             </dependency>
-            <!--            <dependency>
-                 Import dependency management from Spring Boot 
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>-->
             <dependency>
                 <groupId>org.keycloak.bom</groupId>
                 <artifactId>keycloak-adapter-bom</artifactId>
@@ -277,7 +277,7 @@
             <scope>test</scope>
         </dependency>
 
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>

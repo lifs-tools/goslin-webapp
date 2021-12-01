@@ -31,7 +31,6 @@ import org.lifstools.jgoslin.domain.KnownFunctionalGroups;
 import org.lifstools.jgoslin.domain.LipidAdduct;
 import org.lifstools.jgoslin.domain.LipidClasses;
 import org.lifstools.jgoslin.domain.LipidLevel;
-import org.lifstools.jgoslin.domain.StringFunctions;
 import static org.lifstools.jgoslin.domain.StringFunctions.DEFAULT_QUOTE;
 import org.lifstools.jgoslin.parser.BaseParserEventHandler;
 import org.lifstools.jgoslin.parser.FattyAcidParser;
@@ -113,6 +112,14 @@ public class LipidNameValidationService {
         }
         throw new RuntimeException("No parser implementation available for grammar '" + grammar + "'!");
     }
+    
+    private LipidAdduct removeXFunctionalGroups(LipidAdduct la) {
+//        la.getLipid().getFaList().stream().forEach(fa -> {
+//            fa.getFunctionalGroups().remove("[X]"); 
+//        });
+//        la.getLipid().getInfo().getFunctionalGroups().remove("[X]");
+        return la;
+    }
 
     private ValidationResult parseWith(String lipidName, Deque<ValidationResult.Grammar> grammars) {
         log.debug("Grammars left: " + grammars.size());
@@ -122,6 +129,7 @@ public class LipidNameValidationService {
         BaseParserEventHandler<LipidAdduct> handler = parser.newEventHandler();
         LipidAdduct la = parser.parse(lipidName, handler, false);
         if (la != null && handler.getErrorMessage().isEmpty()) {
+            la = removeXFunctionalGroups(la);
             ValidationResult result = new ValidationResult();
             result.setLipidName(lipidName);
             result.setLipidAdduct(la);
@@ -130,14 +138,6 @@ public class LipidNameValidationService {
             if (handler.getErrorMessage() != null && !handler.getErrorMessage().isEmpty()) {
                 messages = Arrays.asList(handler.getErrorMessage());
             }
-            //            if (la != null) {
-            //                long fasWithModifications = la.lipid.getFa().entrySet().stream().filter((t) -> {
-            //                    return !t.getValue().getModifications().isEmpty();
-            //                }).count();
-            ////                if (fasWithModifications > 0) {
-            ////                    messages.add(lipidName + " contains modifications. At the moment, Goslin only supports proper handling of hydroxylations concerning the number of hydroxylations, sum formula and mass. This will be resolved as soon as the next update to the lipid shorthand nomenclature is published, which will include all LIPID MAPS and SwissLipids modifications.");
-            ////                }
-            //            }
             result.setMessages(messages);
 
             result.setLipidMapsCategory(la.getLipid().getHeadGroup().getLipidCategory().name());
