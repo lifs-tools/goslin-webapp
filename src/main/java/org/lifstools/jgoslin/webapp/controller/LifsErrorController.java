@@ -87,9 +87,4 @@ public class LifsErrorController implements ErrorController {
         return mav;
     }
 
-    @Override
-    public String getErrorPath() {
-        return null;
-    }
-
 }
