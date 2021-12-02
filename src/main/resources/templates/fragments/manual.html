@@ -7,14 +7,14 @@
                 <div class="card-body">
                     <div>
                         <h4 id="user-content-lipid-shorthand-nomenclature-grammars"><a id="user-content-2-lipid-shorthand-nomenclature-grammars" class="anchor" aria-hidden="true" href="#2-lipid-shorthand-nomenclature-grammars"></a>Lipid Shorthand Nomenclature Grammars</h4>
-                        <p>Goslin uses ANTLRv4 compatible context-free EBNF grammars. ANTLRv4 is then used for jgoslin to generate the LL(*) parsers compatible with those grammars. The other implementations use a
+                        <p>Goslin uses ANTLRv4 compatible context-free EBNF grammars. All Goslin implementations use a
                             generic recursive decent parser (see <a href="https://en.wikipedia.org/wiki/Context-free_language" rel="nofollow" target="_blank">Context-free language</a>, <a href="https://en.wikipedia.org/wiki/LL_parser" rel="nofollow" target="_blank">LL parser</a>, <a href="https://www.antlr.org/about.html" rel="nofollow" target="_blank">ANTLRv4</a>).</p>
                         <p>These grammars (*.g4 files) are available from our Goslin GitHub repository at <a href="https://github.com/lifs-tools/goslin">https://github.com/lifs-tools/goslin</a>.</p>
                         <h4 id="user-content-hierarchical-representation-of-lipids"><a id="user-content-3-hierarchical-representation-of-lipids" class="anchor" aria-hidden="true" href="#3-hierarchical-representation-of-lipids"></a>Hierarchical Representation of Lipids</h4>
                         <p>The grammars model lipids as hierarchically structured bits of information.
                             We do not model the lipid category or main class explicitly, but rather keep them in a global lookup table data structure, derived from the <a href="https://github.com/lifs-tools/goslin/blob/master/lipid-list.csv" target="_blank"><code>lipid-list.csv</code></a> file for reference.
                             This allows us to keep the grammars clutter-free and makes them easier to read.</p>
-                        <p>The structural classification of lipids follows the shorthand notation as proposed by Liebisch et al. and is compatible to that of SwissLipids. The following example shows the hierarchical representation of PE(16:1(6Z)/16:0):</p>
+                        <p>The structural classification of lipids follows the shorthand notation recently updated by Liebisch et al. and is compatible to that of LIPID MAPS. The following example shows the hierarchical representation of PE 16:1(6Z)/16:0;5OH[R],8OH;3oxo:</p>
 
                         Table 1. Structural hierarchy representation of PE(16:1(6Z)/16:0;5OH,8OH;3oxo). LM: LIPID MAPS, HG: Head Group, FA: Fatty Acyl
                         <table><tbody>
