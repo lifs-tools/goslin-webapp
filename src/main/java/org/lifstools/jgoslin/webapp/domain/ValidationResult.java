@@ -18,11 +18,11 @@ package org.lifstools.jgoslin.webapp.domain;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.lifstools.jgoslin.domain.FattyAcid;
 import org.lifstools.jgoslin.domain.LipidAdduct;
-import org.lifstools.jgoslin.domain.LipidSpeciesInfo;
 
 /**
  *
@@ -42,8 +42,8 @@ public class ValidationResult {
     private List<String> messages = Collections.emptyList();
 
     private LipidAdduct lipidAdduct;
-
-    private LipidSpeciesInfo lipidSpeciesInfo;
+    
+    private Map<String, Integer> functionalGroupCounts;
 
     private String normalizedName;
 
@@ -59,8 +59,6 @@ public class ValidationResult {
 
     private Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences;
 
-    private List<FattyAcid> fattyAcids = Collections.emptyList();
-
     public static String toFunctionalGroupString(LipidAdduct la, FattyAcid fa) {
         return fa.getFunctionalGroups().entrySet().stream().map((entry) -> {
             return entry.getValue().stream().map((functionalGroup) -> {
@@ -68,16 +66,21 @@ public class ValidationResult {
             }).collect(Collectors.joining(",", "[", "]"));
         }).collect(Collectors.joining(",", "{", "}"));
     }
+    
+    public static Integer getTotalFunctionalGroupCount(LipidAdduct la, String functionalGroup) {
+        return la.getLipid().getInfo().getTotalFunctionalGroupCount(functionalGroup);
+    }
 
     public ValidationResult() {
 
     }
 
-    public ValidationResult(String lipidName, Grammar grammar, LipidAdduct lipidAdduct, LipidSpeciesInfo lipidSpeciesInfo, String normalizedName, String lipidMapsCategory, String lipidMapsClass, Double mass, String sumFormula, Optional<Collection<ExternalDatabaseReference>> lipidMapsReferences, Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences) {
+    public ValidationResult(String lipidName, Grammar grammar, LipidAdduct lipidAdduct, Map<String, Integer> functionalGroupCounts, String normalizedName, String lipidMapsCategory, String lipidMapsClass, Double mass, String sumFormula, Optional<Collection<ExternalDatabaseReference>> lipidMapsReferences, Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences) {
         this.lipidName = lipidName;
         this.grammar = grammar;
         this.lipidAdduct = lipidAdduct;
-        this.lipidSpeciesInfo = lipidSpeciesInfo;
+//        this.lipidSpeciesInfo = lipidSpeciesInfo;
+        this.functionalGroupCounts = functionalGroupCounts;
         this.normalizedName = normalizedName;
         this.lipidMapsCategory = lipidMapsCategory;
         this.lipidMapsClass = lipidMapsClass;
@@ -118,13 +121,13 @@ public class ValidationResult {
     public void setLipidAdduct(LipidAdduct lipidAdduct) {
         this.lipidAdduct = lipidAdduct;
     }
-
-    public LipidSpeciesInfo getLipidSpeciesInfo() {
-        return lipidSpeciesInfo;
+    
+    public Map<String, Integer> getFunctionalGroupCounts() {
+        return functionalGroupCounts;
     }
-
-    public void setLipidSpeciesInfo(LipidSpeciesInfo lipidSpeciesInfo) {
-        this.lipidSpeciesInfo = lipidSpeciesInfo;
+    
+    public void setFunctionalGroupCounts(Map<String, Integer> functionalGroupCounts) {
+        this.functionalGroupCounts = functionalGroupCounts;
     }
 
     public String getNormalizedName() {
@@ -183,17 +186,9 @@ public class ValidationResult {
         this.swissLipidsReferences = swissLipidsReferences;
     }
 
-    public List<FattyAcid> getFattyAcids() {
-        return fattyAcids;
-    }
-
-    public void setFattyAcids(List<FattyAcid> fattyAcids) {
-        this.fattyAcids = fattyAcids;
-    }
-
     @Override
     public String toString() {
-        return "ValidationResult{" + "lipidName=" + lipidName + ", grammar=" + grammar + ", messages=" + messages + ", lipidAdduct=" + lipidAdduct + ", lipidSpeciesInfo=" + lipidSpeciesInfo + ", normalizedName=" + normalizedName + ", lipidMapsCategory=" + lipidMapsCategory + ", lipidMapsClass=" + lipidMapsClass + ", mass=" + mass + ", sumFormula=" + sumFormula + ", lipidMapsReferences=" + lipidMapsReferences + ", swissLipidsReferences=" + swissLipidsReferences + ", fattyAcids=" + fattyAcids + '}';
+        return "ValidationResult{" + "lipidName=" + lipidName + ", grammar=" + grammar + ", messages=" + messages + ", lipidAdduct=" + lipidAdduct + ", functionalGroupCounts=" + functionalGroupCounts + ", normalizedName=" + normalizedName + ", lipidMapsCategory=" + lipidMapsCategory + ", lipidMapsClass=" + lipidMapsClass + ", mass=" + mass + ", sumFormula=" + sumFormula + ", lipidMapsReferences=" + lipidMapsReferences + ", swissLipidsReferences=" + swissLipidsReferences + '}';
     }
 
 }

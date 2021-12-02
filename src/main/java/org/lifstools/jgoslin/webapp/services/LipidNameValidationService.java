@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -149,7 +151,12 @@ public class LipidNameValidationService {
             result.setMass(mass);
             result.setSumFormula(la.getSumFormula());
             result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
-            result.setLipidSpeciesInfo(la.getLipid().getInfo());
+//            result.setLipidSpeciesInfo(la.getLipid().getInfo());
+            Map<String, Integer> functionalGroupCounts = new TreeMap<>();
+            for (String key:la.getLipid().getInfo().getFunctionalGroups().keySet()) {
+                functionalGroupCounts.put(key, ValidationResult.getTotalFunctionalGroupCount(la, key));
+            }
+            result.setFunctionalGroupCounts(functionalGroupCounts);
             try {
                 String normalizedName = la.getLipid().getLipidString();
                 result.setNormalizedName(normalizedName);
@@ -158,7 +165,7 @@ public class LipidNameValidationService {
             } catch (RuntimeException re) {
                 log.debug("Error while trying to resolve database hits for {}!", lipidName);
             }
-            result.setFattyAcids(la.getLipid().getFaList());
+//            result.setFattyAcids(la.getLipid().getFaList());
             return result;
         } else {
             log.debug("Could not parse " + lipidName + " with " + parser.getClass().getName() + " for grammar " + grammar + "! Message: " + handler.getErrorMessage());
