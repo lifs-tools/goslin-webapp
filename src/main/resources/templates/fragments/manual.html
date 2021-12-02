@@ -16,7 +16,7 @@
                             This allows us to keep the grammars clutter-free and makes them easier to read.</p>
                         <p>The structural classification of lipids follows the shorthand notation as proposed by Liebisch et al. and is compatible to that of SwissLipids. The following example shows the hierarchical representation of PE(16:1(6Z)/16:0):</p>
 
-                        Table 1. Structural hierarchy representation of PE(16:1(6Z)/16:0). LM: LIPID MAPS, SL: SwissLipids, HG: Head Group, FA: Fatty Acyl
+                        Table 1. Structural hierarchy representation of PE(16:1(6Z)/16:0;5OH,8OH;3oxo). LM: LIPID MAPS, HG: Head Group, FA: Fatty Acyl
                         <table><tbody>
                                 <tr>
                                     <td><p><strong>Level</strong></p></td>
@@ -25,33 +25,43 @@
                                 </tr>
                                 <tr>
                                     <td><p>Category (LM)</p></td>
-                                    <td><p>Glycerophospholipids</p></td>
+                                    <td><p>Glycerophospholipids (GP)</p></td>
                                     <td><p>Lipid category</p></td>
                                 </tr>
                                 <tr>
                                     <td><p>Class (LM)</p></td>
-                                    <td><p>Glycerophosphoethanolamine</p></td>
+                                    <td><p>Glycerophosphoethanolamine (PE) GP02</p></td>
                                     <td><p>Lipid class</p></td>
                                 </tr>
                                 <tr>
-                                    <td><p>Species (SL, LM Subclass)</p></td>
-                                    <td><p>Phosphatidylethanolamine (32:1), PE(32:1)</p></td>
-                                    <td><p>HG, FA summary</p></td>
+                                    <td><p>Species (LM Subclass)</p></td>
+                                    <td><p>Phosphatidylethanolamine, PE 32:2;O3</p></td>
+                                    <td><p>HG, FA summary, two double bond equivalents, three oxidations</p></td>
                                 </tr>
                                 <tr>
-                                    <td><p>Molecular Subspecies (SL)</p></td>
-                                    <td><p>PE(16:0_16:1)</p></td>
-                                    <td><p>HG, two FAs</p></td>
+                                    <td><p>Molecular species</p></td>
+                                    <td><p>PE 16:1_16:1;O3</p></td>
+                                    <td><p>HG, two FAs, two double bond equivalents, three oxidations</p></td>
                                 </tr>
                                 <tr>
-                                    <td><p>Structural Subspecies (SL)</p></td>
-                                    <td><p>PE(16:1/16:0)</p></td>
-                                    <td><p>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2</p></td>
+                                    <td><p><i>sn</i>-Position</p></td>
+                                    <td><p>PE 16:1/16:1;O3</p></td>
+                                    <td><p>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, two double bond equivalents, three oxidations</p></td>
                                 </tr>
                                 <tr>
-                                    <td><p>Isomeric Subspecies (SL, LM)</p></td>
-                                    <td><p>PE(16:1(6Z)/16:0)</p></td>
-                                    <td><p>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, double bond position and stereo configuration (6Z) on FA1</p></td>
+                                    <td><p>Structure defined</p></td>
+                                    <td><p>PE 16:1(6)/16:1;(OH)2;oxo</p></td>
+                                    <td><p>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, three oxidations and unspecified stereo configuration (6) on FA1</p></td>
+                                </tr>
+                                <tr>
+                                    <td><p>Full structure</p></td>
+                                    <td><p>PE 16:1(6Z)/16:1;5OH,8OH;3oxo</p></td>
+                                    <td><p>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, positions for oxidations and stereo configuration (6Z) on FA1</p></td>
+                                </tr>
+                                <tr>
+                                    <td><p>Complete structure</p></td>
+                                    <td><p>PE 16:1(6Z)/16:0;5OH[R],8OH;3oxo</p></td>
+                                    <td><p>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, positions for oxidations and stereo configuration ([R]) and double bond position and stereo configuration (6Z) on FA1</p></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -70,31 +80,31 @@
                             concerning every processed lipid, such as invalid names or typos (see <a href="#fig:goslin-webapp-form-02a">Figure 3.</a>), to
                             allow the user to cross-check their data before proceeding.</p>
                         <figure class="figure">
-                            <a id="fig:goslin-webapp-form-01" ><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-form-01.png" alt="SubmissionForm1" style="max-width:100%;"/></a>
+                            <a id="fig:goslin-webapp-form-01" ><img th:src="@{/img/goslin-webapp-form-01.png}" alt="SubmissionForm1" style="max-width:100%;"/></a>
                             <figcaption class="figure-caption"><b>Figure 1.</b>&nbsp;Goslin web application submission form for text files with one lipid name per row.</figcaption>
                         </figure>
                         <figure class="figure">
-                            <a id="fig:goslin-webapp-form-02"><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-form-02.png" alt="SubmissionForm2" style="max-width:100%;"/></a>
+                            <a id="fig:goslin-webapp-form-02"><img th:src="@{/img/goslin-webapp-form-02.png}" alt="SubmissionForm2" style="max-width:100%;"/></a>
                             <figcaption class="figure-caption"><b>Figure 2.</b>&nbsp;Goslin web application submission form for user-defined lipid names.</figcaption>
                         </figure>
                         <figure class="figure">
-                            <a id="fig:goslin-webapp-form-02a"><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-form-02a.png" alt="SubmissionForm3" style="max-width:100%;"/></a>
+                            <a id="fig:goslin-webapp-form-02a"><img th:src="@{/img/goslin-webapp-form-02a.png}" alt="SubmissionForm3" style="max-width:100%;"/></a>
                             <figcaption class="figure-caption"><b>Figure 3.</b>&nbsp;Goslin web application submission form for user-defined lipid names provides feedback for unknown or unsupported names and parts thereof.</figcaption>
                         </figure>
                         <figure class="figure">
-                            <a id="fig:goslin-webapp-form-03" ><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-result-03.png" alt="ResultForm" style="max-width:100%;"/></a>
+                            <a id="fig:goslin-webapp-form-03" ><img th:src="@{/img/goslin-webapp-result-03.png}" alt="ResultForm" style="max-width:100%;"/></a>
                             <figcaption class="figure-caption"><b>Figure 4.</b>&nbsp;Parsing results are displayed as ’cards’ for every lipid name. Clicking on a card opens it and shows details of the according lipid.</figcaption>
                         </figure>
                         <p>After successful validation, the validated lipids are returned in
                             overview cards (see <a href="#fig:goslin-webapp-form-03">Figure 4.</a>),
                             detailing their LIPID MAPS&REG; classification, cross-links to SwissLipids
-                            and/or LIPID MAPS&REG; or HMDB. Additionally, the cards show summary
+                            and/or LIPID MAPS&REG;. Additionally, the cards show summary
                             information about the number of carbon atoms, double bonds,
                             hydroxylations and detailed information, such as double bond position,
                             long-chain-base status, and the bond type of the fatty acyl to the head
                             group for each fatty acyl, if available (see <a href="#fig:goslin-webapp-form-04" >Figure 5.</a>).</p>
                         <figure class="figure">
-                            <a id="fig:goslin-webapp-form-04" ><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-result-detail-04.png" alt="ResultDetail" style="max-width:100%;"/></a>
+                            <a id="fig:goslin-webapp-form-04" ><img th:src="@{/img/goslin-webapp-result-detail-04.png}" alt="ResultDetail" style="max-width:100%;"/></a>
                             <figcaption class="figure-caption"><b>Figure 5.</b>&nbsp;Each result card displays summary and detail information about a lipid. Depending on the lipid level, this can include information about each individual fatty acyl. Cross-links to SwissLipids and LIPID MAPS&REG; are shown where a normalized lipid name could be matched unambiguously against the normalized names of SwissLipids and / or LIPID MAPS&REG; lipids.</figcaption>
                         </figure>
                         <p>Finally, it is also possible to download the translated list of lipid names and their properties as a tab-separated file, by clicking on the <em>Download</em> button.</p>
@@ -115,16 +125,16 @@
                                 can access the rest api with a standard http client.</p>
                         </div>
                         <figure class="figure">
-                            <a id="fig:goslin-webapp-rest-05" ><img src="https://github.com/lifs-tools/goslin/raw/master/docs/goslin-webapp-rest-05.png" alt="RESTForm" style="max-width:100%;"/></a>
+                            <a id="fig:goslin-webapp-rest-05" ><img th:src="@{/img/goslin-webapp-rest-05.png}" alt="RESTForm" style="max-width:100%;"/></a>
                             <figcaption class="figure-caption"><b>Figure 6.</b>&nbsp;The goslin web application provides an interactive documentation for its rest api to simplify programmatic access.</figcaption>
                         </figure>
                         <div>
                             <p>The Structure for the request consists of a json object&nbsp;\{} enclosing
                                 two lists, with the names <code>lipidNames</code> and <code>grammars</code>. Acceptable values
-                                for <code>grammars</code> are: <code>LIPIDMAPS</code>, <code>GOSLIN</code>, <code>GOSLIN_FRAGMENTS</code>,
+                                for <code>grammars</code> are: <code>LIPIDMAPS</code>, <code>GOSLIN</code>, <code>SHORTHAND</code>, <code>FATTY_ACID</code>, 
                                 <code>SWISSLIPIDS</code>, and <code>HMDB</code>. A complete list is available from the
                                 interactive rest api documentation’s <code>Models</code> section under
-                                <code>ValidationRequest</code>. Both fields in the <code>ValidationRequest</code> accept
+                                <code>ValidationRequest</code>. The available grammars may also be retrieved by the <a th:href="@{/swagger-ui/#/lipid-grammars/grammarsUsingGET}">grammars</a> method. Both fields in the <code>ValidationRequest</code> accept
                                 comma-separated entries, enclosed in double quotes:</p>
                         </div>
                         <div>
@@ -164,30 +174,134 @@
                         </div>
                         <div>
                             <div>
-                                <div class="highlight highlight-source-json"><pre>{
-  <span class="pl-s"><span class="pl-pds">"</span>results<span class="pl-pds">"</span></span>: [
+                                <pre><code class="language-json">
+{
+  "results": [
     {
-      <span class="pl-s"><span class="pl-pds">"</span>lipidName<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Cer(d18:1/16:1(6Z))<span class="pl-pds">"</span></span>,
-      <span class="pl-s"><span class="pl-pds">"</span>grammar<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>LIPIDMAPS<span class="pl-pds">"</span></span>,
-      <span class="pl-s"><span class="pl-pds">"</span>messages<span class="pl-pds">"</span></span>: [],
-      <span class="pl-s"><span class="pl-pds">"</span>lipidAdduct<span class="pl-pds">"</span></span>: {
-        <span class="pl-s"><span class="pl-pds">"</span>lipid<span class="pl-pds">"</span></span>: {
-          <span class="pl-s"><span class="pl-pds">"</span>lipidCategory<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>SP<span class="pl-pds">"</span></span>,
-          <span class="pl-s"><span class="pl-pds">"</span>lipidClass<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>CER<span class="pl-pds">"</span></span>,
-          <span class="pl-s"><span class="pl-pds">"</span>headGroup<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Cer<span class="pl-pds">"</span></span>,
-          <span class="pl-s"><span class="pl-pds">"</span>info<span class="pl-pds">"</span></span>: {
-            <span class="pl-s"><span class="pl-pds">"</span>type<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>STRUCTURAL<span class="pl-pds">"</span></span>,
-            <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Cer<span class="pl-pds">"</span></span>,
-            <span class="pl-s"><span class="pl-pds">"</span>position<span class="pl-pds">"</span></span>: <span class="pl-c1">-1</span>,
-            <span class="pl-s"><span class="pl-pds">"</span>lipidFaBondType<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>ESTER<span class="pl-pds">"</span></span>,
-            <span class="pl-s"><span class="pl-pds">"</span>lcb<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>,
-            <span class="pl-s"><span class="pl-pds">"</span>modifications<span class="pl-pds">"</span></span>: [],
-            <span class="pl-s"><span class="pl-pds">"</span>doubleBondPositions<span class="pl-pds">"</span></span>: {},
-            <span class="pl-s"><span class="pl-pds">"</span>level<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>STRUCTURAL_SUBSPECIES<span class="pl-pds">"</span></span>,
-            <span class="pl-s"><span class="pl-pds">"</span>ncarbon<span class="pl-pds">"</span></span>: <span class="pl-c1">34</span>,
-            <span class="pl-s"><span class="pl-pds">"</span>nhydroxy<span class="pl-pds">"</span></span>: <span class="pl-c1">2</span>,
-            <span class="pl-s"><span class="pl-pds">"</span>ndoubleBonds<span class="pl-pds">"</span></span>: <span class="pl-c1">2</span>
-          },</pre></div>
+      "lipidName": "Cer(d18:1/16:1(6Z))",
+      "grammar": "LIPIDMAPS",
+      "messages": [],
+      "lipidAdduct": {
+        "lipid": {
+          "headGroup": {
+            "headgroup": "Cer",
+            "lipidCategory": "SP",
+            "lipidClass": 29,
+            "useHeadgroup": false,
+            "spException": true,
+            "className": "Cer"
+          },
+          "info": {
+            "name": "info",
+            "position": 0,
+            "count": 1,
+            "doubleBonds": {
+              "numDoubleBonds": 2,
+              "doubleBondPositions": {}
+            },
+            "functionalGroups": {
+              "OH": [
+                {
+                  "name": "OH",
+                  "position": -1,
+                  "count": 2,
+                  "doubleBonds": {
+                    "numDoubleBonds": 0,
+                    "doubleBondPositions": {}
+                  },
+                  "functionalGroups": {},
+                  "ndoubleBonds": 0
+                }
+              ]
+            },
+            "numCarbon": 34,
+            "lipidFaBondType": "LCB_EXCEPTION",
+            "level": "SN_POSITION",
+            "numEthers": 0,
+            "numSpecifiedFa": 1,
+            "totalFa": 2,
+            "extendedClass": "ESTER",
+            "lipidClass": 29,
+            "ndoubleBonds": 2
+          },
+          "faList": [
+            {
+              "name": "LCB",
+              "position": 0,
+              "count": 1,
+              "doubleBonds": {
+                "numDoubleBonds": 1,
+                "doubleBondPositions": {}
+              },
+              "functionalGroups": {
+                "OH": [
+                  {
+                    "name": "OH",
+                    "position": -1,
+                    "count": 2,
+                    "doubleBonds": {
+                      "numDoubleBonds": 0,
+                      "doubleBondPositions": {}
+                    },
+                    "functionalGroups": {},
+                    "ndoubleBonds": 0
+                  }
+                ]
+              },
+              "numCarbon": 18,
+              "lipidFaBondType": "LCB_EXCEPTION",
+              "ndoubleBonds": 1
+            },
+            {
+              "name": "FA1",
+              "position": 2,
+              "count": 1,
+              "doubleBonds": {
+                "numDoubleBonds": 1,
+                "doubleBondPositions": {
+                  "6": "Z"
+                }
+              },
+              "functionalGroups": {},
+              "numCarbon": 16,
+              "lipidFaBondType": "ESTER",
+              "ndoubleBonds": 1
+            }
+          ],
+          "lipidString": "Cer 18:1;O2/16:1",
+          "lipidLevel": "SN_POSITION",
+          "extendedClass": "Cer"
+        },
+        "adduct": null,
+        "className": "Cer",
+        "lipidString": "Cer 18:1;O2/16:1",
+        "mass": 535.4964451650001,
+        "sumFormula": "C34H65NO3",
+        "lipidLevel": "SN_POSITION",
+        "extendedClass": "Cer",
+        "lyso": false,
+        "cardioLipin": false,
+        "containsSugar": false,
+        "containsEster": false,
+        "spException": true
+      },
+      "functionalGroupCounts": {
+        "OH": 2
+      },
+      "normalizedName": "Cer 18:1;O2/16:1",
+      "lipidMapsCategory": "SP",
+      "lipidMapsClass": "SP02",
+      "mass": 535.4964451650001,
+      "sumFormula": "C34H65NO3",
+      "lipidMapsReferences": [],
+      "swissLipidsReferences": []
+    }
+  ],
+  "totalReceived": 1,
+  "totalParsed": 1,
+  "failedToParse": 0
+}
+</code></pre>
                             </div>
                         </div>
                         <div>
@@ -197,51 +311,75 @@
                         </div>
                         <div>
                             <div>
-                                <div class="highlight highlight-source-json"><pre>      },
-      <span class="pl-s"><span class="pl-pds">"</span>goslinName<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Cer 18:1;2/16:1(6Z)<span class="pl-pds">"</span></span>,
-      <span class="pl-s"><span class="pl-pds">"</span>lipidMapsCategory<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>SP<span class="pl-pds">"</span></span>,
-      <span class="pl-s"><span class="pl-pds">"</span>lipidMapsClass<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>SP0203<span class="pl-pds">"</span></span>,</pre></div>
+                                <pre><code>
+...
+"normalizedName": "Cer 18:1;O2/16:1",
+"lipidMapsCategory": "SP",
+"lipidMapsClass": "SP02",
+"mass": 535.4964451650001,
+"sumFormula": "C34H65NO3",
+...
+</code></pre>
                             </div>
                         </div>
                         <div>
                             <p>The response also reports information on the fatty acyls detected in the
-                                lipid name. In this case, a lcb (in the ceramide) has been detected. The
-                                name given here as an example was classified on structural subspecies
-                                level, since the lcb contains one double bond, but without positional
+                                lipid name. In this case, a Ceramide with a long-chain base and an additional fatty acyl has been detected. The
+                                name given here as an example was classified on SN_position level, since the lcb contains one double bond, but without positional
                                 E/Z information. The fatty acyl FA1 at the sn2 position does report E/Z
-                                information for its double bond, thus FA1 is an isomeric fatty acyl.
-                                Overall, the lipid can thus be classified as a structural subspecies.</p>
+                                information for its double bond.</p>
                         </div>
                         <div>
                             <div>
-                                <div class="highlight highlight-source-json"><pre>      <span class="pl-s"><span class="pl-pds">"</span>fattyAcids<span class="pl-pds">"</span></span>: {
-        <span class="pl-s"><span class="pl-pds">"</span>LCB<span class="pl-pds">"</span></span>: {
-          <span class="pl-s"><span class="pl-pds">"</span>type<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>STRUCTURAL<span class="pl-pds">"</span></span>,
-          <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>LCB<span class="pl-pds">"</span></span>,
-          <span class="pl-s"><span class="pl-pds">"</span>position<span class="pl-pds">"</span></span>: <span class="pl-c1">1</span>,
-          <span class="pl-s"><span class="pl-pds">"</span>lipidFaBondType<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>ESTER<span class="pl-pds">"</span></span>,
-          <span class="pl-s"><span class="pl-pds">"</span>lcb<span class="pl-pds">"</span></span>: <span class="pl-c1">true</span>,
-          <span class="pl-s"><span class="pl-pds">"</span>modifications<span class="pl-pds">"</span></span>: [],
-          <span class="pl-s"><span class="pl-pds">"</span>doubleBondPositions<span class="pl-pds">"</span></span>: {},
-          <span class="pl-s"><span class="pl-pds">"</span>ncarbon<span class="pl-pds">"</span></span>: <span class="pl-c1">18</span>,
-          <span class="pl-s"><span class="pl-pds">"</span>nhydroxy<span class="pl-pds">"</span></span>: <span class="pl-c1">2</span>,
-          <span class="pl-s"><span class="pl-pds">"</span>ndoubleBonds<span class="pl-pds">"</span></span>: <span class="pl-c1">1</span>
-        },
-        <span class="pl-s"><span class="pl-pds">"</span>FA1<span class="pl-pds">"</span></span>: {
-          <span class="pl-s"><span class="pl-pds">"</span>type<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>ISOMERIC<span class="pl-pds">"</span></span>,
-          <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>FA1<span class="pl-pds">"</span></span>,
-          <span class="pl-s"><span class="pl-pds">"</span>position<span class="pl-pds">"</span></span>: <span class="pl-c1">2</span>,
-          <span class="pl-s"><span class="pl-pds">"</span>lipidFaBondType<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>ESTER<span class="pl-pds">"</span></span>,
-          <span class="pl-s"><span class="pl-pds">"</span>lcb<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>,
-          <span class="pl-s"><span class="pl-pds">"</span>modifications<span class="pl-pds">"</span></span>: [],
-          <span class="pl-s"><span class="pl-pds">"</span>doubleBondPositions<span class="pl-pds">"</span></span>: {
-            <span class="pl-s"><span class="pl-pds">"</span>6<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Z<span class="pl-pds">"</span></span>
+                                <pre><code>
+...
+"faList": [
+  {
+    "name": "LCB",
+    "position": 0,
+    "count": 1,
+    "doubleBonds": {
+      "numDoubleBonds": 1,
+      "doubleBondPositions": {}
+    },
+    "functionalGroups": {
+      "OH": [
+        {
+          "name": "OH",
+          "position": -1,
+          "count": 2,
+          "doubleBonds": {
+            "numDoubleBonds": 0,
+            "doubleBondPositions": {}
           },
-          <span class="pl-s"><span class="pl-pds">"</span>ncarbon<span class="pl-pds">"</span></span>: <span class="pl-c1">16</span>,
-          <span class="pl-s"><span class="pl-pds">"</span>nhydroxy<span class="pl-pds">"</span></span>: <span class="pl-c1">0</span>,
-          <span class="pl-s"><span class="pl-pds">"</span>ndoubleBonds<span class="pl-pds">"</span></span>: <span class="pl-c1">1</span>
+          "functionalGroups": {},
+          "ndoubleBonds": 0
         }
-      }</pre></div>
+      ]
+    },
+    "numCarbon": 18,
+    "lipidFaBondType": "LCB_EXCEPTION",
+    "ndoubleBonds": 1
+  },
+  {
+    "name": "FA1",
+    "position": 2,
+    "count": 1,
+    "doubleBonds": {
+      "numDoubleBonds": 1,
+      "doubleBondPositions": {
+        "6": "Z"
+      }
+    },
+    "functionalGroups": {},
+    "numCarbon": 16,
+    "lipidFaBondType": "ESTER",
+    "ndoubleBonds": 1
+  }
+],
+...                                    
+</code></pre>
+                                
                             </div>
                         </div>
                         <div>
@@ -250,11 +388,13 @@
                         </div>
                         <div>
                             <div>
-                                <div class="highlight highlight-source-json"><pre>  ],
-  <span class="pl-s"><span class="pl-pds">"</span>totalReceived<span class="pl-pds">"</span></span>: <span class="pl-c1">1</span>,
-  <span class="pl-s"><span class="pl-pds">"</span>totalParsed<span class="pl-pds">"</span></span>: <span class="pl-c1">1</span>,
-  <span class="pl-s"><span class="pl-pds">"</span>failedToParse<span class="pl-pds">"</span></span>: <span class="pl-c1">0</span>
-}</pre></div>
+                                <pre><code>
+...
+"totalReceived": 1,
+"totalParsed": 1,
+"failedToParse": 0
+...                                    
+</code></pre>
                             </div>
                         </div>
                     </div>
