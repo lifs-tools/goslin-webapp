@@ -33,4 +33,19 @@
                 <activatedProfile>dev</activatedProfile>
             </activatedProfiles>
         </action>
+        <action>
+            <actionName>CUSTOM-Build Native Image</actionName>
+            <displayName>Build Native Image</displayName>
+            <goals>
+                <goal>spring-boot:build-image</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>CUSTOM-Build Native Package</actionName>
+            <displayName>Build Native Package</displayName>
+            <goals>
+                <goal>package</goal>
+                <goal>spring-boot:build-image</goal>
+            </goals>
+        </action>
     </actions>

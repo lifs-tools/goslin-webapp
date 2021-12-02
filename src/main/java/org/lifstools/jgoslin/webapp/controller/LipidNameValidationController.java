@@ -34,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -53,8 +54,10 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.lifstools.jgoslin.domain.FattyAcid;
+import org.lifstools.jgoslin.domain.FunctionalGroup;
 import org.lifstools.jgoslin.domain.LipidClassMeta;
 import org.lifstools.jgoslin.domain.LipidClasses;
+import org.lifstools.jgoslin.domain.LipidSpeciesInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -287,18 +290,20 @@ public class LipidNameValidationController {
                 }).collect(Collectors.joining(" | ")));
                 m.put("Functional Class Abbr", "[" + lclass.getClassName() + "]");
                 m.put("Functional Class Synonyms", "[" + lclass.getSynonyms().stream().collect(Collectors.joining(", ")) + "]");
-                m.put("Level", t.getLipidSpeciesInfo().getLevel().toString());
-                m.put("Total #C", t.getLipidSpeciesInfo().getNumCarbon() + "");
-                m.put("Total Modifications", t.getLipidSpeciesInfo().getFunctionalGroups().entrySet().stream().filter(entry -> !entry.getKey().equals("[X]")).map((entry) -> {
+                LipidSpeciesInfo info = t.getLipidAdduct().getLipid().getInfo();
+                m.put("Level", info.getLevel().toString());
+                m.put("Total #C", info.getNumCarbon() + "");
+                Map<String, ArrayList<FunctionalGroup>> functionalGroups = info.getFunctionalGroups();
+                m.put("Total Modifications", functionalGroups.entrySet().stream().filter(entry -> !entry.getKey().equals("[X]")).map((entry) -> {
                     return entry.getKey()+"=["+entry.getValue().stream().map((functionalGroup) -> {
-                        return functionalGroup.toString(t.getLipidSpeciesInfo().getLevel());
+                        return functionalGroup.toString(info.getLevel());
                     }).collect(Collectors.joining(","))+"]";
                 }).collect(Collectors.joining(",", "[", "]")) + "");
                 //            m.put("Total #OH", t.getLipidSpeciesInfo().getNHydroxy() + "");
-                m.put("Total #DB", t.getLipidSpeciesInfo().getDoubleBonds().getNumDoubleBonds() + "");
+                m.put("Total #DB", info.getDoubleBonds().getNumDoubleBonds() + "");
                 m.put("Exact Mass", String.format("%.4f", t.getMass()));
                 m.put("Formula", t.getSumFormula());
-                for (FattyAcid fa : t.getFattyAcids()) {
+                for (FattyAcid fa : t.getLipidAdduct().getLipid().getFaList()) {
                     if (fa.getCount() > 0) {
                         m.put(fa.getName() + " SN Position", fa.getPosition() + "");
                         m.put(fa.getName() + " #C", fa.getNumCarbon() + "");
@@ -313,7 +318,7 @@ public class LipidNameValidationController {
                             if(!entry.getKey().equals("[X]")) {
                                 m.put(fa.getName() + " " + entry.getKey(),
                                     entry.getValue().stream().map((functionalGroup) -> {
-                                        return functionalGroup.toString(t.getLipidSpeciesInfo().getLevel());
+                                        return functionalGroup.toString(info.getLevel());
                                     }).collect(Collectors.joining(",", "[", "]")));
                             }
                         });

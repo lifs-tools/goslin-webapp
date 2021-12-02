@@ -17,8 +17,9 @@ package org.lifstools.jgoslin.webapp.services;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 /**
  *
