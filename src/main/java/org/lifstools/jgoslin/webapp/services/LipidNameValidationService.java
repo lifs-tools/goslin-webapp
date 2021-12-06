@@ -89,7 +89,7 @@ public class LipidNameValidationService {
         UUID requestId = UUID.randomUUID();
         tracker.count(requestId, getClass().getSimpleName(), "validate-with-grammars");
         List<ValidationResult> results = lipidNames.parallelStream().map((lipidName) -> {
-            return parseWith(lipidName.trim().replaceAll("\\s+", " "), new ArrayDeque<ValidationResult.Grammar>(grammars));
+            return parseWith(lipidName.replaceAll("\\s+", " ").trim(), new ArrayDeque<ValidationResult.Grammar>(grammars));
         }).collect(Collectors.toList());
         return results;
     }
