@@ -155,7 +155,7 @@ public class LipidNameValidationController {
     }
 
     @PostMapping("/validatefile")
-    public RedirectView validate(@Valid @ModelAttribute("validationFileRequest") ValidationFileRequest validationFileRequest, BindingResult bindingResult,
+    public RedirectView validate(@ModelAttribute("validationFileRequest") ValidationFileRequest validationFileRequest, BindingResult bindingResult,
             RedirectAttributes redirectAttributes, HttpServletRequest request,
             HttpSession session, Principal principal) throws IOException {
         ValidationRequest validationRequest = new ValidationRequest();
