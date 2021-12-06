@@ -50,7 +50,7 @@ public class LipidNameValidator implements ConstraintValidator<ValidLipidName, S
             context.buildConstraintViolationWithTemplate("Lipid name must not be null!").addConstraintViolation();
             return false;
         }
-        String lipidNameToValidate = lipidName.trim().replaceAll("\\s+", " ");
+        String lipidNameToValidate = lipidName.replaceAll("\\s+", " ").trim();
         try {
             lipidParser.parse(lipidNameToValidate);
             return true;

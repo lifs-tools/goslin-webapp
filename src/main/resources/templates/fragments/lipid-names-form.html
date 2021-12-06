@@ -201,51 +201,14 @@
                 </div>
                 <ul class="nav nav-tabs mx-3 mt-4" id="inputTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                      <a class="nav-link active" id="lipidFileInputFormCard-tab" data-toggle="tab" href="#lipidFileInputFormCard" role="tab" aria-controls="lipidFileInputFormCard" aria-selected="true">Lipid File Input</a>
+                      <a class="nav-link active"  id="lipidNameInputFormCard-tab" data-toggle="tab" href="#lipidNameInputFormCard" role="tab" aria-controls="lipidNameInputFormCard" aria-selected="true">Lipid Name Input</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                      <a class="nav-link"  id="lipidNameInputFormCard-tab" data-toggle="tab" href="#lipidNameInputFormCard" role="tab" aria-controls="lipidNameInputFormCard" aria-selected="false">Lipid Name Input</a>
+                      <a class="nav-link" id="lipidFileInputFormCard-tab" data-toggle="tab" href="#lipidFileInputFormCard" role="tab" aria-controls="lipidFileInputFormCard" aria-selected="false">Lipid File Input</a>
                     </li>
                 </ul>
                 <div class="tab-content" id="inputTabContent">
-                    <div id="lipidFileInputFormCard" class="card-body tab-pane fade show active" role="tabpanel" aria-labelledby="lipidFileInputFormCard-tab">
-                        <form class="needs-validation" enctype="multipart/form-data" name="uf" th:action="@{/validatefile}" th:object="${validationFileRequest}" method="POST">               
-                            <div class="card my-2" th:if="${#fields.hasGlobalErrors()}">
-                                <div class="card-header">Validation File Errors</div>
-                                <div class="card-body">
-                                    <div th:each="e : ${#fields.detailedErrors()}" class="alert alert-danger my-2" role="alert">
-                                        <h4 class="alert-heading" th:text="${e.global}? '*' : ${e.fieldName}">The field name</h4>
-                                        <p th:text="${e.message}">The error message</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <!--<fieldset>-->
-                            <legend class="card-title">Upload a text file with one lipid name per row</legend>
-                            <div class="form-row">
-                                <div class="col-sm-5">  
-                                    <label for="file" class="col-form-label">File with lipid names to validate</label>
-                                </div>
-                                <div class="col-sm-7">
-                                    <input id="file" class="no-gutters form-control-file" name="file" type="file" th:field="*{file}" required/>
-                                </div>
-                                <div class="col-sm-12">
-                                    <small id="fileHelpBlock" class="form-text text-muted">Select a local file to upload and validate.<th:block th:if="${page!=null}"> Size limit is <span th:text="${page.maxFileSize}"></span><th:block>.</small>
-                                </div>
-                            </div>
-                            <small id="usernameHelpBlock" class="form-text text-muted">
-                                <!--The lipid name, either on species or sub-species level, e.g. 'PC(32:0)', 'PC 32:0', 'PE 16:2/18:3;1', or 'PE(16:2(9Z,12Z)/18:1(6Z))' etc.-->
-                            </small>
-                            <hr />
-                            <!--</fieldset>-->
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
-                                <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
-                                <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
-                            </div>
-                        </form>
-                    </div>
-                <!--<hr />-->
-                    <div id="lipidNameInputFormCard" class="card-body tab-pane fade" role="tabpanel" aria-labelledby="lipidNameInputFormCard-tab">
+                    <div id="lipidNameInputFormCard" class="card-body tab-pane fade show active" role="tabpanel" aria-labelledby="lipidNameInputFormCard-tab">
                         <form th:if="${validationRequest != null}" class="needs-validation" enctype="multipart/form-data" name="uf" th:action="@{/validate}" th:object="${validationRequest}" method="POST">               
                             <div class="card my-2" th:if="${#fields.hasGlobalErrors()}">
                                 <div class="card-header">Validation Errors</div>
@@ -301,6 +264,44 @@
                             </div>
                         </form>
                     </div>
+                    <div id="lipidFileInputFormCard" class="card-body tab-pane fade" role="tabpanel" aria-labelledby="lipidFileInputFormCard-tab">
+                        <form class="needs-validation" enctype="multipart/form-data" name="uf" th:action="@{/validatefile}" th:object="${validationFileRequest}" method="POST">               
+                            <div class="card my-2" th:if="${#fields.hasGlobalErrors()}">
+                                <div class="card-header">Validation File Errors</div>
+                                <div class="card-body">
+                                    <div th:each="e : ${#fields.detailedErrors()}" class="alert alert-danger my-2" role="alert">
+                                        <h4 class="alert-heading" th:text="${e.global}? '*' : ${e.fieldName}">The field name</h4>
+                                        <p th:text="${e.message}">The error message</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--<fieldset>-->
+                            <legend class="card-title">Upload a text file with one lipid name per row</legend>
+                            <div class="form-row">
+                                <div class="col-sm-5">  
+                                    <label for="file" class="col-form-label">File with lipid names to validate</label>
+                                </div>
+                                <div class="col-sm-7">
+                                    <input id="file" class="no-gutters form-control-file" name="file" type="file" th:field="*{file}" required/>
+                                </div>
+                                <div class="col-sm-12">
+                                    <small id="fileHelpBlock" class="form-text text-muted">Select a local file to upload and validate.<th:block th:if="${page!=null}"> Size limit is <span th:text="${page.maxFileSize}"></span><th:block>.</small>
+                                </div>
+                            </div>
+                            <small id="usernameHelpBlock" class="form-text text-muted">
+                                <!--The lipid name, either on species or sub-species level, e.g. 'PC(32:0)', 'PC 32:0', 'PE 16:2/18:3;1', or 'PE(16:2(9Z,12Z)/18:1(6Z))' etc.-->
+                            </small>
+                            <hr />
+                            <!--</fieldset>-->
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
+                                <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
+                                <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                <!--<hr />-->
+                    
                 </div>
             </div>
         </div>
