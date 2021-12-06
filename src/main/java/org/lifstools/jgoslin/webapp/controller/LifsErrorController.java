@@ -72,8 +72,8 @@ public class LifsErrorController implements ErrorController {
     }
     
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ModelAndView handleMaxUploadSizeExceeded(HttpServletRequest req,
-            HttpServletResponse resp, Exception exception, Principal principal) throws Exception {
+    public ModelAndView handleMaxUploadSizeExceeded(MaxUploadSizeExceededException exception, HttpServletRequest req,
+            HttpServletResponse resp, Principal principal) throws Exception {
         log.error("Caught exception: ", exception);
         ModelAndView mav = new ModelAndView();
         Page page = pageBuilderService.addPrincipalInfo(pageBuilderService.createPage("error"), Optional.ofNullable(principal));
@@ -82,7 +82,7 @@ public class LifsErrorController implements ErrorController {
         mav.addObject("error", "The file you tried to upload was larger than the current limit: " + page.getMaxFileSize());
         mav.addObject("url", req.getRequestURL());
         mav.addObject("timestamp", new Date().toString());
-        mav.addObject("status", 500);
+        mav.addObject("status", resp.getStatus());
         mav.setViewName("error");
         return mav;
     }

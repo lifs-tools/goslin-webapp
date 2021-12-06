@@ -32,6 +32,10 @@ public class LipidNameValidator implements ConstraintValidator<ValidLipidName, S
 
     private static final LipidParser lipidParser = LipidParser.newInstance();
     private ConstraintValidatorContext context;
+    
+    public LipidNameValidator() {
+        super();
+    }
 
     @Override
     public void initialize(ValidLipidName constraintAnnotation) {
