@@ -30,7 +30,7 @@ public class LipidNameValidator implements ConstraintValidator<ValidLipidName, S
 
     private static final Logger log = LoggerFactory.getLogger(LipidNameValidator.class);
 
-    private static final LipidParser lipidParser = LipidParser.newInstance();
+    private static final LipidParser lipidParser = new LipidParser();
     private ConstraintValidatorContext context;
     
     public LipidNameValidator() {

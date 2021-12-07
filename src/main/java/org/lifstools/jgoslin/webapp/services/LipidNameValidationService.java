@@ -33,7 +33,6 @@ import org.lifstools.jgoslin.domain.KnownFunctionalGroups;
 import org.lifstools.jgoslin.domain.LipidAdduct;
 import org.lifstools.jgoslin.domain.LipidClasses;
 import org.lifstools.jgoslin.domain.LipidLevel;
-import static org.lifstools.jgoslin.domain.StringFunctions.DEFAULT_QUOTE;
 import org.lifstools.jgoslin.parser.BaseParserEventHandler;
 import org.lifstools.jgoslin.parser.FattyAcidParser;
 import org.lifstools.jgoslin.parser.GoslinParser;
@@ -41,7 +40,6 @@ import org.lifstools.jgoslin.parser.HmdbParser;
 import org.lifstools.jgoslin.parser.LipidMapsParser;
 import org.lifstools.jgoslin.parser.Parser;
 import org.lifstools.jgoslin.parser.ShorthandParser;
-import org.lifstools.jgoslin.parser.SumFormulaParser;
 import org.lifstools.jgoslin.parser.SwissLipidsParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +60,6 @@ public class LipidNameValidationService {
     private final AnalyticsTracker tracker;
     private final ExternalDatabaseMappingLoader dbLoader;
     private final List<ValidationResult.Grammar> defaultGrammars;
-    private final SumFormulaParser sfp = SumFormulaParser.newInstance();
     private final KnownFunctionalGroups knownFunctionalGroups = new KnownFunctionalGroups();
     private final LipidClasses lipidClasses = LipidClasses.getInstance();
 
@@ -97,20 +94,20 @@ public class LipidNameValidationService {
     private Parser<LipidAdduct> parserFor(ValidationResult.Grammar grammar) {
         switch (grammar) {
             case SHORTHAND:
-                return ShorthandParser.newInstance(knownFunctionalGroups, "Shorthand2020.g4", DEFAULT_QUOTE);
+                return new ShorthandParser(knownFunctionalGroups);
             case FATTY_ACID:
-                return FattyAcidParser.newInstance(knownFunctionalGroups, "FattyAcids.g4", DEFAULT_QUOTE);
+                return new FattyAcidParser(knownFunctionalGroups);
             case GOSLIN:
-                return GoslinParser.newInstance(knownFunctionalGroups, "Goslin.g4", DEFAULT_QUOTE);
+                return new GoslinParser(knownFunctionalGroups);
             //            case GOSLIN_FRAGMENTS:
             //                return new GoslinFragmentsVisitorParser();
             //break;
             case LIPIDMAPS:
-                return LipidMapsParser.newInstance(knownFunctionalGroups, "LipidMaps.g4", DEFAULT_QUOTE);
+                return new LipidMapsParser(knownFunctionalGroups);
             case SWISSLIPIDS:
-                return SwissLipidsParser.newInstance(knownFunctionalGroups, "SwissLipids.g4", DEFAULT_QUOTE);
+                return new SwissLipidsParser(knownFunctionalGroups);
             case HMDB:
-                return HmdbParser.newInstance(knownFunctionalGroups, "HMDB.g4", DEFAULT_QUOTE);
+                return new HmdbParser(knownFunctionalGroups);
         }
         throw new RuntimeException("No parser implementation available for grammar '" + grammar + "'!");
     }
