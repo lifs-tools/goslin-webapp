@@ -108,7 +108,7 @@
                                                                     </div>
                                                                 </div>-->
                             </form>
-                            <form th:if="${validationResult.lipidAdduct.lipid.info}" th:object="${validationResult.lipidAdduct.lipid.info}">
+                            <form th:if="${validationResult.lipidAdduct!=null && validationResult.lipidAdduct.lipid.info!=null}" th:object="${validationResult.lipidAdduct.lipid.info}">
                                 <div class="form-group row">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The structural level of this lipid.">Level&nbsp;</abbr></label>
                                     <div class="col-sm-9">
@@ -152,7 +152,7 @@
                                     </div>
                                 </div>
                             </form>
-                            <form th:if="${validationResult.lipidAdduct.lipid.faList}" th:object="${validationResult.lipidAdduct.lipid}">
+                            <form th:if="${validationResult.lipidAdduct!=null && validationResult.lipidAdduct.lipid.faList!=null}" th:object="${validationResult.lipidAdduct.lipid}">
                                 <div class="form-group row" th:if="*{faList != null and !faList.isEmpty()}">
                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="The fatty acyls attached to the lipid head group.">Fatty Acyls</abbr></label>
                                     <div class="col-sm-9">
@@ -201,10 +201,10 @@
                 </div>
                 <ul class="nav nav-tabs mx-3 mt-4" id="inputTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                      <a class="nav-link active"  id="lipidNameInputFormCard-tab" data-toggle="tab" href="#lipidNameInputFormCard" role="tab" aria-controls="lipidNameInputFormCard" aria-selected="true">Lipid Name Input</a>
+                        <a class="nav-link active"  id="lipidNameInputFormCard-tab" data-toggle="tab" href="#lipidNameInputFormCard" role="tab" aria-controls="lipidNameInputFormCard" aria-selected="true">Lipid Name Input</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                      <a class="nav-link" id="lipidFileInputFormCard-tab" data-toggle="tab" href="#lipidFileInputFormCard" role="tab" aria-controls="lipidFileInputFormCard" aria-selected="false">Lipid File Input</a>
+                        <a class="nav-link" id="lipidFileInputFormCard-tab" data-toggle="tab" href="#lipidFileInputFormCard" role="tab" aria-controls="lipidFileInputFormCard" aria-selected="false">Lipid File Input</a>
                     </li>
                 </ul>
                 <div class="tab-content" id="inputTabContent">
@@ -233,6 +233,10 @@
                                 <button type="button" class="deleteLipidNameRow btn btn-sm btn-outline-danger" title="Remove input row"><span class="oi oi-minus"></span></button>
                                 <button type="button" class="clearLipidNameInputRows btn btn-sm btn-outline-danger" title="Remove Input Rows"><span class="oi oi-collapse-up"></span></button>
                                 <button type="button" class="reloadPage btn btn-sm btn-outline-primary" title="Reset to default Input Rows"><span class="oi oi-collapse-down"></span></button>
+                                <div class="form-group form-check float-right">
+                                    <input type="checkbox" class="form-check-input" id="skipInvalid1" title="Skip invalid names and proceed to results" th:field="*{skipInvalid}"></input>
+                                    <label class="form-check-label" for="skipInvalid1">Skip invalid names</label>
+                                </div>
                             </div>
                             <small id="pasteLipidsInputHelpBlock" class="form-text text-muted">
                                 Enter individual lipid names on species or subspecies level, or paste multiple lipid names, separated by a new line from your clipboard <b>by left-clicking here</b> and hitting CTRL+V.
@@ -286,49 +290,49 @@
                                 </div>
                                 <div class="col-sm-12">
                                     <small id="fileHelpBlock" class="form-text text-muted">Select a local file to upload and validate.<th:block th:if="${page!=null}"> Size limit is <span th:text="${page.maxFileSize}"></span><th:block>.</small>
-                                </div>
-                            </div>
-                            <small id="usernameHelpBlock" class="form-text text-muted">
-                                <!--The lipid name, either on species or sub-species level, e.g. 'PC(32:0)', 'PC 32:0', 'PE 16:2/18:3;1', or 'PE(16:2(9Z,12Z)/18:1(6Z))' etc.-->
-                            </small>
-                            <hr />
-                            <!--</fieldset>-->
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
-                                <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
-                                <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
-                            </div>
-                        </form>
-                    </div>
-                <!--<hr />-->
-                    
-                </div>
-            </div>
-        </div>
-        <!-- Show validated lipid name results -->
-        <div th:fragment="validate-lipid-names-result-card">
-            <div class="card my-2"> <!-- sec:authorize="isAuthenticated()"> -->
-                <div class="card-header">
-                    <span class="align-middle">Validated Lipid Names</span>
-                    <a th:unless="${validationResults.results==null || #lists.size(validationResults.results)==0}" href="#" th:href="@{/download/{userSessionId}/{validationResultsTsv}(userSessionId=${userSessionId},validationResultsTsv=${validationResultsTsv})}" id="downloadTsvTop" class="btn btn btn-primary btn-sm float-right" title="Save TSV"><span class="oi oi-data-transfer-download" aria-hidden="true"></span>&nbsp;Download</a>
-                </div>
-                <div class="card-body">
-                    <form th:if="${validationResults != null}" name="uf" th:object="${validationResults}" id="validationResultsCards">
-                        <div th:if="${validationResults.results==null || #lists.size(validationResults.results)==0}">
-                            <div class="alert alert-warning my-2" role="alert">
-                                <span>No translated names were received. Please click on 'Dismiss' to return to the submission form.</span>
-                            </div>
-                        </div>
-                        <div th:each="validationResult, itemStat : *{results}">
-                            <div th:replace="::lipid-adduct-card (idx=${itemStat.index}, validationResult=${validationResult}, nresults=${#lists.size(validationResults.results)})"></div>
-                        </div>
-                        <div class="form-actions">
-                            <a th:unless="${validationResults.results==null || #lists.size(validationResults.results)==0}" href="#" th:href="@{/download/{userSessionId}/{validationResultsTsv}(userSessionId=${userSessionId},validationResultsTsv=${validationResultsTsv})}" id="downloadTsv" class="btn btn btn-primary" title="Save TSV"><span class="oi oi-data-transfer-download" aria-hidden="true"></span>&nbsp;Download</a>
-                            <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Dismiss</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </body>
-</html>
+                                                </div>
+                                                </div>
+                                                <small id="usernameHelpBlock" class="form-text text-muted">
+                                                    <!--The lipid name, either on species or sub-species level, e.g. 'PC(32:0)', 'PC 32:0', 'PE 16:2/18:3;1', or 'PE(16:2(9Z,12Z)/18:1(6Z))' etc.-->
+                                                </small>
+                                                <hr />
+                                                <!--</fieldset>-->
+                                                <div class="form-actions">
+                                                    <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
+                                                    <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
+                                                    <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
+                                                </div>
+                                                </form>
+                                                </div>
+                                                <!--<hr />-->
+
+                                                </div>
+                                                </div>
+                                                </div>
+                                                <!-- Show validated lipid name results -->
+                                                <div th:fragment="validate-lipid-names-result-card">
+                                                    <div class="card my-2"> <!-- sec:authorize="isAuthenticated()"> -->
+                                                        <div class="card-header">
+                                                            <span class="align-middle">Validated Lipid Names</span>
+                                                            <a th:unless="${validationResults.results==null || #lists.size(validationResults.results)==0}" href="#" th:href="@{/download/{userSessionId}/{validationResultsTsv}(userSessionId=${userSessionId},validationResultsTsv=${validationResultsTsv})}" id="downloadTsvTop" class="btn btn btn-primary btn-sm float-right" title="Save TSV"><span class="oi oi-data-transfer-download" aria-hidden="true"></span>&nbsp;Download</a>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <form th:if="${validationResults != null}" name="uf" th:object="${validationResults}" id="validationResultsCards">
+                                                                <div th:if="${validationResults.results==null || #lists.size(validationResults.results)==0}">
+                                                                    <div class="alert alert-warning my-2" role="alert">
+                                                                        <span>No translated names were received. Please click on 'Dismiss' to return to the submission form.</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div th:each="validationResult, itemStat : *{results}">
+                                                                    <div th:replace="::lipid-adduct-card (idx=${itemStat.index}, validationResult=${validationResult}, nresults=${#lists.size(validationResults.results)})"></div>
+                                                                </div>
+                                                                <div class="form-actions">
+                                                                    <a th:unless="${validationResults.results==null || #lists.size(validationResults.results)==0}" href="#" th:href="@{/download/{userSessionId}/{validationResultsTsv}(userSessionId=${userSessionId},validationResultsTsv=${validationResultsTsv})}" id="downloadTsv" class="btn btn btn-primary" title="Save TSV"><span class="oi oi-data-transfer-download" aria-hidden="true"></span>&nbsp;Download</a>
+                                                                    <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Dismiss</a>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                </body>
+                                                </html>

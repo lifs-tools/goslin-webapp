@@ -173,7 +173,7 @@ public class LipidNameValidationController {
     public ModelAndView validate(@Valid @ModelAttribute("validationRequest") ValidationRequest validationRequest, BindingResult bindingResult,
             RedirectAttributes redirectAttributes, HttpServletRequest request,
             HttpSession session, Principal principal) {
-        if (bindingResult.hasErrors()) {
+        if (bindingResult.hasErrors() && !validationRequest.isSkipInvalid()) {
             log.warn("Binding result has errors: {}", bindingResult);
             ModelAndView modelAndView = new ModelAndView("index");
             modelAndView.addObject("page", createPage("Translate Lipid Names", Optional.ofNullable(principal)));
@@ -266,7 +266,7 @@ public class LipidNameValidationController {
         HashSet<String> keys = new LinkedHashSet<>();
         List<Map<String, String>> entries = vr.getResults().stream().map((t) -> {
             Map<String, String> m = new LinkedHashMap<>();
-            m.put("Normalized Name", t.getNormalizedName());
+            m.put("Normalized Name", t.getNormalizedName()==null?"":t.getNormalizedName());
             m.put("Original Name", t.getLipidName());
             m.put("Grammar", t.getGrammar().name());
             m.put("Validation Messages", t.getMessages().stream().collect(Collectors.joining(" | ")));
@@ -301,7 +301,7 @@ public class LipidNameValidationController {
                 }).collect(Collectors.joining(",", "[", "]")) + "");
                 //            m.put("Total #OH", t.getLipidSpeciesInfo().getNHydroxy() + "");
                 m.put("Total #DB", info.getDoubleBonds().getNumDoubleBonds() + "");
-                m.put("Exact Mass", String.format("%.4f", t.getMass()));
+                m.put("Exact Mass", String.format(Locale.US, "%.4f", t.getMass()));
                 m.put("Formula", t.getSumFormula());
                 for (FattyAcid fa : t.getLipidAdduct().getLipid().getFaList()) {
                     if (fa.getCount() > 0) {
