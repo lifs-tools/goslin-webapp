@@ -30,6 +30,9 @@ public class ValidationRequest {
 
     @ApiModelProperty(position = 2, allowEmptyValue = true, required = false, example = "[\"GOSLIN\",\"LIPIDMAPS\"]")
     private List<ValidationResult.Grammar> grammars;
+    
+    @ApiModelProperty(position = 3, allowEmptyValue = true, required = false, example = "false", notes = "Only applies when used via the validating web-form.")
+    private boolean skipInvalid;
 
     public ValidationRequest() {
 
@@ -54,6 +57,14 @@ public class ValidationRequest {
 
     public void setGrammars(List<ValidationResult.Grammar> grammars) {
         this.grammars = grammars;
+    }
+
+    public boolean isSkipInvalid() {
+        return skipInvalid;
+    }
+
+    public void setSkipInvalid(boolean skipInvalid) {
+        this.skipInvalid = skipInvalid;
     }
 
     @Override
