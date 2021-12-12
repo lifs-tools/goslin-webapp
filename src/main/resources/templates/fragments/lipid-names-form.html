@@ -193,11 +193,11 @@
                 </div>
             </div>
         </div>
-        <!-- Validate lipid names view -->
+        <!-- Normalize lipid names view -->
         <div th:fragment="validate-lipid-names-card">
             <div class="card my-2"> <!-- sec:authorize="isAuthenticated()">-->
                 <div class="card-header">
-                    Parse, Translate &amp; Validate Lipid Names
+                    Parse, Translate &amp; Normalize Lipid Names
                 </div>
                 <ul class="nav nav-tabs mx-3 mt-4" id="inputTab" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -223,7 +223,7 @@
                             <legend class="card-title">Enter individual lipid names</legend>
                             <!--</fieldset>-->
                             <div class="form-actions">
-                                <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
+                                <button type="submit" class="btn btn-primary" title="Normalize"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Normalize</button>
                                 <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
                                 <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
                             </div>
@@ -262,7 +262,7 @@
                             <hr />
                             <!--</fieldset>-->
                             <div class="form-actions">
-                                <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
+                                <button type="submit" class="btn btn-primary" title="Normalize"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Normalize</button>
                                 <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
                                 <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
                             </div>
@@ -298,7 +298,7 @@
                                                 <hr />
                                                 <!--</fieldset>-->
                                                 <div class="form-actions">
-                                                    <button type="submit" class="btn btn-primary" title="Validate"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Validate</button>
+                                                    <button type="submit" class="btn btn-primary" title="Normalize"><span class="oi oi-check" aria-hidden="true"></span>&nbsp;Normalize</button>
                                                     <button type="reset" class="btn btn-light" title="Reset Form"><span class="oi oi-reload" aria-hidden="true"></span>&nbsp;Reset Form</button>
                                                     <a href="/" th:href="@{/}" class="btn btn-danger float-right" title="Cancel"><span class="oi oi-x" aria-hidden="true"></span>&nbsp;Cancel</a>
                                                 </div>
@@ -313,7 +313,7 @@
                                                 <div th:fragment="validate-lipid-names-result-card">
                                                     <div class="card my-2"> <!-- sec:authorize="isAuthenticated()"> -->
                                                         <div class="card-header">
-                                                            <span class="align-middle">Validated Lipid Names</span>
+                                                            <span class="align-middle">Normalized Lipid Names</span>
                                                             <a th:unless="${validationResults.results==null || #lists.size(validationResults.results)==0}" href="#" th:href="@{/download/{userSessionId}/{validationResultsTsv}(userSessionId=${userSessionId},validationResultsTsv=${validationResultsTsv})}" id="downloadTsvTop" class="btn btn btn-primary btn-sm float-right" title="Save TSV"><span class="oi oi-data-transfer-download" aria-hidden="true"></span>&nbsp;Download</a>
                                                         </div>
                                                         <div class="card-body">
