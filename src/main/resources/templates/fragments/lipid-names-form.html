@@ -170,9 +170,9 @@
                                             <tbody>
                                                 <tr th:each="element : *{faList} ">
                                                     <td th:text="${element.name}"></td>
-                                                    <!--<td th:if="${element.position==-1 || element.position==0}"><abbr title="Not Defined">N.D.</abbr></td>-->
-                                                    <!--<td th:if="${element.position>0}" th:text="${'sn'+(element.position)}"></td>-->
-                                                    <td th:text="${'sn'+(element.position)}"></td>
+                                                    <td th:if="${element.position==-1 || element.position==0}"><abbr title="Not Defined">N.D.</abbr></td>
+                                                    <td th:if="${element.position>0}" th:text="${'sn'+(element.position)}"></td>
+                                                    <!--<td th:text="${'sn'+(element.position)}"></td>-->
                                                     <td th:text="${element.numCarbon}"></td>
                                                     <td th:text="${element.nDoubleBonds}"></td>
                                                     <td th:text="#{${element.lipidFaBondType}}"></td>
