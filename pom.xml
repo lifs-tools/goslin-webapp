@@ -304,7 +304,7 @@
             <scope>provided</scope>
         </dependency>-->
         <dependency>
-            <groupId>org.lifstools</groupId>
+            <groupId>org.lifs-tools</groupId>
             <artifactId>jgoslin-parsers</artifactId>
             <version>${jgoslin.version}</version>
         </dependency>
