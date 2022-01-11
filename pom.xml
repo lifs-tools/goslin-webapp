@@ -76,7 +76,7 @@
         <jquery.version>3.4.0</jquery.version>
         <spring.boot.version>2.4.3</spring.boot.version>
         <springfox.version>3.0.0</springfox.version>
-        <lifs.webapps.common.version>1.0.25</lifs.webapps.common.version>
+        <lifs.webapps.common.version>1.1.27</lifs.webapps.common.version>
         <jgoslin.version>1.1.2</jgoslin.version>
         <keycloak.version>12.0.4</keycloak.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
