@@ -81,8 +81,8 @@ public class LipidNameValidationService {
         grammarToParser.put(Grammar.SHORTHAND, new ShorthandParser(knownFunctionalGroups));
         grammarToParser.put(Grammar.FATTY_ACID, new FattyAcidParser(knownFunctionalGroups));
         grammarToParser.put(Grammar.GOSLIN, new GoslinParser(knownFunctionalGroups));
-        grammarToParser.put(Grammar.LIPIDMAPS, new GoslinParser(knownFunctionalGroups));
-        grammarToParser.put(Grammar.SWISSLIPIDS, new GoslinParser(knownFunctionalGroups));
+        grammarToParser.put(Grammar.LIPIDMAPS, new LipidMapsParser(knownFunctionalGroups));
+        grammarToParser.put(Grammar.SWISSLIPIDS, new SwissLipidsParser(knownFunctionalGroups));
         grammarToParser.put(Grammar.HMDB, new HmdbParser(knownFunctionalGroups));
     }
 
@@ -100,22 +100,8 @@ public class LipidNameValidationService {
     }
 
     private Parser<LipidAdduct> parserFor(ValidationResult.Grammar grammar) {
-        switch (grammar) {
-            case SHORTHAND:
-                return new ShorthandParser(knownFunctionalGroups);
-            case FATTY_ACID:
-                return new FattyAcidParser(knownFunctionalGroups);
-            case GOSLIN:
-                return new GoslinParser(knownFunctionalGroups);
-            //            case GOSLIN_FRAGMENTS:
-            //                return new GoslinFragmentsVisitorParser();
-            //break;
-            case LIPIDMAPS:
-                return new LipidMapsParser(knownFunctionalGroups);
-            case SWISSLIPIDS:
-                return new SwissLipidsParser(knownFunctionalGroups);
-            case HMDB:
-                return new HmdbParser(knownFunctionalGroups);
+        if(grammarToParser.containsKey(grammar)) {
+            return grammarToParser.get(grammar);
         }
         throw new RuntimeException("No parser implementation available for grammar '" + grammar + "'!");
     }
