@@ -68,11 +68,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private TrackingConfig trackingConfiguration;
 
-    @Value("keycloak.auth-server-url")
+    @Value("${keycloak.auth-server-url}")
     private String authServerUrl;
 
-    @Value("keycloak.realm")
+    @Value("${keycloak.realm}")
     private String authServerRealm;
+    
+    @Value("${jgoslin.maxItemsInRequest}")
+    private Integer maxItemsInRequest;
 
 //    @Value("${app.buildDate}")
 //    private String buildDate;
