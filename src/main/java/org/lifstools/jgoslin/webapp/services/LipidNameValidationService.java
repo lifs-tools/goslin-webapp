@@ -15,13 +15,14 @@
  */
 package org.lifstools.jgoslin.webapp.services;
 
+import de.isas.lifs.webapps.common.service.AnalyticsTracker;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult.Grammar;
-import de.isas.lifs.webapps.common.service.AnalyticsTracker;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -62,6 +63,7 @@ public class LipidNameValidationService {
     private final List<ValidationResult.Grammar> defaultGrammars;
     private final KnownFunctionalGroups knownFunctionalGroups = new KnownFunctionalGroups();
     private final LipidClasses lipidClasses = LipidClasses.getInstance();
+    private final Map<Grammar, Parser> grammarToParser= new HashMap<>();
 
     @Autowired
     public LipidNameValidationService(AnalyticsTracker tracker, ExternalDatabaseMappingLoader dbLoader) {
@@ -76,6 +78,12 @@ public class LipidNameValidationService {
                 Grammar.HMDB
         )
         );
+        grammarToParser.put(Grammar.SHORTHAND, new ShorthandParser(knownFunctionalGroups));
+        grammarToParser.put(Grammar.FATTY_ACID, new FattyAcidParser(knownFunctionalGroups));
+        grammarToParser.put(Grammar.GOSLIN, new GoslinParser(knownFunctionalGroups));
+        grammarToParser.put(Grammar.LIPIDMAPS, new GoslinParser(knownFunctionalGroups));
+        grammarToParser.put(Grammar.SWISSLIPIDS, new GoslinParser(knownFunctionalGroups));
+        grammarToParser.put(Grammar.HMDB, new HmdbParser(knownFunctionalGroups));
     }
 
     public List<ValidationResult> validate(List<String> lipidNames) {

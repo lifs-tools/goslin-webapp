@@ -68,7 +68,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -101,10 +103,11 @@ public class LipidNameValidationController {
     private final Resource lipidnames;
     private final NewsPropertyConfig newsPropertyConfig;
     private final LipidClasses lipidClasses = LipidClasses.getInstance();
+    private final Integer maxItemsInRequest;
 
     @Autowired
     public LipidNameValidationController(LipidNameValidationService lipidNameValidationService, StorageService storageService, PageBuilderService pageBuilderService,
-            AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames, NewsPropertyConfig newsPropertyConfig) {
+            AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames, NewsPropertyConfig newsPropertyConfig, @Value("${jgoslin.maxItemsInRequest}") Integer maxItemsInRequest) {
         this.appInfo = appInfo;
         this.lipidNameValidationService = lipidNameValidationService;
         this.storageService = storageService;
@@ -113,6 +116,12 @@ public class LipidNameValidationController {
         this.localeResolver = localeResolver;
         this.lipidnames = lipidnames;
         this.newsPropertyConfig = newsPropertyConfig;
+        this.maxItemsInRequest = maxItemsInRequest;
+    }
+    
+    @InitBinder
+    public void initBinder(WebDataBinder dataBinder) {
+        dataBinder.setAutoGrowCollectionLimit(this.maxItemsInRequest);
     }
 
     @GetMapping("/")
