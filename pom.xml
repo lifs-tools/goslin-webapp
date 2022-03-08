@@ -69,7 +69,7 @@
         <docker.base.image.version>17-jdk-alpine</docker.base.image.version>
         <skip.docker>true</skip.docker>
         <app.port>8083</app.port>
-        <jackson.version>2.13.1</jackson.version>
+        <jackson.version>2.13.2</jackson.version>
         <spring.boot.version>2.5.6</spring.boot.version>
         <springfox.version>3.0.0</springfox.version>
         <lifs.webapps.common.version>1.1.4</lifs.webapps.common.version>
@@ -389,7 +389,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.2.2</version>
                     <configuration>
                         <archive>
                             <manifest>
@@ -412,7 +412,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.3.2</version>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
