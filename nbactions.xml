@@ -8,6 +8,7 @@
             </goals>
             <activatedProfiles>
                 <activatedProfile>dev</activatedProfile>
+                <activatedProfile>goslin-webapp</activatedProfile>
             </activatedProfiles>
         </action>
         <action>
@@ -21,6 +22,7 @@
             </properties>
             <activatedProfiles>
                 <activatedProfile>dev</activatedProfile>
+                <activatedProfile>goslin-webapp</activatedProfile>
             </activatedProfiles>
         </action>
         <action>
@@ -31,6 +33,7 @@
             </goals>
             <activatedProfiles>
                 <activatedProfile>dev</activatedProfile>
+                <activatedProfile>goslin-webapp</activatedProfile>
             </activatedProfiles>
         </action>
         <action>

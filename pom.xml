@@ -72,7 +72,7 @@
         <jackson.version>2.13.2</jackson.version>
         <spring.boot.version>2.5.6</spring.boot.version>
         <springfox.version>3.0.0</springfox.version>
-        <lifs.webapps.common.version>1.1.4</lifs.webapps.common.version>
+        <lifs.webapps.common.version>1.1.27</lifs.webapps.common.version>
         <jgoslin.version>2.0.0</jgoslin.version>
         <jacoco.version>jacoco.version</jacoco.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
@@ -216,6 +216,7 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-spring-boot-starter</artifactId>
+            <version>15.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -292,6 +293,7 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <type>jar</type>
+            <version>31.0.1-jre</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
