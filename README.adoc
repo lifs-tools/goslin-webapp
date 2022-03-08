@@ -1,7 +1,7 @@
 = LIFS Goslin Webapplication
 Nils Hoffmann &lt;nils.hoffmann@cebitec.uni-bielefeld.de&gt;
 
-image:https://zenodo.org/badge/DOI/10.5281/zenodo.3829055.svg["DOI", link="https://doi.org/10.5281/zenodo.3829055"]
+image:https://zenodo.org/badge/DOI/10.5281/zenodo.3829054.svg["DOI", link="https://doi.org/10.5281/zenodo.3829054"]
 //Build status: image:https://travis-ci.org/nilshoffmann/jmzTab-m-webapp.svg?branch=master["Build Status", link="https://travis-ci.org/nilshoffmann/jmzTab-m-webapp"]
 
 This project provides a webapplication for the jgoslin library.
@@ -10,6 +10,7 @@ This project provides a webapplication for the jgoslin library.
 - https://github.com/lifs-tools/goslin[Goslin grammars and test files]
 - https://github.com/lifs-tools/jgoslin[Java implementation]
 - https://github.com/lifs-tools/cppgoslin[C++ implementation]
+- https://github.com/lifs-tools/csgoslin[C# implementation]
 - https://github.com/lifs-tools/pygoslin[Python implementation]
 - https://github.com/lifs-tools/rgoslin[R implementation]
 
@@ -41,7 +42,7 @@ This will build a Docker container for the webapplication and will make it local
 
   docker image ls
   REPOSITORY              TAG            IMAGE ID     CREATED        SIZE
-  lifs/lifs-goslin-webapp 1.0.5-SNAPSHOT 7347237b752e 16 seconds ago 274MB
+  lifs/lifs-goslin-webapp 2.0.1-SNAPSHOT 7347237b752e 16 seconds ago 274MB
 
 To run the web application as a Docker container, type in the following (replacing <VERSION> with the current project version, i.e. the TAG version displayed by `docker image ls`):
 
