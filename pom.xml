@@ -73,7 +73,7 @@
         <lombok.version>1.18.10</lombok.version>
         <jackson.version>2.12.2</jackson.version>
         <bootstrap.version>4.3.1</bootstrap.version>
-        <jquery.version>3.4.0</jquery.version>
+        <jquery.version>3.6.0</jquery.version>
         <spring.boot.version>2.4.3</spring.boot.version>
         <springfox.version>3.0.0</springfox.version>
         <lifs.webapps.common.version>1.0.25</lifs.webapps.common.version>
