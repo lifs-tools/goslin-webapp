@@ -67,20 +67,13 @@
         <docker.image.prefix>docker.lifs-tools.org/lifs</docker.image.prefix>
         <docker.base.image>eclipse-temurin</docker.base.image>
         <docker.base.image.version>17-jdk-alpine</docker.base.image.version>
-        <!--        <docker.base.image>adoptopenjdk/openjdk11</docker.base.image>
-        <docker.base.image.version>debianslim-jre</docker.base.image.version>-->
         <skip.docker>true</skip.docker>
         <app.port>8083</app.port>
-        <!--<lombok.version>1.18.10</lombok.version>-->
-        <jackson.version>2.12.2</jackson.version>
-        <bootstrap.version>4.6.1</bootstrap.version>
-        <jquery.version>3.4.0</jquery.version>
+        <jackson.version>2.13.1</jackson.version>
         <spring.boot.version>2.5.6</spring.boot.version>
-        <log4j2.version>2.15.0</log4j2.version>
         <springfox.version>3.0.0</springfox.version>
-        <lifs.webapps.common.version>1.0.26</lifs.webapps.common.version>
-        <jgoslin.version>2.0.0-SNAPSHOT</jgoslin.version>
-        <keycloak.version>15.0.2</keycloak.version>
+        <lifs.webapps.common.version>1.1.4</lifs.webapps.common.version>
+        <jgoslin.version>2.0.0</jgoslin.version>
         <jacoco.version>jacoco.version</jacoco.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
         <app.name>goslin</app.name>
@@ -107,14 +100,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <!--Import dependency management from Spring Boot--> 
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>org.lifs-tools</groupId>
                 <artifactId>lifs-webapps-common</artifactId>
@@ -148,12 +133,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <!--            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>1.5.24</version>
-                <type>jar</type>
-            </dependency>-->
 
             <!-- HTTP client: jersey-client -->
             <dependency>
@@ -217,17 +196,15 @@
                 <artifactId>swagger2markup</artifactId>
                 <version>${swagger2markup.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.keycloak.bom</groupId>
-                <artifactId>keycloak-adapter-bom</artifactId>
-                <version>${keycloak.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.lifs-tools</groupId>
+            <artifactId>lifs-webapps-common</artifactId>
+            <version>${lifs.webapps.common.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -277,12 +254,10 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>jquery</artifactId>
-            <version>${jquery.version}</version>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>bootstrap</artifactId>
-            <version>${bootstrap.version}</version>
         </dependency>
 
         <dependency>
@@ -297,21 +272,10 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!--        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>-->
         <dependency>
             <groupId>org.lifs-tools</groupId>
             <artifactId>jgoslin-parsers</artifactId>
             <version>${jgoslin.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.lifs-tools</groupId>
-            <artifactId>lifs-webapps-common</artifactId>
-            <version>${lifs.webapps.common.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -327,7 +291,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>30.1-jre</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -338,10 +301,6 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
         </dependency>
-        <!--        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -710,7 +669,6 @@
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
-                        <!--<version>${spring.boot.version}</version>-->
                         <executions>
                             <execution>
                                 <id>repackage</id>
