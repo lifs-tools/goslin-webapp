@@ -10,10 +10,14 @@ $( ".lipids-input-row" ).click(function() {
 });
 
 function addLipidNameInputRow() {
-    var newIndex = Math.max(0, $("#lipidsInput").children().length);
+    var newIndex = Math.max(0, Math.min(1000, $("#lipidsInput").children().length));
+    if ($("#lipidsInput").children().length >= 1000) {
+        return;
+    }
     var lipidNameInputRow =
-            "<div class=\"form-group lipids-input-row\">" +
-            "<div>" +
+            "<div class=\"form-group row lipids-input-row\">" +
+            "<label class=\"col-sm-1 col-form-label col-form-label-sm\">"+(newIndex+1)+".</label>" +
+            "<div class=\"col-sm-11\">" +
             "<input id=\"lipidNames" + newIndex + "\" name=\"lipidNames[" + newIndex + "]\" type=\"text\" class=\"form-control form-control-sm\" required=\"true\" ></input>" +
             "<div class=\"help-block invalid-feedback\"></div>" +
             "</div>" +
@@ -42,10 +46,14 @@ function clearLipidNameInputRows() {
 }
 
 function addLipidName(name) {
-    var newIndex = Math.max(0, $("#lipidsInput").children().length);
+    var newIndex = Math.max(0, Math.min(1000, $("#lipidsInput").children().length));
+    if ($("#lipidsInput").children().length >= 1000) {
+        return;
+    }
     var lipidNameInputRow =
-            "<div class=\"form-group\">" +
-            "<div>" +
+            "<div class=\"form-group row lipids-input-row\">" +
+            "<label class=\"col-sm-1 col-form-label col-form-label-sm\">"+(newIndex+1)+".</label>" +
+            "<div class=\"col-sm-11\">" +
             "<input id=\"lipidNames" + newIndex + "\" name=\"lipidNames[" + newIndex + "]\" type=\"text\" class=\"form-control form-control-sm\" required=\"true\" ></input>" +
             "<div class=\"help-block invalid-feedback\"></div>" +
             "</div>" +

@@ -240,12 +240,13 @@
                                 </div>
                             </div>
                             <small id="pasteLipidsInputHelpBlock" class="form-text text-muted">
-                                Enter individual lipid names on species or subspecies level, or paste multiple lipid names, separated by a new line from your clipboard <b>by left-clicking here</b> and hitting CTRL+V.
+                                Enter individual lipid names on species or subspecies level, or paste multiple lipid names (max 1000), separated by a new line from your clipboard <b>by left-clicking here</b> and hitting CTRL+V.
                             </small>
                             <div id="lipidsInput">
-                                <div class="form-group lipids-input-row" th:each="lipidName, itemStat : *{lipidNames}">
+                                <div class="form-group row lipids-input-row" th:each="lipidName, itemStat : *{lipidNames}">
 
-                                    <div>
+                                    <label class="col-sm-1 col-form-label col-form-label-sm" th:text="(1 + __${itemStat.index}__) + '.'"></label>
+                                    <div class="col-sm-11">
                                         <input type="text" class="form-control form-control-sm" th:field="*{lipidNames[__${itemStat.index}__]}" th:classappend="${not #lists.isEmpty(#fields.errors('lipidNames[__${itemStat.index}__]'))} ? is-invalid" required="true" />
                                         <div th:if="${#fields.hasErrors('lipidNames[__${itemStat.index}__]')}" th:errors="*{lipidNames[__${itemStat.index}__]}" class="help-block invalid-feedback"></div>
                                     </div>

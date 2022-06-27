@@ -22,7 +22,7 @@
                         location.reload();
                     });
                     var pasteLipidsInput = document.getElementById('lipidNameInputFormCard');
-                    if(pasteLipidsInput) {
+                    if (pasteLipidsInput) {
                         pasteLipidsInput.onpaste = function (e) {
                             var pastedText = undefined;
                             if (window.clipboardData && window.clipboardData.getData) { // IE
@@ -30,7 +30,14 @@
                             } else if (e.clipboardData && e.clipboardData.getData) {
                                 pastedText = e.clipboardData.getData('text/plain');
                             }
-                            var lines = pastedText.split("\n");
+                            var matches = pastedText.match(/\n/g);
+                            var new_lines = matches ? matches.length : 0;
+                            if (new_lines > 0) {
+                                var lines = pastedText.split("\n").slice(0, -1);
+                                lines = lines.slice(0, Math.min(1000, lines.length));
+                            } else {
+                                lines = [pastedText];
+                            }
                             for (var i = 0, max = lines.length; i < max; i++) {
                                 addLipidName(lines[i]);
                             }

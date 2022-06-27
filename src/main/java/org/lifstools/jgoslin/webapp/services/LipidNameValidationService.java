@@ -30,9 +30,11 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.lifstools.jgoslin.domain.ConstraintViolationException;
 import org.lifstools.jgoslin.domain.KnownFunctionalGroups;
 import org.lifstools.jgoslin.domain.LipidAdduct;
 import org.lifstools.jgoslin.domain.LipidClasses;
+import org.lifstools.jgoslin.domain.LipidException;
 import org.lifstools.jgoslin.domain.LipidLevel;
 import org.lifstools.jgoslin.parser.BaseParserEventHandler;
 import org.lifstools.jgoslin.parser.FattyAcidParser;
@@ -63,7 +65,7 @@ public class LipidNameValidationService {
     private final List<ValidationResult.Grammar> defaultGrammars;
     private final KnownFunctionalGroups knownFunctionalGroups = new KnownFunctionalGroups();
     private final LipidClasses lipidClasses = LipidClasses.getInstance();
-    private final Map<Grammar, Parser> grammarToParser= new HashMap<>();
+    private final Map<Grammar, Parser> grammarToParser = new HashMap<>();
 
     @Autowired
     public LipidNameValidationService(AnalyticsTracker tracker, ExternalDatabaseMappingLoader dbLoader) {
@@ -100,12 +102,12 @@ public class LipidNameValidationService {
     }
 
     private Parser<LipidAdduct> parserFor(ValidationResult.Grammar grammar) {
-        if(grammarToParser.containsKey(grammar)) {
+        if (grammarToParser.containsKey(grammar)) {
             return grammarToParser.get(grammar);
         }
         throw new RuntimeException("No parser implementation available for grammar '" + grammar + "'!");
     }
-    
+
     private LipidAdduct removeXFunctionalGroups(LipidAdduct la) {
 //        la.getLipid().getFaList().stream().forEach(fa -> {
 //            fa.getFunctionalGroups().remove("[X]"); 
@@ -135,16 +137,27 @@ public class LipidNameValidationService {
 
             result.setLipidMapsCategory(la.getLipid().getHeadGroup().getLipidCategory().name());
             String speciesName = la.getLipid().getLipidString(LipidLevel.SPECIES);
-            Double mass = la.getMass();
-            if (mass == 0.0) {
-                mass = Double.NaN;
+            try {
+                Double mass = la.getMass();
+                if (mass == 0.0) {
+                    mass = Double.NaN;
+                }
+                result.setMass(mass);
+            } catch (RuntimeException re) {
+                log.warn("Failed to get mass: ", re);
+                result.setMass(Double.NaN);
             }
-            result.setMass(mass);
-            result.setSumFormula(la.getSumFormula());
+            try {
+                String sumFormula = la.getSumFormula();
+                result.setSumFormula(sumFormula);
+            } catch (RuntimeException re) {
+                log.warn("Failed to get sum formula: ", re);
+                result.setSumFormula(null);
+            }
             result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
 //            result.setLipidSpeciesInfo(la.getLipid().getInfo());
             Map<String, Integer> functionalGroupCounts = new TreeMap<>();
-            for (String key:la.getLipid().getInfo().getFunctionalGroups().keySet()) {
+            for (String key : la.getLipid().getInfo().getFunctionalGroups().keySet()) {
                 functionalGroupCounts.put(key, ValidationResult.getTotalFunctionalGroupCount(la, key));
             }
             result.setFunctionalGroupCounts(functionalGroupCounts);
