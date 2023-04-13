@@ -137,6 +137,10 @@ pre {
 
 .db-list-group {
   display: grid !important;
-  grid-template-columns: repeat(8, 1fr);
-  grid-gap: 1em;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-gap: 0.25em;
+}
+
+.list-item-dbhits {
+    border: 0px !important;
 }
