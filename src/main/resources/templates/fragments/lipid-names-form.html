@@ -78,8 +78,8 @@
                                     <div class="col-sm-9" th:if="${validationResult.lipidMapsReferences.isPresent()}">
                                         <div readonly="true" class="form-control-plaintext form-control-sm form-control-dbhits">
                                             <th:block th:if="${validationResult.lipidMapsReferences.get().isEmpty()}"><abbr title="Not Available">N.A.</abbr></th:block>
-                                            <ul class="list-group list-group-flush" th:unless="${validationResult.lipidMapsReferences.get().isEmpty()}" th:each="lipidMapsEntry, itemStat : ${validationResult.lipidMapsReferences.get()}">
-                                                <li class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${lipidMapsEntry.databaseUrl}+${lipidMapsEntry.databaseElementId}}" th:title="${lipidMapsEntry.getDatabaseElementId()}"><span th:if="${lipidMapsEntry.getNativeAbbreviation()!=null && !lipidMapsEntry.getNativeAbbreviation().isEmpty()}" th:text="${lipidMapsEntry.getNativeAbbreviation()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
+                                            <ul class="list-group list-group-horizontal list-group-flush db-list-group" th:unless="${validationResult.lipidMapsReferences.get().isEmpty()}">
+                                                <li th:each="lipidMapsEntry, itemStat : ${validationResult.lipidMapsReferences.get()}" class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${lipidMapsEntry.databaseUrl}+${lipidMapsEntry.databaseElementId}}" th:title="${lipidMapsEntry.getDatabaseElementId()}"><span th:if="${lipidMapsEntry.getNativeAbbreviation()!=null && !lipidMapsEntry.getNativeAbbreviation().isEmpty()}" th:text="${lipidMapsEntry.getNativeAbbreviation()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -89,8 +89,8 @@
                                     <div class="col-sm-9" th:if="${validationResult.swissLipidsReferences.isPresent()}">
                                         <div readonly="true" class="form-control-plaintext form-control-sm form-control-dbhits">
                                             <th:block th:if="${validationResult.swissLipidsReferences.get().isEmpty()}"><abbr title="Not Available">N.A.</abbr></th:block>
-                                            <ul class="list-group list-group-flush" th:unless="${validationResult.swissLipidsReferences.get().isEmpty()}" th:each="swissLipidsEntry, itemStat : ${validationResult.swissLipidsReferences.get()}">
-                                                <li class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${swissLipidsEntry.databaseUrl}+${swissLipidsEntry.databaseElementId}}" th:title="${swissLipidsEntry.getDatabaseElementId()}"><span th:if="${swissLipidsEntry.getNativeAbbreviation()!=null && !swissLipidsEntry.getNativeAbbreviation().isEmpty()}" th:text="${swissLipidsEntry.getNativeAbbreviation()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
+                                            <ul class="list-group list-group-horizontal list-group-flush db-list-group" th:unless="${validationResult.swissLipidsReferences.get().isEmpty()}">
+                                                <li th:each="swissLipidsEntry, itemStat : ${validationResult.swissLipidsReferences.get()}" class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${swissLipidsEntry.databaseUrl}+${swissLipidsEntry.databaseElementId}}" th:title="${swissLipidsEntry.getDatabaseElementId()}"><span th:if="${swissLipidsEntry.getNativeAbbreviation()!=null && !swissLipidsEntry.getNativeAbbreviation().isEmpty()}" th:text="${swissLipidsEntry.getNativeAbbreviation()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -285,13 +285,13 @@
                             <legend class="card-title">Upload a text file with one lipid name per row</legend>
                             <div class="form-row">
                                 <div class="col-sm-5">  
-                                    <label for="file" class="col-form-label">File with lipid names to validate</label>
+                                    <label for="file" class="col-form-label">File with lipid names to validate and normalize</label>
                                 </div>
                                 <div class="col-sm-7">
                                     <input id="file" class="no-gutters form-control-file" name="file" type="file" th:field="*{file}" required/>
                                 </div>
                                 <div class="col-sm-12">
-                                    <small id="fileHelpBlock" class="form-text text-muted">Select a local file to upload and validate.<th:block th:if="${page!=null}"> Size limit is <span th:text="${page.maxFileSize}"></span><th:block>.</small>
+                                    <small id="fileHelpBlock" class="form-text text-muted">Select a local file to upload. One lipid name per line. <th:block th:if="${page!=null}"> Size limit is <span th:text="${page.maxFileSize}"></span><th:block>.</small>
                                                 </div>
                                                 </div>
                                                 <small id="usernameHelpBlock" class="form-text text-muted">

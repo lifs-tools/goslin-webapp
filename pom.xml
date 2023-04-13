@@ -78,7 +78,7 @@
         <assembly.dir>${project.artifactId}</assembly.dir>
         <app.name>goslin</app.name>
         <contextPath>/goslin</contextPath>
-        <start-class>de.isas.lifs.palinom.webapp.Application</start-class>
+        <start-class>org.lifstools.jgoslin.webapp.Application</start-class>
         <spring.profiles.active></spring.profiles.active>
         <!-- tracking info -->
         <ga.id>10</ga.id>

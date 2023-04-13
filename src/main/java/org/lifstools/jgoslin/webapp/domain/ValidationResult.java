@@ -32,7 +32,33 @@ public class ValidationResult {
 
     public static enum Grammar {
         GOSLIN, //GOSLIN_FRAGMENTS, 
-        LIPIDMAPS, SWISSLIPIDS, HMDB, SHORTHAND, FATTY_ACID // NONE
+        LIPIDMAPS, SWISSLIPIDS, HMDB, SHORTHAND, FATTY_ACID, NONE;
+
+        public static Grammar forName(String name) {
+            switch (name.toUpperCase()) {
+                case "GOSLIN" -> {
+                    return GOSLIN;
+                }
+                case "LIPIDMAPS" -> {
+                    return LIPIDMAPS;
+                }
+                case "SWISSLIPIDS" -> {
+                    return SWISSLIPIDS;
+                }
+                case "HMDB" -> {
+                    return HMDB;
+                }
+                case "SHORTHAND2020" -> {
+                    return SHORTHAND;
+                }
+                case "FATTYACIDS" -> {
+                    return FATTY_ACID;
+                }
+                default -> {
+                    return NONE;
+                }
+            }
+        }
     };
 
     private String lipidName;
@@ -42,7 +68,7 @@ public class ValidationResult {
     private List<String> messages = Collections.emptyList();
 
     private LipidAdduct lipidAdduct;
-    
+
     private Map<String, Integer> functionalGroupCounts;
 
     private String normalizedName;
@@ -66,7 +92,7 @@ public class ValidationResult {
             }).collect(Collectors.joining(",", "[", "]"));
         }).collect(Collectors.joining(",", "{", "}"));
     }
-    
+
     public static Integer getTotalFunctionalGroupCount(LipidAdduct la, String functionalGroup) {
         return la.getLipid().getInfo().getTotalFunctionalGroupCount(functionalGroup);
     }
@@ -121,11 +147,11 @@ public class ValidationResult {
     public void setLipidAdduct(LipidAdduct lipidAdduct) {
         this.lipidAdduct = lipidAdduct;
     }
-    
+
     public Map<String, Integer> getFunctionalGroupCounts() {
         return functionalGroupCounts;
     }
-    
+
     public void setFunctionalGroupCounts(Map<String, Integer> functionalGroupCounts) {
         this.functionalGroupCounts = functionalGroupCounts;
     }

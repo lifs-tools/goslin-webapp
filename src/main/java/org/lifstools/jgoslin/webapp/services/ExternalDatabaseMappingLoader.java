@@ -69,15 +69,20 @@ public class ExternalDatabaseMappingLoader {
 
     public Optional<Collection<ExternalDatabaseReference>> findSwissLipidsEntry(String... names) {
         List<String> namesList = Arrays.asList(names);
-        return Optional.of(namesList.stream().map((t) -> {
+        return Optional.of(namesList.stream().filter((t) -> t!=null).map((t) -> {
             return this.swissLipidsReferences.get(t);
         }).flatMap(Collection::stream).filter((t) -> {
             return t != null;
         }).distinct().collect(Collectors.toList()));
     }
 
-    public Optional<Collection<ExternalDatabaseReference>> findLipidMapsEntry(String lipidMapsNames) {
-        return Optional.of(this.lipidMapsReferences.get(lipidMapsNames).stream().distinct().collect(Collectors.toList()));
+    public Optional<Collection<ExternalDatabaseReference>> findLipidMapsEntry(String... lipidMapsNames) {
+        List<String> namesList = Arrays.asList(lipidMapsNames);
+        return Optional.of(namesList.stream().filter((t) -> t!=null).map((t) -> {
+            return this.lipidMapsReferences.get(t);
+        }).flatMap(Collection::stream).filter((t) -> {
+            return t != null;
+        }).distinct().collect(Collectors.toList()));
     }
 
     protected final <T> List<T> loadObjectList(Class<T> type, String fileName, char columnSeparator) {

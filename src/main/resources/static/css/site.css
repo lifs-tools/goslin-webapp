@@ -134,3 +134,9 @@ pre {
     border-left-color: #ffeeba;
     background-color: #fff3cd;
 }
+
+.db-list-group {
+  display: grid !important;
+  grid-template-columns: repeat(8, 1fr);
+  grid-gap: 1em;
+}

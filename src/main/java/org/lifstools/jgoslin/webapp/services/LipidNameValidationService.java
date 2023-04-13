@@ -30,17 +30,17 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.lifstools.jgoslin.domain.ConstraintViolationException;
 import org.lifstools.jgoslin.domain.KnownFunctionalGroups;
 import org.lifstools.jgoslin.domain.LipidAdduct;
 import org.lifstools.jgoslin.domain.LipidClasses;
-import org.lifstools.jgoslin.domain.LipidException;
 import org.lifstools.jgoslin.domain.LipidLevel;
+import org.lifstools.jgoslin.domain.LipidParsingException;
 import org.lifstools.jgoslin.parser.BaseParserEventHandler;
 import org.lifstools.jgoslin.parser.FattyAcidParser;
 import org.lifstools.jgoslin.parser.GoslinParser;
 import org.lifstools.jgoslin.parser.HmdbParser;
 import org.lifstools.jgoslin.parser.LipidMapsParser;
+import org.lifstools.jgoslin.parser.LipidParser;
 import org.lifstools.jgoslin.parser.Parser;
 import org.lifstools.jgoslin.parser.ShorthandParser;
 import org.lifstools.jgoslin.parser.SwissLipidsParser;
@@ -66,6 +66,7 @@ public class LipidNameValidationService {
     private final KnownFunctionalGroups knownFunctionalGroups = new KnownFunctionalGroups();
     private final LipidClasses lipidClasses = LipidClasses.getInstance();
     private final Map<Grammar, Parser> grammarToParser = new HashMap<>();
+//    private final LipidParser parser = new LipidParser();
 
     @Autowired
     public LipidNameValidationService(AnalyticsTracker tracker, ExternalDatabaseMappingLoader dbLoader) {
@@ -89,16 +90,24 @@ public class LipidNameValidationService {
     }
 
     public List<ValidationResult> validate(List<String> lipidNames) {
-        return validate(lipidNames, defaultGrammars);
+        return validate(lipidNames, Collections.emptyList());
     }
 
     public List<ValidationResult> validate(List<String> lipidNames, List<ValidationResult.Grammar> grammars) {
         UUID requestId = UUID.randomUUID();
         tracker.count(requestId, getClass().getSimpleName(), "validate-with-grammars");
-        List<ValidationResult> results = lipidNames.parallelStream().map((lipidName) -> {
-            return parseWith(lipidName.replaceAll("\\s+", " ").trim(), new ArrayDeque<ValidationResult.Grammar>(grammars));
-        }).collect(Collectors.toList());
-        return results;
+        if(grammars.isEmpty()) {
+            LipidParser lipidParser = new LipidParser();
+            List<ValidationResult> results = lipidNames.stream().map((lipidName) -> {
+                return parseWithLipidParser(lipidParser, lipidName.replaceAll("\\s+", " ").trim());
+            }).collect(Collectors.toList());
+            return results;
+        } else {
+            List<ValidationResult> results = lipidNames.parallelStream().map((lipidName) -> {
+                return parseWith(lipidName.replaceAll("\\s+", " ").trim(), new ArrayDeque<ValidationResult.Grammar>(grammars));
+            }).collect(Collectors.toList());
+            return results;
+        }
     }
 
     private Parser<LipidAdduct> parserFor(ValidationResult.Grammar grammar) {
@@ -107,13 +116,20 @@ public class LipidNameValidationService {
         }
         throw new RuntimeException("No parser implementation available for grammar '" + grammar + "'!");
     }
-
-    private LipidAdduct removeXFunctionalGroups(LipidAdduct la) {
-//        la.getLipid().getFaList().stream().forEach(fa -> {
-//            fa.getFunctionalGroups().remove("[X]"); 
-//        });
-//        la.getLipid().getInfo().getFunctionalGroups().remove("[X]");
-        return la;
+    
+    private ValidationResult parseWithLipidParser(LipidParser lipidParser, String lipidName) {
+        try {
+            LipidAdduct la = lipidParser.parse(lipidName);
+            return createValidationResult(la, lipidName, Grammar.forName(lipidParser.getLastSuccessfulGrammar()), "");
+        } catch(LipidParsingException lpe) {
+            log.debug("Could not parse " + lipidName + " with " + LipidParser.class.getName() + "! Message: " + lpe.getMessage());            
+            ValidationResult result = new ValidationResult();
+            result.setLipidName(lipidName);
+            result.setGrammar(Grammar.NONE);
+            result.setMessages(Arrays.asList("Could not parse "+lipidName+" with any parser. Original message:"+ lpe.getMessage()));
+            return result;
+        }
+        
     }
 
     private ValidationResult parseWith(String lipidName, Deque<ValidationResult.Grammar> grammars) {
@@ -124,53 +140,12 @@ public class LipidNameValidationService {
         BaseParserEventHandler<LipidAdduct> handler = parser.newEventHandler();
         LipidAdduct la = parser.parse(lipidName, handler, false);
         if (la != null && handler.getErrorMessage().isEmpty()) {
-            la = removeXFunctionalGroups(la);
-            ValidationResult result = new ValidationResult();
-            result.setLipidName(lipidName);
-            result.setLipidAdduct(la);
-            result.setGrammar(grammar);
-            List<String> messages = Collections.emptyList();
+            String errorMessage = "";
             if (handler.getErrorMessage() != null && !handler.getErrorMessage().isEmpty()) {
-                messages = Arrays.asList(handler.getErrorMessage());
+                errorMessage = handler.getErrorMessage();
             }
-            result.setMessages(messages);
-
-            result.setLipidMapsCategory(la.getLipid().getHeadGroup().getLipidCategory().name());
-            String speciesName = la.getLipid().getLipidString(LipidLevel.SPECIES);
-            try {
-                Double mass = la.getMass();
-                if (mass == 0.0) {
-                    mass = Double.NaN;
-                }
-                result.setMass(mass);
-            } catch (RuntimeException re) {
-                log.warn("Failed to get mass: ", re);
-                result.setMass(Double.NaN);
-            }
-            try {
-                String sumFormula = la.getSumFormula();
-                result.setSumFormula(sumFormula);
-            } catch (RuntimeException re) {
-                log.warn("Failed to get sum formula: ", re);
-                result.setSumFormula(null);
-            }
-            result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
-//            result.setLipidSpeciesInfo(la.getLipid().getInfo());
-            Map<String, Integer> functionalGroupCounts = new TreeMap<>();
-            for (String key : la.getLipid().getInfo().getFunctionalGroups().keySet()) {
-                functionalGroupCounts.put(key, ValidationResult.getTotalFunctionalGroupCount(la, key));
-            }
-            result.setFunctionalGroupCounts(functionalGroupCounts);
-            try {
-                String normalizedName = la.getLipid().getLipidString();
-                result.setNormalizedName(normalizedName);
-                result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName));
-                result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName));
-            } catch (RuntimeException re) {
-                log.debug("Error while trying to resolve database hits for {}!", lipidName);
-            }
+            return createValidationResult(la, lipidName, grammar, errorMessage);
 //            result.setFattyAcids(la.getLipid().getFaList());
-            return result;
         } else {
             log.debug("Could not parse " + lipidName + " with " + parser.getClass().getName() + " for grammar " + grammar + "! Message: " + handler.getErrorMessage());
             if (grammars.isEmpty()) {
@@ -187,6 +162,57 @@ public class LipidNameValidationService {
                 return parseWith(lipidName.trim(), grammars);
             }
         }
+    }
+
+    private ValidationResult createValidationResult(LipidAdduct la, String lipidName, Grammar grammar, String errorMessage) {
+        ValidationResult result = new ValidationResult();
+        result.setLipidName(lipidName);
+        result.setLipidAdduct(la);
+        result.setGrammar(grammar);
+        List<String> messages = Collections.emptyList();
+        if (errorMessage != null && !errorMessage.isEmpty()) {
+            messages = Arrays.asList(errorMessage);
+        }
+        result.setMessages(messages);
+        result.setLipidMapsCategory(la.getLipid().getHeadGroup().getLipidCategory().name());
+//        String speciesName = la.getLipid().getLipidString(LipidLevel.SPECIES);
+        try {
+            Double mass = la.getMass();
+            if (mass == 0.0) {
+                mass = Double.NaN;
+            }
+            result.setMass(mass);
+        } catch (RuntimeException re) {
+            log.warn("Failed to get mass: ", re);
+            result.setMass(Double.NaN);
+        }
+        try {
+            String sumFormula = la.getSumFormula();
+            result.setSumFormula(sumFormula);
+        } catch (RuntimeException re) {
+            log.warn("Failed to get sum formula: ", re);
+            result.setSumFormula(null);
+        }
+        result.setLipidMapsClass(getLipidMapsClassAbbreviation(la));
+        //            result.setLipidSpeciesInfo(la.getLipid().getInfo());
+        Map<String, Integer> functionalGroupCounts = new TreeMap<>();
+        for (String key : la.getLipid().getInfo().getFunctionalGroups().keySet()) {
+            functionalGroupCounts.put(key, ValidationResult.getTotalFunctionalGroupCount(la, key));
+        }
+        result.setFunctionalGroupCounts(functionalGroupCounts);
+        try {
+            String normalizedName = la.getLipid().getLipidString();
+            String lipidSpeciesName = null;
+            if(la.getLipidLevel()!=LipidLevel.CATEGORY && la.getLipidLevel()!=LipidLevel.CLASS && la.getLipidLevel()!=LipidLevel.UNDEFINED_LEVEL && la.getLipidLevel()!=LipidLevel.NO_LEVEL) {
+                lipidSpeciesName = la.getLipidString(LipidLevel.SPECIES);
+            } 
+            result.setNormalizedName(normalizedName);
+            result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName, lipidName, lipidSpeciesName));
+            result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName, lipidSpeciesName));
+        } catch (RuntimeException re) {
+            log.debug("Error while trying to resolve database hits for {}!", lipidName);
+        }
+        return result;
     }
 
 //    private List<String> toStringMessages(SyntaxErrorListener listener) {
