@@ -73,7 +73,7 @@
         <spring.boot.version>2.7.10</spring.boot.version>
         <springfox.version>3.0.0</springfox.version>
         <lifs.webapps.common.version>1.1.27</lifs.webapps.common.version>
-        <jgoslin.version>2.0.2</jgoslin.version>
+        <jgoslin.version>2.1.0</jgoslin.version>
         <jacoco.version>0.8.9</jacoco.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
         <app.name>goslin</app.name>
