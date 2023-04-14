@@ -62,7 +62,7 @@ public class LipidNameValidation {
     })
     @PostMapping()
     public ResponseEntity<ValidationResults> validate(
-            @ApiParam(value = "Validation request with list of lipid names and grammars to use. For each grammar, a specialized parser is instantiated and used to parse the lipid name. The first successful parser result is returned. If no parser was successful, the returned list will contain validation messages to help you track down the issue and the name of the last grammar / parser used to validate the lipid name. If you provide an empty list or null for grammars, jgoslin will use the LipidParser internally, which supports all grammars. ", required = true)
+            @ApiParam(value = "Validation request with list of lipid names and grammars to use. For each grammar, a specialized parser is instantiated and used to parse the lipid name. The first successful parser result is returned. If no parser was successful, the returned list will contain validation messages to help you track down the issue and the name of the last grammar / parser used to validate the lipid name. If you provide an empty list or null for grammars, jgoslin will use the LipidParser internally, which supports all grammars. skipInvalid is currently only relevant to the form based validation. REST service validation will commence on all lipid names.", required = true)
             @RequestBody ValidationRequest validationRequest) {
         List<ValidationResult> results;
         HttpStatus httpStatus = HttpStatus.OK;
