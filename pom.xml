@@ -74,7 +74,7 @@
         <springfox.version>3.0.0</springfox.version>
         <lifs.webapps.common.version>1.1.27</lifs.webapps.common.version>
         <jgoslin.version>2.1.0</jgoslin.version>
-        <jacoco.version>0.8.9</jacoco.version>
+        <jacoco.version>0.8.10</jacoco.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
         <app.name>goslin</app.name>
         <contextPath>/goslin</contextPath>
