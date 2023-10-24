@@ -57,6 +57,7 @@ import org.lifstools.jgoslin.domain.FattyAcid;
 import org.lifstools.jgoslin.domain.FunctionalGroup;
 import org.lifstools.jgoslin.domain.LipidClassMeta;
 import org.lifstools.jgoslin.domain.LipidClasses;
+import org.lifstools.jgoslin.domain.LipidLevel;
 import org.lifstools.jgoslin.domain.LipidSpeciesInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,7 +194,10 @@ public class LipidNameValidationController {
         }
         ModelAndView mav = new ModelAndView("validationResult");
         mav.addObject("page", createPage("Lipid Name Validation Results", Optional.ofNullable(principal)));
-        List<ValidationResult> validationResults = lipidNameValidationService.validate(Optional.ofNullable(validationRequest.getLipidNames()).orElse(Collections.emptyList()));
+        List<ValidationResult> validationResults = lipidNameValidationService.validate(
+                Optional.ofNullable(validationRequest.getLipidNames()).orElse(Collections.emptyList()),
+                Collections.emptyList()
+        );
         log.info("Received {} validation results!", validationResults.size());
         ValidationResults results = new ValidationResults();
         results.setResults(validationResults);
@@ -291,6 +295,15 @@ public class LipidNameValidationController {
                 m.put("Lipid Maps Category", t.getLipidAdduct().getLipid().getHeadGroup().getLipidCategory().getFullName() + " [" + t.getLipidAdduct().getLipid().getHeadGroup().getLipidCategory().name() + "]");
                 LipidClassMeta lclass = lipidClasses.get(t.getLipidAdduct().getLipid().getHeadGroup().getLipidClass());
                 m.put("Lipid Maps Main Class", lclass.getDescription());
+                m.put("Lipid Category Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.CATEGORY));
+                m.put("Lipid Class Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.CLASS));
+                m.put("Extended Species Name", t.getLipidAdduct().getExtendedClass());
+                m.put("Species Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.SPECIES));
+                m.put("Molecular Species Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.MOLECULAR_SPECIES));
+                m.put("SN Position Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.SN_POSITION));
+                m.put("Structure Defined Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.STRUCTURE_DEFINED));
+                m.put("Full Structure Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.FULL_STRUCTURE));
+                m.put("Complete Structure Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.COMPLETE_STRUCTURE));
                 m.put("Lipid Maps References", t.getLipidMapsReferences().stream().flatMap(Collection::stream).map((r) -> {
                     return r.getDatabaseUrl() + r.getDatabaseElementId();
                 }).collect(Collectors.joining(" | ")));

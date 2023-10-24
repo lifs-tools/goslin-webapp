@@ -77,6 +77,24 @@ public class ValidationResult {
 
     private String lipidMapsClass;
 
+    private String lipidCategoryName;
+
+    private String lipidClassName;
+
+    private String lipidExtendedSpeciesName;
+
+    private String lipidSpeciesName;
+
+    private String lipidMolecularSpeciesName;
+
+    private String lipidSnPositionName;
+
+    private String lipidStructureDefinedName;
+
+    private String lipidFullStructureName;
+
+    private String lipidCompleteStructureName;
+
     private Double mass;
 
     private String sumFormula;
@@ -101,7 +119,10 @@ public class ValidationResult {
 
     }
 
-    public ValidationResult(String lipidName, Grammar grammar, LipidAdduct lipidAdduct, Map<String, Integer> functionalGroupCounts, String normalizedName, String lipidMapsCategory, String lipidMapsClass, Double mass, String sumFormula, Optional<Collection<ExternalDatabaseReference>> lipidMapsReferences, Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences) {
+    public ValidationResult(String lipidName, Grammar grammar, LipidAdduct lipidAdduct, Map<String, Integer> functionalGroupCounts, String normalizedName, String lipidMapsCategory, String lipidMapsClass,
+            String lipidCategoryName, String lipidClassName, String lipidExtendedSpeciesName,
+            String lipidSpeciesName, String lipidMolecularSpeciesName, String lipidSnPositionName, String lipidStructureDefinedName, String lipidFullStructureName, String lipidCompleteStructureName,
+            Double mass, String sumFormula, Optional<Collection<ExternalDatabaseReference>> lipidMapsReferences, Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences) {
         this.lipidName = lipidName;
         this.grammar = grammar;
         this.lipidAdduct = lipidAdduct;
@@ -110,6 +131,15 @@ public class ValidationResult {
         this.normalizedName = normalizedName;
         this.lipidMapsCategory = lipidMapsCategory;
         this.lipidMapsClass = lipidMapsClass;
+        this.lipidCategoryName = lipidCategoryName;
+        this.lipidClassName = lipidClassName;
+        this.lipidExtendedSpeciesName = lipidExtendedSpeciesName;
+        this.lipidSpeciesName = lipidSpeciesName;
+        this.lipidMolecularSpeciesName = lipidMolecularSpeciesName;
+        this.lipidSnPositionName = lipidSnPositionName;
+        this.lipidStructureDefinedName = lipidStructureDefinedName;
+        this.lipidFullStructureName = lipidFullStructureName;
+        this.lipidCompleteStructureName = lipidCompleteStructureName;
         this.mass = mass;
         this.sumFormula = sumFormula;
         this.lipidMapsReferences = lipidMapsReferences;
@@ -180,6 +210,78 @@ public class ValidationResult {
         this.lipidMapsClass = lipidMapsClass;
     }
 
+    public String getLipidCategoryName() {
+        return lipidCategoryName;
+    }
+
+    public void setLipidCategoryName(String lipidCategoryName) {
+        this.lipidCategoryName = lipidCategoryName;
+    }
+
+    public String getLipidClassName() {
+        return lipidClassName;
+    }
+
+    public void setLipidClassName(String lipidClassName) {
+        this.lipidClassName = lipidClassName;
+    }
+
+    public String getLipidExtendedSpeciesName() {
+        return lipidExtendedSpeciesName;
+    }
+
+    public void setLipidExtendedSpeciesName(String lipidExtendedSpeciesName) {
+        this.lipidExtendedSpeciesName = lipidExtendedSpeciesName;
+    }
+
+    public String getLipidSpeciesName() {
+        return lipidSpeciesName;
+    }
+
+    public void setLipidSpeciesName(String lipidSpeciesName) {
+        this.lipidSpeciesName = lipidSpeciesName;
+    }
+
+    public String getLipidMolecularSpeciesName() {
+        return lipidMolecularSpeciesName;
+    }
+
+    public void setLipidMolecularSpeciesName(String lipidMolecularSpeciesName) {
+        this.lipidMolecularSpeciesName = lipidMolecularSpeciesName;
+    }
+
+    public String getLipidSnPositionName() {
+        return lipidSnPositionName;
+    }
+
+    public void setLipidSnPositionName(String lipidSnPositionName) {
+        this.lipidSnPositionName = lipidSnPositionName;
+    }
+
+    public String getLipidStructureDefinedName() {
+        return lipidStructureDefinedName;
+    }
+
+    public void setLipidStructureDefinedName(String lipidStructureDefinedName) {
+        this.lipidStructureDefinedName = lipidStructureDefinedName;
+    }
+
+    public String getLipidFullStructureName() {
+        return lipidFullStructureName;
+    }
+
+    public void setLipidFullStructureName(String lipidFullStructureName) {
+        this.lipidFullStructureName = lipidFullStructureName;
+    }
+
+    public String getLipidCompleteStructureName() {
+        return lipidCompleteStructureName;
+    }
+
+    public void setLipidCompleteStructureName(String lipidCompleteStructureName) {
+        this.lipidCompleteStructureName = lipidCompleteStructureName;
+    }
+
     public Double getMass() {
         return mass;
     }
@@ -214,7 +316,24 @@ public class ValidationResult {
 
     @Override
     public String toString() {
-        return "ValidationResult{" + "lipidName=" + lipidName + ", grammar=" + grammar + ", messages=" + messages + ", lipidAdduct=" + lipidAdduct + ", functionalGroupCounts=" + functionalGroupCounts + ", normalizedName=" + normalizedName + ", lipidMapsCategory=" + lipidMapsCategory + ", lipidMapsClass=" + lipidMapsClass + ", mass=" + mass + ", sumFormula=" + sumFormula + ", lipidMapsReferences=" + lipidMapsReferences + ", swissLipidsReferences=" + swissLipidsReferences + '}';
+        return "ValidationResult{" + "lipidName=" + lipidName
+                + ", grammar=" + grammar + ", messages=" + messages
+                + ", lipidAdduct=" + lipidAdduct + ", functionalGroupCounts=" + functionalGroupCounts
+                + ", normalizedName=" + normalizedName + ", lipidMapsCategory=" + lipidMapsCategory
+                + ", lipidMapsClass=" + lipidMapsClass
+                + ", lipidCategoryName=" + lipidCategoryName
+                + ", lipidClassName=" + lipidClassName
+                + ", lipidExtendedSpeciesName=" + lipidExtendedSpeciesName
+                + ", lipidSpeciesName=" + lipidSpeciesName
+                + ", lipidMolecularSpeciesName=" + lipidMolecularSpeciesName
+                + ", lipidSnPositionName" + lipidSnPositionName
+                + ", lipidStructureDefinedName" + lipidStructureDefinedName
+                + ", lipidFullStructureName" + lipidFullStructureName
+                + ", lipidCompleteStructureName" + lipidCompleteStructureName
+                + ", mass=" + mass
+                + ", sumFormula=" + sumFormula
+                + ", lipidMapsReferences=" + lipidMapsReferences
+                + ", swissLipidsReferences=" + swissLipidsReferences + '}';
     }
 
 }

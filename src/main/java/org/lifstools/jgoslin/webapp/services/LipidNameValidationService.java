@@ -96,7 +96,7 @@ public class LipidNameValidationService {
     public List<ValidationResult> validate(List<String> lipidNames, List<ValidationResult.Grammar> grammars) {
         UUID requestId = UUID.randomUUID();
         tracker.count(requestId, getClass().getSimpleName(), "validate-with-grammars");
-        if(grammars.isEmpty()) {
+        if (grammars.isEmpty()) {
             LipidParser lipidParser = new LipidParser();
             List<ValidationResult> results = lipidNames.stream().map((lipidName) -> {
                 return parseWithLipidParser(lipidParser, lipidName.replaceAll("\\s+", " ").trim());
@@ -116,20 +116,20 @@ public class LipidNameValidationService {
         }
         throw new RuntimeException("No parser implementation available for grammar '" + grammar + "'!");
     }
-    
+
     private ValidationResult parseWithLipidParser(LipidParser lipidParser, String lipidName) {
         try {
             LipidAdduct la = lipidParser.parse(lipidName);
             return createValidationResult(la, lipidName, Grammar.forName(lipidParser.getLastSuccessfulGrammar()), "");
-        } catch(LipidParsingException lpe) {
-            log.debug("Could not parse " + lipidName + " with " + LipidParser.class.getName() + "! Message: " + lpe.getMessage());            
+        } catch (LipidParsingException lpe) {
+            log.debug("Could not parse " + lipidName + " with " + LipidParser.class.getName() + "! Message: " + lpe.getMessage());
             ValidationResult result = new ValidationResult();
             result.setLipidName(lipidName);
             result.setGrammar(Grammar.NONE);
-            result.setMessages(Arrays.asList("Could not parse "+lipidName+" with any parser. Original message:"+ lpe.getMessage()));
+            result.setMessages(Arrays.asList("Could not parse " + lipidName + " with any parser. Original message:" + lpe.getMessage()));
             return result;
         }
-        
+
     }
 
     private ValidationResult parseWith(String lipidName, Deque<ValidationResult.Grammar> grammars) {
@@ -203,9 +203,18 @@ public class LipidNameValidationService {
         try {
             String normalizedName = la.getLipid().getLipidString();
             String lipidSpeciesName = null;
-            if(la.getLipidLevel()!=LipidLevel.CATEGORY && la.getLipidLevel()!=LipidLevel.CLASS && la.getLipidLevel()!=LipidLevel.UNDEFINED_LEVEL && la.getLipidLevel()!=LipidLevel.NO_LEVEL) {
+            if (la.getLipidLevel() != LipidLevel.CATEGORY && la.getLipidLevel() != LipidLevel.CLASS && la.getLipidLevel() != LipidLevel.UNDEFINED_LEVEL && la.getLipidLevel() != LipidLevel.NO_LEVEL) {
                 lipidSpeciesName = la.getLipidString(LipidLevel.SPECIES);
-            } 
+            }
+            result.setLipidCategoryName(nameForLevel(la, LipidLevel.CATEGORY));
+            result.setLipidClassName(nameForLevel(la, LipidLevel.CLASS));
+            result.setLipidSpeciesName(nameForLevel(la, LipidLevel.SPECIES));
+            result.setLipidExtendedSpeciesName(la.getExtendedClass());
+            result.setLipidMolecularSpeciesName(nameForLevel(la, LipidLevel.MOLECULAR_SPECIES));
+            result.setLipidSnPositionName(nameForLevel(la, LipidLevel.SN_POSITION));
+            result.setLipidStructureDefinedName(nameForLevel(la, LipidLevel.STRUCTURE_DEFINED));
+            result.setLipidFullStructureName(nameForLevel(la, LipidLevel.FULL_STRUCTURE));
+            result.setLipidCompleteStructureName(nameForLevel(la, LipidLevel.COMPLETE_STRUCTURE));
             result.setNormalizedName(normalizedName);
             result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName, lipidName, lipidSpeciesName));
             result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName, lipidSpeciesName));
@@ -215,11 +224,6 @@ public class LipidNameValidationService {
         return result;
     }
 
-//    private List<String> toStringMessages(SyntaxErrorListener listener) {
-//        return listener.getSyntaxErrors().stream().map((syntaxError) -> {
-//            return syntaxError.getMessage();
-//        }).collect(Collectors.toList());
-//    }
     private String getLipidMapsClassAbbreviation(LipidAdduct la) {
         String lipidMapsClass = lipidClasses.get(la.getLipid().getHeadGroup().getLipidClass()).description;
         Pattern lmcRegexp = Pattern.compile(LIPIDMAPS_CLASS_REGEXP);
@@ -230,5 +234,12 @@ public class LipidNameValidationService {
             lipidMapsClass = null;
         }
         return lipidMapsClass;
+    }
+
+    public String nameForLevel(LipidAdduct la, LipidLevel level) {
+        if (level.level <= la.getLipidLevel().level) {
+            return la.getLipidString(level);
+        }
+        return "";
     }
 }
