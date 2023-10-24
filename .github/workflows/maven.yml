@@ -34,7 +34,7 @@ jobs:
     - name: Setup Maven settings.xml
       uses: whelk-io/maven-settings-xml-action@v21
       with:
-        servers: '[{ "id": "lifstools-jfrog", "username": "github-deployer", "password": "${env.ARTIFACTORY_TOKEN_REF}" }, { "id": "lifs-new-central", "username": "github-deployer", "password": "${env.ARTIFACTORY_TOKEN_REF}" }, { "id": "lifs-new-snapshots", "username": "github-deployer", "password": "${env.ARTIFACTORY_TOKEN_REF}" }]'
+        servers: '[{ "id": "artifactory-releases", "username": "github-deployer", "password": "${env.ARTIFACTORY_TOKEN_REF}" }, { "id": "lifs-new-central", "username": "github-deployer", "password": "${env.ARTIFACTORY_TOKEN_REF}" }, { "id": "artifactory-snapshots", "username": "github-deployer", "password": "${env.ARTIFACTORY_TOKEN_REF}" }]'
     - name: Set Release version env variable
       env:
         USERNAME: ${{ github.actor }}
@@ -51,5 +51,5 @@ jobs:
       env:
         USERNAME: ${{ github.actor }}
         PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        ARTIFACTORY_TOKEN_REF: ${{ secrets.ARTIFACTORY_TOKEN }}
+        ARTIFACTORY_TOKEN_REF: ${{ secrets.ARTIFACTORY_NEW_TOKEN }}
       run: ./mvnw -B deploy -Pdocker --file pom.xml
