@@ -169,11 +169,12 @@ public class LipidNameValidationController {
             RedirectAttributes redirectAttributes, HttpServletRequest request,
             HttpSession session, Principal principal) throws IOException {
         ValidationRequest validationRequest = new ValidationRequest();
-        validationRequest.setLipidNames(new String(validationFileRequest.getFile().getBytes(), StandardCharsets.UTF_8).lines().filter((t) -> {
-            return !t.isEmpty();
-        }).map((t) -> {
-            return t.trim().replaceAll("\\s+", " ");
-        }).collect(Collectors.toList()));
+        validationRequest.setLipidNames(new String(validationFileRequest.getFile().getBytes(), StandardCharsets.UTF_8).
+            lines().
+            filter((t) -> !t.isEmpty()).
+            map((t) -> t.trim().replaceAll("\\s+", " ")).
+            collect(Collectors.toList())
+        );
         redirectAttributes.addFlashAttribute("validationRequest", validationRequest);
         return new RedirectView("/validate", true);
     }
@@ -309,6 +310,9 @@ public class LipidNameValidationController {
                 }).collect(Collectors.joining(" | ")));
                 m.put("Swiss Lipids References", t.getSwissLipidsReferences().stream().flatMap(Collection::stream).map((r) -> {
                     return r.getDatabaseUrl() + r.getDatabaseElementId();
+                }).collect(Collectors.joining(" | ")));
+                m.put("ChEBI References", t.getChebiReferences().stream().flatMap(Collection::stream).map((r) -> {
+                    return r.getDatabaseUrl();
                 }).collect(Collectors.joining(" | ")));
                 m.put("Functional Class Abbr", "[" + lclass.getClassName() + "]");
                 m.put("Functional Class Synonyms", "[" + lclass.getSynonyms().stream().collect(Collectors.joining(", ")) + "]");

@@ -79,7 +79,7 @@
                                         <div readonly="true" class="form-control-plaintext form-control-sm form-control-dbhits">
                                             <th:block th:if="${validationResult.lipidMapsReferences.get().isEmpty()}"><abbr title="Not Available">N.A.</abbr></th:block>
                                             <ul class="list-group list-group-horizontal list-group-flush db-list-group" th:unless="${validationResult.lipidMapsReferences.get().isEmpty()}">
-                                                <li th:each="lipidMapsEntry, itemStat : ${validationResult.lipidMapsReferences.get()}" class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${lipidMapsEntry.databaseUrl}+${lipidMapsEntry.databaseElementId}}" th:title="${lipidMapsEntry.getDatabaseElementId()}"><span th:if="${lipidMapsEntry.getNativeAbbreviation()!=null && !lipidMapsEntry.getNativeAbbreviation().isEmpty()}" th:text="${lipidMapsEntry.getNativeAbbreviation()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
+                                                <li th:each="lipidMapsEntry, itemStat : ${validationResult.lipidMapsReferences.get()}" class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${lipidMapsEntry.databaseUrl}+${lipidMapsEntry.databaseElementId}}" th:title="${lipidMapsEntry.getDatabaseElementId()}"><span th:if="${lipidMapsEntry.getNativeName()!=null && !lipidMapsEntry.getNativeName().isEmpty()}" th:text="${lipidMapsEntry.getNativeName()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -90,11 +90,24 @@
                                         <div readonly="true" class="form-control-plaintext form-control-sm form-control-dbhits">
                                             <th:block th:if="${validationResult.swissLipidsReferences.get().isEmpty()}"><abbr title="Not Available">N.A.</abbr></th:block>
                                             <ul class="list-group list-group-horizontal list-group-flush db-list-group" th:unless="${validationResult.swissLipidsReferences.get().isEmpty()}">
-                                                <li th:each="swissLipidsEntry, itemStat : ${validationResult.swissLipidsReferences.get()}" class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${swissLipidsEntry.databaseUrl}+${swissLipidsEntry.databaseElementId}}" th:title="${swissLipidsEntry.getDatabaseElementId()}"><span th:if="${swissLipidsEntry.getNativeAbbreviation()!=null && !swissLipidsEntry.getNativeAbbreviation().isEmpty()}" th:text="${swissLipidsEntry.getNativeAbbreviation()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
+                                                <li th:each="swissLipidsEntry, itemStat : ${validationResult.swissLipidsReferences.get()}" class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${swissLipidsEntry.databaseUrl}+${swissLipidsEntry.databaseElementId}}" th:title="${swissLipidsEntry.getDatabaseElementId()}"><span th:if="${swissLipidsEntry.getNativeName()!=null && !swissLipidsEntry.getNativeName().isEmpty()}" th:text="${swissLipidsEntry.getNativeName()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
+<!--                                 ID      COMPOUND_ID     TYPE    SOURCE  NAME    ADAPTED LANGUAGE -->
+                                <div th:if="${validationResult.chebiReferences!=null && validationResult.chebiReferences.isPresent()}" class="form-group row">
+                                    <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Corresponding ChEBI entries, based on the normalized lipid name. May contain synonyms.">ChEBI Entries&nbsp;</abbr></label>
+                                    <div class="col-sm-9" th:if="${validationResult.chebiReferences.isPresent()}">
+                                        <div readonly="true" class="form-control-plaintext form-control-sm form-control-dbhits">
+                                            <th:block th:if="${validationResult.chebiReferences.get().isEmpty()}"><abbr title="Not Available">N.A.</abbr></th:block>
+                                            <ul class="list-group list-group-horizontal list-group-flush db-list-group" th:unless="${validationResult.chebiReferences.get().isEmpty()}">
+                                                <li th:each="chebiEntry, itemStat : ${validationResult.chebiReferences.get()}" class="list-group-item list-item-dbhits"><a target="_blank" th:href="@{${chebiEntry.databaseUrl}}" th:title="${chebiEntry.getDatabaseElementId()}"><span th:if="${chebiEntry.getNativeName()!=null && !chebiEntry.getNativeName().isEmpty()}" th:text="${chebiEntry.getNativeName()}"></span>&nbsp;<span class="oi oi-external-link" aria-hidden="true"></span></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!--                                <div th:if="${validationResult.lipidAdduct.lipid.lipidClass!=null}"class="form-group row">
                                                                     <label class="col-sm-3 col-form-label col-form-label-sm"><abbr title="Abbreviated name of the lipid head group.">Functional Class Abbreviation&nbsp;</abbr></label>
                                                                     <div class="col-sm-9">

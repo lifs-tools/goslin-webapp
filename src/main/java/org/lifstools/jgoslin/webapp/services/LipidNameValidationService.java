@@ -218,6 +218,7 @@ public class LipidNameValidationService {
             result.setNormalizedName(normalizedName);
             result.setLipidMapsReferences(dbLoader.findLipidMapsEntry(normalizedName, lipidName, lipidSpeciesName));
             result.setSwissLipidsReferences(dbLoader.findSwissLipidsEntry(normalizedName, lipidName, lipidSpeciesName));
+            result.setChebiReferences(dbLoader.findChebiEntry(normalizedName, lipidName, lipidSpeciesName));
         } catch (RuntimeException re) {
             log.debug("Error while trying to resolve database hits for {}!", lipidName);
         }

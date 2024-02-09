@@ -103,6 +103,8 @@ public class ValidationResult {
 
     private Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences;
 
+    private Optional<Collection<ExternalDatabaseReference>> chebiReferences;
+    
     public static String toFunctionalGroupString(LipidAdduct la, FattyAcid fa) {
         return fa.getFunctionalGroups().entrySet().stream().map((entry) -> {
             return entry.getValue().stream().map((functionalGroup) -> {
@@ -122,7 +124,7 @@ public class ValidationResult {
     public ValidationResult(String lipidName, Grammar grammar, LipidAdduct lipidAdduct, Map<String, Integer> functionalGroupCounts, String normalizedName, String lipidMapsCategory, String lipidMapsClass,
             String lipidCategoryName, String lipidClassName, String lipidExtendedSpeciesName,
             String lipidSpeciesName, String lipidMolecularSpeciesName, String lipidSnPositionName, String lipidStructureDefinedName, String lipidFullStructureName, String lipidCompleteStructureName,
-            Double mass, String sumFormula, Optional<Collection<ExternalDatabaseReference>> lipidMapsReferences, Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences) {
+            Double mass, String sumFormula, Optional<Collection<ExternalDatabaseReference>> lipidMapsReferences, Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences, Optional<Collection<ExternalDatabaseReference>> chebiReferences) {
         this.lipidName = lipidName;
         this.grammar = grammar;
         this.lipidAdduct = lipidAdduct;
@@ -144,6 +146,7 @@ public class ValidationResult {
         this.sumFormula = sumFormula;
         this.lipidMapsReferences = lipidMapsReferences;
         this.swissLipidsReferences = swissLipidsReferences;
+        this.chebiReferences = chebiReferences;
     }
 
     public String getLipidName() {
@@ -313,6 +316,14 @@ public class ValidationResult {
     public void setSwissLipidsReferences(Optional<Collection<ExternalDatabaseReference>> swissLipidsReferences) {
         this.swissLipidsReferences = swissLipidsReferences;
     }
+    
+    public Optional<Collection<ExternalDatabaseReference>> getChebiReferences() {
+        return chebiReferences;
+    }
+
+    public void setChebiReferences(Optional<Collection<ExternalDatabaseReference>> chebiReferences) {
+        this.chebiReferences = chebiReferences;
+    }
 
     @Override
     public String toString() {
@@ -333,7 +344,9 @@ public class ValidationResult {
                 + ", mass=" + mass
                 + ", sumFormula=" + sumFormula
                 + ", lipidMapsReferences=" + lipidMapsReferences
-                + ", swissLipidsReferences=" + swissLipidsReferences + '}';
+                + ", swissLipidsReferences=" + swissLipidsReferences
+                + ", chebiReferences=" + chebiReferences
+                + '}';
     }
 
 }
