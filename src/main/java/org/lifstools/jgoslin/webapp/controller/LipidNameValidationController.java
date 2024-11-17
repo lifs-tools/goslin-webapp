@@ -15,21 +15,6 @@
  */
 package org.lifstools.jgoslin.webapp.controller;
 
-import com.google.common.io.Files;
-import org.lifstools.jgoslin.webapp.config.NewsPropertyConfig;
-import org.lifstools.jgoslin.webapp.domain.AppInfo;
-import org.lifstools.jgoslin.webapp.domain.Page;
-import org.lifstools.jgoslin.webapp.domain.PalinomStorageServiceSlots;
-import org.lifstools.jgoslin.webapp.domain.ValidationFileRequest;
-import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
-import org.lifstools.jgoslin.webapp.domain.ValidationResult;
-import org.lifstools.jgoslin.webapp.domain.ValidationResults;
-import org.lifstools.jgoslin.webapp.services.LipidNameValidationService;
-import org.lifstools.jgoslin.webapp.services.PageBuilderService;
-import de.isas.lifs.webapps.common.domain.StorageServiceSlot;
-import de.isas.lifs.webapps.common.domain.UserSessionFile;
-import de.isas.lifs.webapps.common.service.SessionIdGenerator;
-import de.isas.lifs.webapps.common.service.StorageService;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -47,11 +32,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.lifstools.jgoslin.domain.FattyAcid;
 import org.lifstools.jgoslin.domain.FunctionalGroup;
@@ -59,6 +46,16 @@ import org.lifstools.jgoslin.domain.LipidClassMeta;
 import org.lifstools.jgoslin.domain.LipidClasses;
 import org.lifstools.jgoslin.domain.LipidLevel;
 import org.lifstools.jgoslin.domain.LipidSpeciesInfo;
+import org.lifstools.jgoslin.webapp.config.NewsPropertyConfig;
+import org.lifstools.jgoslin.webapp.domain.AppInfo;
+import org.lifstools.jgoslin.webapp.domain.Page;
+import org.lifstools.jgoslin.webapp.domain.PalinomStorageServiceSlots;
+import org.lifstools.jgoslin.webapp.domain.ValidationFileRequest;
+import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
+import org.lifstools.jgoslin.webapp.domain.ValidationResult;
+import org.lifstools.jgoslin.webapp.domain.ValidationResults;
+import org.lifstools.jgoslin.webapp.services.LipidNameValidationService;
+import org.lifstools.jgoslin.webapp.services.PageBuilderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +80,13 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+
+import com.google.common.io.Files;
+
+import de.isas.lifs.webapps.common.domain.StorageServiceSlot;
+import de.isas.lifs.webapps.common.domain.UserSessionFile;
+import de.isas.lifs.webapps.common.service.SessionIdGenerator;
+import de.isas.lifs.webapps.common.service.StorageService;
 import springfox.documentation.annotations.ApiIgnore;
 //import uk.ac.ebi.pride.jmztab2.utils.errors.MZTabErrorType;
 
@@ -136,6 +140,13 @@ public class LipidNameValidationController {
         vr.setLipidNames(Streams.asString(lipidnames.getInputStream(), "UTF8").lines().collect(Collectors.toList()));
         model.addObject("validationRequest", vr);
         model.addObject("validationFileRequest", new ValidationFileRequest());
+        if (appInfo != null) {
+            if (appInfo.getVersionNumber().endsWith("-SNAPSHOT")) {
+                model.addObject("message", "This is a development version, please be aware that it may not be stable and expect bugs and errors!");
+                model.addObject("messageLevel", "alert-warning");
+            }
+            model.addObject("appInfo", appInfo);
+        }
         return model;
     }
 
