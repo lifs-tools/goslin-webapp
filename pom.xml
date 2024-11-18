@@ -72,7 +72,7 @@
         <jackson.version>2.18.1</jackson.version>
         <spring.boot.version>3.3.5</spring.boot.version>
         <springfox.version>3.0.0</springfox.version>
-        <lifs.webapps.common.version>1.1.4</lifs.webapps.common.version>
+        <lifs.webapps.common.version>1.1.6</lifs.webapps.common.version>
         <jgoslin.version>2.2.1</jgoslin.version>
         <jacoco.version>0.8.10</jacoco.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
