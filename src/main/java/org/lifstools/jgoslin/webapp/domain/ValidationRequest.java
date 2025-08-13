@@ -16,7 +16,6 @@
 package org.lifstools.jgoslin.webapp.domain;
 
 import org.lifstools.jgoslin.webapp.domain.annotations.ValidLipidName;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 /**
@@ -25,13 +24,13 @@ import java.util.List;
  */
 public class ValidationRequest {
 
-    @ApiModelProperty(position = 1, required = true, example = "[\"Cer 18:1;2/16:0\",\"Cer(d18:1/16:0)\"]")
+    //@ApiModelProperty(position = 1, required = true, example = "[\"Cer 18:1;2/16:0\",\"Cer(d18:1/16:0)\"]")
     private List<@ValidLipidName String> lipidNames;
 
-    @ApiModelProperty(position = 2, allowEmptyValue = true, required = false, example = "[\"GOSLIN\",\"LIPIDMAPS\"]")
+    //@ApiModelProperty(position = 2, allowEmptyValue = true, required = false, example = "[\"GOSLIN\",\"LIPIDMAPS\"]")
     private List<ValidationResult.Grammar> grammars;
 
-    @ApiModelProperty(position = 3, allowEmptyValue = true, required = false, example = "false", notes = "Only applies when used via the validating web-form.")
+    //@ApiModelProperty(position = 3, allowEmptyValue = true, required = false, example = "false", notes = "Only applies when used via the validating web-form.")
     private boolean skipInvalid;
 
     public ValidationRequest() {

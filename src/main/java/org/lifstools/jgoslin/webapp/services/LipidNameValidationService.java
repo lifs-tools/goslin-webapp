@@ -15,7 +15,7 @@
  */
 package org.lifstools.jgoslin.webapp.services;
 
-import de.isas.lifs.webapps.common.service.AnalyticsTracker;
+import org.lifstools.lifs.webapps.common.service.AnalyticsTracker;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult.Grammar;
 import java.util.ArrayDeque;

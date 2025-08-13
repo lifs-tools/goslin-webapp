@@ -18,13 +18,7 @@ package org.lifstools.jgoslin.webapp.services;
 
 import org.lifstools.jgoslin.webapp.domain.AppInfo;
 import org.lifstools.jgoslin.webapp.domain.Page;
-import java.security.Principal;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
-import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 /**
@@ -43,18 +37,5 @@ public class PageBuilderService {
 
     public Page createPage(String title) {
         return new Page(title, appInfo);
-    }
-
-    public Page addPrincipalInfo(Page page, Optional<Principal> optionalPrincipal) {
-        if (optionalPrincipal.isPresent()) {
-            Principal principal = optionalPrincipal.get();
-            if (principal instanceof KeycloakAuthenticationToken) {
-                KeycloakAuthenticationToken keycloakAuthenticationToken = (KeycloakAuthenticationToken) principal;
-                AccessToken accessToken = keycloakAuthenticationToken.getAccount().getKeycloakSecurityContext().getToken();
-                page.setUserName(accessToken.getGivenName() + " " + accessToken.getFamilyName());
-                page.setUserRoles(keycloakAuthenticationToken.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
-            }
-        }
-        return page;
     }
 }

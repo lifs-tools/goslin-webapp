@@ -68,29 +68,7 @@ public class LipidNameValidationControllerTest {
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
-                .apply(springSecurity())
                 .build();
-    }
-
-    @WithMockUser(username = "testuser", password = "K/sZ!a:M*W*b")
-    @Test
-    public void loginAuthenticated() throws Exception {
-        FormLoginRequestBuilder login = formLogin().loginProcessingUrl("/login")
-                .user("testuser")
-                .password("K/sZ!a:M*W*b");
-
-        mockMvc.perform(login)
-                .andExpect(authenticated().withUsername("testuser"));
-    }
-
-    @Test
-    public void loginUnauthenticated() throws Exception {
-        FormLoginRequestBuilder login = formLogin().loginProcessingUrl("/login")
-                .user("invalid")
-                .password("invalidpassword");
-
-        mockMvc.perform(login)
-                .andExpect(unauthenticated());
     }
 
 // /* This test currently has issues with object serialization of the multipart file */

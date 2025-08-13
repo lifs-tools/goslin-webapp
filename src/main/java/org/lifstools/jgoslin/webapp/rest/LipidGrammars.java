@@ -16,10 +16,6 @@
 package org.lifstools.jgoslin.webapp.rest;
 
 import org.lifstools.jgoslin.webapp.domain.ValidationResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -34,17 +30,17 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/rest/grammars")
-@Api(value = "Return information on grammars")
+//@Api(value = "Return information on grammars")
 public class LipidGrammars {
     
     private static final Logger log = LoggerFactory.getLogger(LipidGrammars.class);
     
-    @ApiOperation(value = "Return a list of supported grammars", response = ValidationResult.Grammar[].class)
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Returned the list of grammars."),
-        @ApiResponse(code = 401, message = "Authorization required to access this resource."),
-        @ApiResponse(code = 403, message = "Access to resource is forbidden.")
-    })
+//    @ApiOperation(value = "Return a list of supported grammars", response = ValidationResult.Grammar[].class)
+//    @ApiResponses(value = {
+//        @ApiResponse(code = 200, message = "Returned the list of grammars."),
+//        @ApiResponse(code = 401, message = "Authorization required to access this resource."),
+//        @ApiResponse(code = 403, message = "Access to resource is forbidden.")
+//    })
     @GetMapping()
     public ResponseEntity<ValidationResult.Grammar[]> grammars() {
         return ResponseEntity.status(HttpStatus.OK).body(ValidationResult.Grammar.values());

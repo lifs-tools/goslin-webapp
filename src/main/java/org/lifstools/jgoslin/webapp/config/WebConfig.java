@@ -17,12 +17,12 @@ package org.lifstools.jgoslin.webapp.config;
 
 import org.lifstools.jgoslin.webapp.services.LipidNameValidationService;
 import org.lifstools.jgoslin.webapp.domain.AppInfo;
-import de.isas.lifs.webapps.common.config.LifsConfig;
-import de.isas.lifs.webapps.common.config.ToolConfig;
-import de.isas.lifs.webapps.common.config.TrackingConfig;
-import de.isas.lifs.webapps.common.service.StorageService;
-import de.isas.lifs.webapps.common.service.storage.FileSystemStorageService;
-import de.isas.lifs.webapps.common.service.storage.StorageProperties;
+import org.lifstools.lifs.webapps.common.config.LifsConfig;
+import org.lifstools.lifs.webapps.common.config.ToolConfig;
+import org.lifstools.lifs.webapps.common.config.TrackingConfig;
+import org.lifstools.lifs.webapps.common.service.StorageService;
+import org.lifstools.lifs.webapps.common.service.storage.FileSystemStorageService;
+import org.lifstools.lifs.webapps.common.service.storage.StorageProperties;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.Executor;
@@ -45,11 +45,6 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
 
 /**
  *
@@ -67,12 +62,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Autowired
     private TrackingConfig trackingConfiguration;
-
-    @Value("${keycloak.auth-server-url}")
-    private String authServerUrl;
-
-    @Value("${keycloak.realm}")
-    private String authServerRealm;
     
     @Value("${jgoslin.maxItemsInRequest}")
     private Integer maxItemsInRequest;
@@ -174,8 +163,8 @@ public class WebConfig implements WebMvcConfigurer {
                 this.toolConfiguration.getUrl(),
                 this.toolConfiguration.getContact(),
                 this.trackingConfiguration.getId(),
-                this.authServerUrl, 
-                this.authServerRealm, 
+                null,
+                null,
                 this.maxFileSize);
         return appInfo;
     }
@@ -204,23 +193,18 @@ public class WebConfig implements WebMvcConfigurer {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
-
-    @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2).select()
-                .apis(RequestHandlerSelectors.basePackage("org.lifstools.jgoslin.webapp.rest"))
-                .build().apiInfo(apiEndPointsInfo());
-    }
-
-    private ApiInfo apiEndPointsInfo() {
-        return new ApiInfoBuilder().title("Goslin REST API")
-                .description("Services for lipid shorthand name parsing, translation and mapping to structural hierarchies.")
-                .contact(new springfox.documentation.service.Contact("LIFS", "https://lifs-tools.org", "contact@lifs-tools.org"))
-                .license("Apache 2.0")
-                .licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html")
-                .version(appInfo().getVersionNumber())
-                .build();
-    }
+    
+    
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http.cors().and()
+//                .authorizeRequests().antMatchers("/actuator/**").permitAll()
+//                .and().authorizeRequests().antMatchers("/rest/validate/**").permitAll()
+//                .and().authorizeRequests().antMatchers("/swagger-ui/**").permitAll()
+//                .and().authorizeRequests().antMatchers("/**").permitAll()
+//                .and().authorizeRequests().antMatchers("/v3/api-docs/**").permitAll();
+//        return http.build();
+//    }
 
     @Bean
     public StorageService storageService(@Autowired StorageProperties storageProperties) {

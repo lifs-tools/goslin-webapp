@@ -15,7 +15,7 @@
  */
 package org.lifstools.jgoslin.webapp.domain;
 
-import de.isas.lifs.webapps.common.domain.DefaultAppInfo;
+import org.lifstools.lifs.webapps.common.domain.DefaultAppInfo;
 
 /**
  *

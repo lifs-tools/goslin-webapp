@@ -15,13 +15,6 @@
  */
 package org.lifstools.jgoslin.webapp.rest;
 
-import org.lifstools.jgoslin.webapp.domain.ValidationResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Example;
-import io.swagger.annotations.ExampleProperty;
 import org.lifstools.jgoslin.domain.LipidLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,17 +30,17 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/rest/lipidlevels")
-@Api(value = "Return information on levels of lipid names in the shorthand nomenclature")
+//@Api(value = "Return information on levels of lipid names in the shorthand nomenclature")
 public class LipidLevels {
     
     private static final Logger log = LoggerFactory.getLogger(LipidLevels.class);
     
-    @ApiOperation(value = "Return a list levels of lipid names in the shorthand nomenclature", response = LipidLevel[].class)
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Returned the list of levels of lipid shorthand names."),
-        @ApiResponse(code = 401, message = "Authorization required to access this resource."),
-        @ApiResponse(code = 403, message = "Access to resource is forbidden.")
-    })
+//    @ApiOperation(value = "Return a list levels of lipid names in the shorthand nomenclature", response = LipidLevel[].class)
+//    @ApiResponses(value = {
+//        @ApiResponse(code = 200, message = "Returned the list of levels of lipid shorthand names."),
+//        @ApiResponse(code = 401, message = "Authorization required to access this resource."),
+//        @ApiResponse(code = 403, message = "Access to resource is forbidden.")
+//    })
     @GetMapping()
     public ResponseEntity<LipidLevel[]> lipidLevels() {
         return ResponseEntity.status(HttpStatus.OK).body(LipidLevel.values());

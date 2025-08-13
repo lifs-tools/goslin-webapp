@@ -49,7 +49,7 @@ import org.lifstools.jgoslin.domain.LipidSpeciesInfo;
 import org.lifstools.jgoslin.webapp.config.NewsPropertyConfig;
 import org.lifstools.jgoslin.webapp.domain.AppInfo;
 import org.lifstools.jgoslin.webapp.domain.Page;
-import org.lifstools.jgoslin.webapp.domain.PalinomStorageServiceSlots;
+import org.lifstools.jgoslin.webapp.domain.GoslinStorageServiceSlots;
 import org.lifstools.jgoslin.webapp.domain.ValidationFileRequest;
 import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult;
@@ -83,18 +83,16 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.io.Files;
 
-import de.isas.lifs.webapps.common.domain.StorageServiceSlot;
-import de.isas.lifs.webapps.common.domain.UserSessionFile;
-import de.isas.lifs.webapps.common.service.SessionIdGenerator;
-import de.isas.lifs.webapps.common.service.StorageService;
-import springfox.documentation.annotations.ApiIgnore;
+import org.lifstools.lifs.webapps.common.domain.StorageServiceSlot;
+import org.lifstools.lifs.webapps.common.domain.UserSessionFile;
+import org.lifstools.lifs.webapps.common.service.SessionIdGenerator;
+import org.lifstools.lifs.webapps.common.service.StorageService;
 //import uk.ac.ebi.pride.jmztab2.utils.errors.MZTabErrorType;
 
 /**
  *
  * @author Nils Hoffmann &lt;nils.hoffmann@isas.de&gt;
  */
-@ApiIgnore
 @Controller
 public class LipidNameValidationController {
 
@@ -215,7 +213,7 @@ public class LipidNameValidationController {
         results.setResults(validationResults);
         UUID sessionId = sessionIdGenerator.generate();
         UserSessionFile usf = storageService.store(toTable(results),
-                sessionId, PalinomStorageServiceSlots.OUTPUT_TSV_FILE);
+                sessionId, GoslinStorageServiceSlots.OUTPUT_TSV_FILE);
         mav.addObject("validationResults", results);
         mav.addObject("validationResultsTsv", "OUTPUT_TSV_FILE");
         mav.addObject(new ValidationFileRequest());
@@ -240,7 +238,7 @@ public class LipidNameValidationController {
         UUID resultSessionId = UUID.fromString(sessionId);
         if ("OUTPUT_TSV_FILE".equals(storageServiceSlot)) {
             MediaType mediaType = MediaType.ALL;
-            StorageServiceSlot slot = PalinomStorageServiceSlots.OUTPUT_TSV_FILE;
+            StorageServiceSlot slot = GoslinStorageServiceSlots.OUTPUT_TSV_FILE;
             UserSessionFile usf = storageService.load(resultSessionId, slot);
             String ext = Files.getFileExtension(usf.getFilename()).toLowerCase();
             switch (ext) {
@@ -377,7 +375,7 @@ public class LipidNameValidationController {
     }
 
     protected Page createPage(String title, Optional<Principal> principal) {
-        return pageBuilderService.addPrincipalInfo(pageBuilderService.createPage(title), principal);
+        return pageBuilderService.createPage(title);
     }
 
 }

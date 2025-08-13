@@ -15,14 +15,14 @@
  */
 package org.lifstools.jgoslin.webapp.domain;
 
-import de.isas.lifs.webapps.common.domain.StorageServiceSlot;
-import de.isas.lifs.webapps.common.domain.ToolResult;
+import org.lifstools.lifs.webapps.common.domain.StorageServiceSlot;
+import org.lifstools.lifs.webapps.common.domain.ToolResult;
 
 /**
  *
  * @author nils.hoffmann
  */
-public final class PalinomStorageServiceSlots {
+public final class GoslinStorageServiceSlots {
 
     public static final StorageServiceSlot OUTPUT_TSV_FILE = new StorageServiceSlot() {
         @Override

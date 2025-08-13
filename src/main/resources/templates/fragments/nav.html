@@ -27,18 +27,6 @@
                             <a class="nav-link" href="https://lifs-tools.org/further-information.html" target="_blank" title="Imprint and Privacy Policy"><span class="oi oi-shield" aria-hidden="true"></span>&nbsp;Imprint and Privacy Policy</a>
                         </li>
                     </ul>
-<!--                    <div class="login-menu btn-group float-right" role="group" sec:authorize="isAuthenticated()" th:if="${page != null}">
-                        <a type="button" class="btn btn-info" th:href="@{{asbu}/realms/{realm}/account(asbu=${page.authServerBaseUrl},realm=${page.authServerRealm})}" th:title="${#authentication.name}"><span class="oi oi-person" aria-hidden="true"></span></a>
-                        <a type="button" class="btn btn-danger" th:href="@{/logout}" title="Log Out">
-                            <span class="oi oi-account-logout" title="Log Out" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                    <div class="login-menu float-right" sec:authorize="not isAuthenticated()">
-                        <a th:href="@{/sso/login}" class="btn btn-success" title="Log In">
-                            <span class="oi oi-account-login" title="Log In" aria-hidden="true"></span>
-                        </a>
-                    </div>-->
-                    <div th:replace="fragments/nav-utils::nav-login"></div>
                     <div class="btn-group float-right" role="group">
                         <a type="button" class="btn btn-secondary float-right" href="https://lifs-tools.org" title="LIFS Application Portal"><span class="oi oi-grid-four-up" aria-hidden="true"></span></a>
                         <a type="button" class="btn btn-info float-right" href="https://lifs-tools.org/support.html" target="_blank" title="Help"><span class="oi oi-question-mark" aria-hidden="true"></span></a>

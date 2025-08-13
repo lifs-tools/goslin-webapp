@@ -19,11 +19,6 @@ import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult;
 import org.lifstools.jgoslin.webapp.domain.ValidationResults;
 import org.lifstools.jgoslin.webapp.services.LipidNameValidationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/rest/validate")
-@Api(value = "Parses and validates Lipid names")
+//@Api(value = "Parses and validates Lipid names")
 public class LipidNameValidation {
 
     private static final Logger log = LoggerFactory.getLogger(LipidGrammars.class);
@@ -53,16 +48,16 @@ public class LipidNameValidation {
         this.validationService = validationService;
     }
 
-    @ApiOperation(value = "Parse and validate the provided lipid names.", response = ValidationResults.class)
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Successfully parsed and validated all lipids."),
-        @ApiResponse(code = 400, message = "Failed to parse and validate at least one lipid."),
-        @ApiResponse(code = 401, message = "Authorization required to access this resource."),
-        @ApiResponse(code = 403, message = "Access to resource is forbidden.")
-    })
+//    @ApiOperation(value = "Parse and validate the provided lipid names.", response = ValidationResults.class)
+//    @ApiResponses(value = {
+//        @ApiResponse(code = 200, message = "Successfully parsed and validated all lipids."),
+//        @ApiResponse(code = 400, message = "Failed to parse and validate at least one lipid."),
+//        @ApiResponse(code = 401, message = "Authorization required to access this resource."),
+//        @ApiResponse(code = 403, message = "Access to resource is forbidden.")
+//    })
     @PostMapping()
     public ResponseEntity<ValidationResults> validate(
-            @ApiParam(value = "Validation request with list of lipid names and grammars to use. For each grammar, a specialized parser is instantiated and used to parse the lipid name. The first successful parser result is returned. If no parser was successful, the returned list will contain validation messages to help you track down the issue and the name of the last grammar / parser used to validate the lipid name. If you provide an empty list or null for grammars, jgoslin will use the LipidParser internally, which supports all grammars. skipInvalid is currently only relevant to the form based validation. REST service validation will commence on all lipid names.", required = true)
+            //@ApiParam(value = "Validation request with list of lipid names and grammars to use. For each grammar, a specialized parser is instantiated and used to parse the lipid name. The first successful parser result is returned. If no parser was successful, the returned list will contain validation messages to help you track down the issue and the name of the last grammar / parser used to validate the lipid name. If you provide an empty list or null for grammars, jgoslin will use the LipidParser internally, which supports all grammars. skipInvalid is currently only relevant to the form based validation. REST service validation will commence on all lipid names.", required = true)
             @RequestBody ValidationRequest validationRequest) {
         List<ValidationResult> results;
         HttpStatus httpStatus = HttpStatus.OK;

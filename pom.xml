@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.lifs-tools</groupId>
     <artifactId>lifs-goslin-webapp</artifactId>
-    <version>2.2.1-SNAPSHOT</version>
+    <version>2.2.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>Grammar of Succinct Lipid Nomenclature - Webapplication and REST service for parsing, validation and normalization of lipid names.</description>
     <name>LIFS Goslin webapp.</name>	
@@ -58,20 +58,20 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- for spring boot -->
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <application.version.number>${project.version}</application.version.number>
         <docker.image.prefix>docker.lifs-tools.org/lifs</docker.image.prefix>
         <docker.base.image>eclipse-temurin</docker.base.image>
-        <docker.base.image.version>17-jdk-alpine</docker.base.image.version>
+        <docker.base.image.version>21-jdk-alpine</docker.base.image.version>
         <skip.docker>true</skip.docker>
         <app.port>8083</app.port>
         <jackson.version>2.18.1</jackson.version>
-        <spring.boot.version>3.4.5</spring.boot.version>
-        <springfox.version>3.0.0</springfox.version>
+        <spring.boot.version>3.4.8</spring.boot.version>
+        <springdoc.version>1.6.15</springdoc.version>
         <lifs.webapps.common.version>1.1.6</lifs.webapps.common.version>
         <jgoslin.version>2.2.1</jgoslin.version>
         <jacoco.version>0.8.13</jacoco.version>
@@ -207,19 +207,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.thymeleaf.extras</groupId>
-            <artifactId>thymeleaf-extras-springsecurity5</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-spring-boot-starter</artifactId>
-            <version>15.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
         <dependency>
@@ -228,9 +215,9 @@
         </dependency>
         <!--SpringFox dependencies -->
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-boot-starter</artifactId>
-            <version>${springfox.version}</version>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
 
         <dependency>
