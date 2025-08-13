@@ -148,12 +148,6 @@ public class LipidNameValidationController {
         return model;
     }
 
-    @GetMapping(path = "/logout")
-    public String logout(HttpServletRequest request) throws ServletException {
-        request.logout();
-        return "redirect:/";
-    }
-
     @GetMapping("/documentation")
     public ModelAndView handleInfo(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response, Principal principal) throws IOException {
         if (language != null) {

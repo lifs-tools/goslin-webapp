@@ -99,11 +99,11 @@ public class WebConfig implements WebMvcConfigurer {
         super();
     }
 
-    @Override
-    public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/webjars/**").
-                addResourceLocations("classpath:/META-INF/resources/webjars/");
-    }
+//    @Override
+//    public void addResourceHandlers(final ResourceHandlerRegistry registry) {
+//        registry.addResourceHandler("/webjars/**").
+//                addResourceLocations("classpath:/META-INF/resources/webjars/");
+//    }
 
     @Bean
     @ConfigurationProperties(prefix = "spring.messages")
@@ -187,11 +187,6 @@ public class WebConfig implements WebMvcConfigurer {
         ThreadPoolTaskExecutor tpe = new ThreadPoolTaskExecutor();
         tpe.setCorePoolSize(Math.max(1, Runtime.getRuntime().availableProcessors() - 1));
         return tpe;
-    }
-
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
     }
     
     

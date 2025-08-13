@@ -18,7 +18,7 @@
                             <a class="nav-link" href="/documentation" th:href="@{/documentation}"><span class="oi oi-book" aria-hidden="true"></span>&nbsp;Documentation</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/swagger-ui/" th:href="@{/swagger-ui/}" title="REST API"><span class="oi oi-script" aria-hidden="true"></span>&nbsp;REST API</a>
+                            <a class="nav-link" href="/swagger-ui/index.html" th:href="@{/swagger-ui/index.html}" title="REST API"><span class="oi oi-script" aria-hidden="true"></span>&nbsp;REST API</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" th:href="${page.scmUrl}" href="https://github.com/lifs-tools/goslin-webapp" target="_blank" title="Source code"><span class="oi oi-code" aria-hidden="true"></span>&nbsp;Source</a>
@@ -44,7 +44,6 @@
             </noscript>
             <div th:replace="fragments/nav-utils::system-message"></div>
             <div th:replace="fragments/nav-utils::user-message"></div>
-            <div th:replace="fragments/nav-utils::user-warnings"></div>
         </header>
     </body>
 </html>
