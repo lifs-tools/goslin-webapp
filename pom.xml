@@ -70,7 +70,7 @@
         <skip.docker>true</skip.docker>
         <app.port>8083</app.port>
         <jackson.version>2.18.1</jackson.version>
-        <spring.boot.version>3.4.8</spring.boot.version>
+        <spring.boot.version>3.5.5</spring.boot.version>
         <springdoc.version>1.6.15</springdoc.version>
         <lifs.webapps.common.version>1.1.6</lifs.webapps.common.version>
         <jgoslin.version>2.2.1</jgoslin.version>
