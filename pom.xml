@@ -74,7 +74,7 @@
         <springdoc.version>1.6.15</springdoc.version>
         <lifs.webapps.common.version>1.1.7</lifs.webapps.common.version>
         <jgoslin.version>2.2.1</jgoslin.version>
-        <jacoco.version>0.8.13</jacoco.version>
+        <jacoco.version>0.8.15</jacoco.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
         <app.name>goslin</app.name>
         <contextPath>/goslin</contextPath>
