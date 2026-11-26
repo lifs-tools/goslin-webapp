@@ -16,7 +16,7 @@
                     </div>
                 </div>
                 <div class="lifs-callout lifs-callout--warn" role="status">
-                    <span class="lifs-prose"><th:block th:text="#{result.notFound}">Result not found or expired. Results are kept for 7 days.</th:block>
+                    <span class="lifs-prose"><th:block th:text="#{result.notFound(${retentionDays})}">Result not found or expired. Results are kept for 7 days.</th:block>
                         <a th:href="@{/}" href="/" th:text="#{result.notFound.link}">Harmonize lipid names</a></span>
                 </div>
             </th:block>

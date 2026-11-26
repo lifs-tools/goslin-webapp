@@ -365,6 +365,7 @@ public class LipidNameValidationController {
         model.addObject("page", pageBuilderService.createPage(message("result.notFound.title", locale)));
         model.addObject("messages", baseMessages(locale));
         model.addObject("notFound", true);
+        model.addObject("retentionDays", retentionDays);
         return model;
     }
 
