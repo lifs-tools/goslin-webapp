@@ -55,7 +55,10 @@ import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult;
 import org.lifstools.jgoslin.webapp.domain.ValidationResults;
 import org.lifstools.jgoslin.webapp.services.LipidNameValidationService;
+import org.lifstools.jgoslin.webapp.domain.NameEntry;
+import org.lifstools.jgoslin.webapp.domain.ResultView;
 import org.lifstools.jgoslin.webapp.services.PageBuilderService;
+import org.lifstools.jgoslin.webapp.services.TsvWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,10 +110,12 @@ public class LipidNameValidationController {
     private final NewsPropertyConfig newsPropertyConfig;
     private final LipidClasses lipidClasses = LipidClasses.getInstance();
     private final Integer maxItemsInRequest;
+    private final TsvWriter tsvWriter;
 
     @Autowired
     public LipidNameValidationController(LipidNameValidationService lipidNameValidationService, StorageService storageService, PageBuilderService pageBuilderService,
-            AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames, NewsPropertyConfig newsPropertyConfig, @Value("${jgoslin.maxItemsInRequest}") Integer maxItemsInRequest) {
+            AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames, NewsPropertyConfig newsPropertyConfig, @Value("${jgoslin.maxItemsInRequest}") Integer maxItemsInRequest, TsvWriter tsvWriter) {
+        this.tsvWriter = tsvWriter;
         this.appInfo = appInfo;
         this.lipidNameValidationService = lipidNameValidationService;
         this.storageService = storageService;
@@ -206,7 +211,7 @@ public class LipidNameValidationController {
         ValidationResults results = new ValidationResults();
         results.setResults(validationResults);
         UUID sessionId = sessionIdGenerator.generate();
-        UserSessionFile usf = storageService.store(toTable(results),
+        UserSessionFile usf = storageService.store(tsvWriter.write(toView(validationResults)),
                 sessionId, GoslinStorageServiceSlots.OUTPUT_TSV_FILE);
         mav.addObject("validationResults", results);
         mav.addObject("validationResultsTsv", "OUTPUT_TSV_FILE");
@@ -278,94 +283,19 @@ public class LipidNameValidationController {
         }
     }
 
-    private String toTable(ValidationResults vr) {
-        StringBuilder sb = new StringBuilder();
-        HashSet<String> keys = new LinkedHashSet<>();
-        List<Map<String, String>> entries = vr.getResults().stream().map((t) -> {
-            Map<String, String> m = new LinkedHashMap<>();
-            m.put("Normalized Name", t.getNormalizedName()==null?"":t.getNormalizedName());
-            m.put("Original Name", t.getLipidName());
-            m.put("Grammar", t.getGrammar().name());
-            m.put("Validation Messages", t.getMessages().stream().collect(Collectors.joining(" | ")));
-            if (t.getLipidAdduct() == null) {
-                log.info("Failed to parse lipid name: {}", t.getLipidName());
+    private static ResultView toView(List<ValidationResult> results) {
+        List<ResultView.Row> harmonized = new ArrayList<>();
+        List<ResultView.FailedRow> failed = new ArrayList<>();
+        for (int i = 0; i < results.size(); i++) {
+            ValidationResult r = results.get(i);
+            NameEntry entry = NameEntry.of(i + 1, r.getLipidName());
+            if (r.getLipidAdduct() == null) {
+                failed.add(new ResultView.FailedRow(entry, r, null));
             } else {
-                if (t.getLipidAdduct() == null || t.getLipidAdduct().getAdduct() == null) {
-                    m.put("Adduct", "");
-                } else {
-                    m.put("Adduct", t.getLipidAdduct().getAdduct().getLipidString());
-                    log.debug("Lipid name with adduct: {}", t.getLipidAdduct().getLipidString());
-                }
-                m.put("Lipid Maps Category", t.getLipidAdduct().getLipid().getHeadGroup().getLipidCategory().getFullName() + " [" + t.getLipidAdduct().getLipid().getHeadGroup().getLipidCategory().name() + "]");
-                LipidClassMeta lclass = lipidClasses.get(t.getLipidAdduct().getLipid().getHeadGroup().getLipidClass());
-                m.put("Lipid Maps Main Class", lclass.getDescription());
-                m.put("Lipid Category Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.CATEGORY));
-                m.put("Lipid Class Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.CLASS));
-                m.put("Extended Species Name", t.getLipidAdduct().getExtendedClass());
-                m.put("Species Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.SPECIES));
-                m.put("Molecular Species Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.MOLECULAR_SPECIES));
-                m.put("SN Position Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.SN_POSITION));
-                m.put("Structure Defined Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.STRUCTURE_DEFINED));
-                m.put("Full Structure Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.FULL_STRUCTURE));
-                m.put("Complete Structure Name", lipidNameValidationService.nameForLevel(t.getLipidAdduct(), LipidLevel.COMPLETE_STRUCTURE));
-                m.put("Lipid Maps References", t.getLipidMapsReferences().stream().flatMap(Collection::stream).map((r) -> {
-                    return r.getDatabaseUrl() + r.getDatabaseElementId();
-                }).collect(Collectors.joining(" | ")));
-                m.put("Swiss Lipids References", t.getSwissLipidsReferences().stream().flatMap(Collection::stream).map((r) -> {
-                    return r.getDatabaseUrl() + r.getDatabaseElementId();
-                }).collect(Collectors.joining(" | ")));
-                m.put("ChEBI References", t.getChebiReferences().stream().flatMap(Collection::stream).map((r) -> {
-                    return r.getDatabaseUrl();
-                }).collect(Collectors.joining(" | ")));
-                m.put("Functional Class Abbr", "[" + lclass.getClassName() + "]");
-                m.put("Functional Class Synonyms", "[" + lclass.getSynonyms().stream().collect(Collectors.joining(", ")) + "]");
-                LipidSpeciesInfo info = t.getLipidAdduct().getLipid().getInfo();
-                m.put("Level", info.getLevel().toString());
-                m.put("Total #C", info.getNumCarbon() + "");
-                Map<String, ArrayList<FunctionalGroup>> functionalGroups = info.getFunctionalGroups();
-                m.put("Total Modifications", functionalGroups.entrySet().stream().filter(entry -> !entry.getKey().equals("[X]")).map((entry) -> {
-                    return entry.getKey()+"=["+entry.getValue().stream().map((functionalGroup) -> {
-                        return functionalGroup.toString(info.getLevel());
-                    }).collect(Collectors.joining(","))+"]";
-                }).collect(Collectors.joining(",", "[", "]")) + "");
-                //            m.put("Total #OH", t.getLipidSpeciesInfo().getNHydroxy() + "");
-                m.put("Total #DB", info.getDoubleBonds().getNumDoubleBonds() + "");
-                m.put("Exact Mass", String.format(Locale.US, "%.4f", t.getMass()));
-                m.put("Formula", t.getSumFormula());
-                for (FattyAcid fa : t.getLipidAdduct().getLipid().getFaList()) {
-                    if (fa.getCount() > 0) {
-                        m.put(fa.getName() + " SN Position", fa.getPosition() + "");
-                        m.put(fa.getName() + " #C", fa.getNumCarbon() + "");
-                        //                m.put(fa.name + " #OH", fa.getNHydroxy() + "");
-                        m.put(fa.getName() + " #DB", fa.getDoubleBonds().getNumDoubleBonds() + "");
-                        m.put(fa.getName() + " Bond Type", fa.getLipidFaBondType() + "");
-                        m.put(fa.getName() + " DB Positions", fa.getDoubleBonds().getDoubleBondPositions().entrySet().stream().map((dbPosEntry) -> {
-                            return dbPosEntry.getKey() + "" + dbPosEntry.getValue();
-                        }).collect(Collectors.toList()) + "");
-
-                        fa.getFunctionalGroups().entrySet().stream().forEachOrdered((entry) -> {
-                            if(!entry.getKey().equals("[X]")) {
-                                m.put(fa.getName() + " " + entry.getKey(),
-                                    entry.getValue().stream().map((functionalGroup) -> {
-                                        return functionalGroup.toString(info.getLevel());
-                                    }).collect(Collectors.joining(",", "[", "]")));
-                            }
-                        });
-                    }
-                }
+                harmonized.add(new ResultView.Row(entry, r));
             }
-            keys.addAll(m.keySet());
-            return m;
-        }).collect(Collectors.toList());
-        sb.append(keys.stream().collect(Collectors.joining("\t"))).append("\n");
-        for (Map<String, String> m : entries) {
-            List<String> l = new LinkedList();
-            for (String key : keys) {
-                l.add(m.getOrDefault(key, ""));
-            }
-            sb.append(l.stream().collect(Collectors.joining("\t"))).append("\n");
         }
-        return sb.toString();
+        return new ResultView(null, 0, results.size(), harmonized, failed);
     }
 
     protected Page createPage(String title, Optional<Principal> principal) {
