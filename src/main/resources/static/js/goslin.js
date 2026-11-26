@@ -6,6 +6,7 @@
  *   outcome of a re-run.
  *   Rows are rendered on the server; this only shows, hides and reorders them.
  * - Any page: a text filter on every [data-filter-target] input (the lipid classes table of the documentation).
+ * - Documentation page: old links to the sections that moved to the About page are forwarded.
  * - Logo: a random blink offset per page load, and a honk on click.
  */
 (function () {
@@ -375,6 +376,14 @@
       callout.focus();
       return true;
     });
+  }
+
+  // ---------- old links to sections that moved to the About page ----------
+  if (location.pathname.replace(/\/+$/, '').slice(-14) === '/documentation') {
+    var moved = ['#citing', '#news', '#contributing', '#acknowledgements'];
+    if (moved.indexOf(location.hash) !== -1) {
+      location.replace(location.pathname.replace(/documentation\/*$/, 'about') + location.hash);
+    }
   }
 
   // ---------- logo: blink offset and honk ----------

@@ -103,6 +103,8 @@ public class LipidNameValidationController {
     private final int exampleCount;
     private final NewsPropertyConfig newsPropertyConfig;
     private final int maxItemsInRequest;
+    /** Days a result is kept; the same property the clean-up of old results reads. */
+    private final int retentionDays;
     /** Largest text accepted, pasted or read from a file: the upload limit, or less if no valid list can be longer. */
     private final long maxTextBytes;
 
@@ -111,7 +113,8 @@ public class LipidNameValidationController {
             PageBuilderService pageBuilderService, AppInfo appInfo, LocaleResolver localeResolver,
             MessageSource messageSource, @Value("classpath:lipidnames.txt") Resource lipidnames,
             NewsPropertyConfig newsPropertyConfig, @Value("${jgoslin.maxItemsInRequest}") int maxItemsInRequest,
-            @Value("${spring.servlet.multipart.max-file-size}") DataSize maxFileSize) throws IOException {
+            @Value("${spring.servlet.multipart.max-file-size}") DataSize maxFileSize,
+            @Value("${minCleanupAge}") int retentionDays) throws IOException {
         this.resultService = resultService;
         this.storageService = storageService;
         this.pageBuilderService = pageBuilderService;
@@ -122,6 +125,7 @@ public class LipidNameValidationController {
         this.exampleCount = NameEntries.countNames(exampleNames);
         this.newsPropertyConfig = newsPropertyConfig;
         this.maxItemsInRequest = maxItemsInRequest;
+        this.retentionDays = retentionDays;
         this.maxTextBytes = Math.min(maxFileSize.toBytes(),
                 (long) maxItemsInRequest * (NameEntries.MAX_NAME_LENGTH + 2));
     }
@@ -233,6 +237,19 @@ public class LipidNameValidationController {
         return messageSource.getMessage(key, args, locale);
     }
 
+    /** About Goslin: citation, news, contributing, acknowledgements, privacy and version. */
+    @GetMapping("/about")
+    public ModelAndView about(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response) {
+        if (language != null) {
+            localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
+        }
+        ModelAndView model = new ModelAndView("about");
+        model.addObject("page", pageBuilderService.createPage("About Goslin"));
+        model.addObject("news", newsPropertyConfig.getNews());
+        model.addObject("retentionDays", retentionDays);
+        return model;
+    }
+
     @GetMapping("/documentation")
     public ModelAndView handleInfo(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response, Principal principal) throws IOException {
         if (language != null) {
@@ -241,7 +258,6 @@ public class LipidNameValidationController {
         log.debug("Retrieved the following news items: {}", newsPropertyConfig.getNews());
         ModelAndView model = new ModelAndView("documentation");
         model.addObject("page", pageBuilderService.createPage("Goslin Webapp Information"));
-        model.addObject("news", newsPropertyConfig.getNews());
         model.addObject("lipidClasses", LipidClasses.getInstance().stream().sorted((t, t1) -> {
             int cmp = t.lipidCategory.name().compareTo(t1.lipidCategory.name());
             if (cmp != 0) {

@@ -101,7 +101,7 @@
                     <section class="lifs-card" aria-labelledby="cite-title">
                         <h2 id="cite-title" class="lifs-card__title" th:text="#{index.cite.title}">How to cite</h2>
                         <p class="lifs-note lifs-prose"><th:block th:utext="#{index.cite.text}">Kopczynski et al., …</th:block>
-                            <a th:href="@{/documentation#citing}" href="/documentation#citing" th:text="#{index.cite.more}">More</a></p>
+                            <a th:href="@{/about#citing}" href="/about#citing" th:text="#{index.cite.more}">More</a></p>
                     </section>
                 </div>
             </div>
@@ -110,6 +110,7 @@
                 <div class="lifs-stack">
                     <h2 th:text="#{index.about.title}">About Goslin</h2>
                     <p class="lifs-note lifs-prose" th:utext="#{index.about.text('https://pubmed.ncbi.nlm.nih.gov/33037133/', 'https://lipidomics-standards-initiative.org/')}">Goslin parses lipid names …</p>
+                    <p class="lifs-note"><a th:href="@{/about}" href="/about" th:text="#{index.cite.more}">More</a></p>
                 </div>
                 <div class="lifs-stack">
                     <h2 th:text="#{index.problem.title}">Found a problem?</h2>

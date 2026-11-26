@@ -173,3 +173,6 @@ th[aria-sort=descending] .sort-btn::after { content: '\25BC'; opacity: 1; font-s
 .news__date { font: 12px var(--lifs-mono); color: var(--lifs-grey); }
 .news__body { padding: 0 16px 14px; }
 .doc-section tr[hidden] { display: none; }
+.about-version { display: grid; grid-template-columns: max-content 1fr; gap: 8px 24px; margin: 0; }
+.about-version dt { color: var(--lifs-grey); }
+.about-version dd { margin: 0; color: var(--lifs-ink); overflow-wrap: anywhere; }

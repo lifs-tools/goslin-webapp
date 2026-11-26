@@ -56,7 +56,7 @@ public class DocumentationPageTest {
         assertThat(doc.select("header .lifs-bar")).hasSize(1);
         assertThat(doc.select("footer.lifs-footer")).hasSize(1);
         assertThat(doc.select("nav#toc a[href^=#]").size()).isGreaterThanOrEqualTo(4);
-        assertThat(doc.getElementById("citing")).isNotNull();
+        assertThat(doc.getElementById("citing")).isNull();
         assertThat(doc.getElementById("lipid-classes")).isNotNull();
         // no Bootstrap-era scripts or markup remain
         assertThat(doc.select("script[src*=jquery], script[src*=bootstrap], script[src*=app.js], link[href*=bootstrap], link[href*=site.css]")).isEmpty();

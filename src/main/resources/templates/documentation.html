@@ -12,7 +12,7 @@
                 <div class="lifs-hero__text">
                     <p class="lifs-eyebrow">LIFS Tools · Goslin</p>
                     <h1 id="page-title">Documentation</h1>
-                    <p class="lifs-lead">How Goslin reads lipid names, how to use the web application and the REST API, which lipid classes are supported, and how to cite Goslin.</p>
+                    <p class="lifs-lead">How Goslin reads lipid names, how to use the web application and the REST API, and which lipid classes are supported.</p>
                 </div>
             </section>
 
@@ -20,24 +20,16 @@
                 <nav id="toc" class="doc__toc" aria-label="On this page">
                     <p class="lifs-eyebrow">On this page</p>
                     <ul>
-                        <li th:if="${news != null && !news.isEmpty()}"><a href="#news">News and updates</a></li>
                         <li><a href="#grammars">Grammars</a></li>
                         <li><a href="#hierarchy">Hierarchical representation</a></li>
                         <li><a href="#interactive-usage">Interactive usage</a></li>
                         <li><a href="#rest-api">REST API</a></li>
                         <li><a href="#lipid-classes">Lipid classes</a></li>
-                        <li><a href="#contributing">Contributing</a></li>
-                        <li><a href="#citing">Citing Goslin</a></li>
-                        <li><a href="#acknowledgements">Acknowledgements</a></li>
                     </ul>
                 </nav>
                 <div class="doc__content">
-                    <th:block th:replace="~{fragments/news :: news}"></th:block>
                     <th:block th:replace="~{fragments/manual :: manual}"></th:block>
                     <th:block th:replace="~{fragments/news :: lipidclasses}"></th:block>
-                    <th:block th:replace="~{fragments/news :: contributing}"></th:block>
-                    <th:block th:replace="~{fragments/news :: citing}"></th:block>
-                    <th:block th:replace="~{fragments/news :: acknowledgements}"></th:block>
                 </div>
             </div>
         </main>

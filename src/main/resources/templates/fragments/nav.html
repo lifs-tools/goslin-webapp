@@ -8,6 +8,8 @@
                th:attr="aria-current=${active == 'harmonize'} ? 'page'" th:text="#{nav.harmonize}">Harmonize</a>
             <a class="lifs-bar__item" th:href="@{/documentation}" href="/documentation" th:classappend="${active == 'documentation'} ? 'lifs-bar__item--active'"
                th:attr="aria-current=${active == 'documentation'} ? 'page'" th:text="#{nav.documentation}">Documentation</a>
+            <a class="lifs-bar__item" th:href="@{/about}" href="/about" th:classappend="${active == 'about'} ? 'lifs-bar__item--active'"
+               th:attr="aria-current=${active == 'about'} ? 'page'" th:text="#{nav.about}">About</a>
             <a class="lifs-bar__item" th:href="@{/swagger-ui/index.html}" href="/swagger-ui/index.html" th:text="#{nav.api}">REST API</a>
         </th:block>
 
