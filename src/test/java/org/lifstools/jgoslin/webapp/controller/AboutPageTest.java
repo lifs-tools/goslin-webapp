@@ -17,6 +17,7 @@ package org.lifstools.jgoslin.webapp.controller;
 
 import java.nio.charset.StandardCharsets;
 import org.jsoup.Jsoup;
+import org.lifstools.jgoslin.webapp.domain.AppInfo;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,8 @@ public class AboutPageTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private AppInfo appInfo;
 
     private Document page(String path) throws Exception {
         return Jsoup.parse(mockMvc.perform(get(path)).andExpect(status().isOk()).andReturn()
@@ -69,13 +72,21 @@ public class AboutPageTest {
     @Test
     public void privacyMentionsRetentionAndServerSideCounting() throws Exception {
         String text = page("/about").getElementById("privacy").text();
-        assertThat(text).contains("7 days", "anyone", "Matomo", "never", "lipid names", "Do Not Track");
+        assertThat(text).contains("7 days", "anyone", "Matomo", "never", "lipid names", "Do Not Track", "site id", "regardless of your choice");
+    }
+
+    @Test
+    public void citationHeadingMatchesTocEntry() throws Exception {
+        Document doc = page("/about");
+        assertThat(doc.select("nav#toc a[href=#citing]").text()).isEqualTo(doc.getElementById("citing-title").text());
     }
 
     @Test
     public void versionShowsWebappAndJgoslin() throws Exception {
         String text = page("/about").getElementById("version").text();
-        assertThat(text).contains("2.3.0-SNAPSHOT").contains("2.2.1");
+        assertThat(appInfo.getVersionNumber()).isNotBlank();
+        assertThat(appInfo.getToolVersionNumber()).isNotBlank();
+        assertThat(text).contains(appInfo.getVersionNumber()).contains(appInfo.getToolVersionNumber());
     }
 
     @Test
@@ -91,5 +102,6 @@ public class AboutPageTest {
         Document doc = page("/");
         assertThat(doc.select("#cite-title").first().parent().select("a[href$=/about#citing]")).hasSize(1);
         assertThat(doc.select("section.about a[href$=/about]")).hasSize(1);
+        assertThat(doc.select("section.about a[href$=/about]").text()).isEqualTo("More about Goslin");
     }
 }

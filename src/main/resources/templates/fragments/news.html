@@ -4,7 +4,7 @@
     <body>
         <!-- The sections of documentation.html around the manual; each has an id that the table of contents links to. -->
         <section th:fragment="news" id="news" class="doc-section" aria-labelledby="news-title" th:if="${news != null && !news.isEmpty()}">
-            <h2 id="news-title">News and updates</h2>
+            <h2 id="news-title" th:text="#{about.toc.news}">X</h2>
             <div class="news">
                 <details class="news__entry" th:each="newsEntry, itemStat : ${news}" th:open="${itemStat.index == 0}">
                     <summary>
@@ -59,7 +59,7 @@
         </section>
 
         <section th:fragment="contributing" id="contributing" class="doc-section" aria-labelledby="contributing-title">
-            <h2 id="contributing-title">Contributing</h2>
+            <h2 id="contributing-title" th:text="#{about.toc.contributing}">X</h2>
             <div class="lifs-prose">
                 <p>If you find that Goslin does not report a lipid name correctly, or is missing some information, please <a href="https://github.com/lifs-tools/goslin-webapp" target="_blank" rel="noopener">file a bug report or pull request at our GitHub repository</a>.</p>
                 <p>Please see the <a href="https://github.com/lifs-tools/goslin" target="_blank" rel="noopener">Goslin GitHub repository</a> for the other programming language implementations and for the lipid-list.csv file, which contains information on which lipid head groups Goslin currently supports.</p>
@@ -69,7 +69,7 @@
         </section>
 
         <section th:fragment="citing" id="citing" class="doc-section" aria-labelledby="citing-title">
-            <h2 id="citing-title">Citing Goslin</h2>
+            <h2 id="citing-title" th:text="#{about.toc.citing}">X</h2>
             <ol class="lifs-prose doc-refs">
                 <li><a href="#" target="_blank" rel="noopener">Goslin 2.0 implements the recent lipid shorthand nomenclature for MS-derived lipid structures. Dominik Kopczynski, Nils Hoffmann, Bing Peng, Gerhard Liebisch, Friedrich Spener, Robert Ahrends. Preprint <b>2021</b></a></li>
                 <li><a href="https://pubs.acs.org/doi/10.1021/acs.analchem.0c01690" target="_blank" rel="noopener">Goslin - A Grammar of Succinct Lipid Nomenclature. Dominik Kopczynski, Nils Hoffmann, Bing Peng, Robert Ahrends. Analytical Chemistry <b>2020</b> 92 (16), 10957-10960</a></li>
@@ -77,7 +77,7 @@
         </section>
 
         <section th:fragment="acknowledgements" id="acknowledgements" class="doc-section" aria-labelledby="acknowledgements-title">
-            <h2 id="acknowledgements-title">Acknowledgements</h2>
+            <h2 id="acknowledgements-title" th:text="#{about.toc.acknowledgements}">X</h2>
             <div class="lifs-prose">
                 <p>In order to test lipid name parsing, sum formula calculation and cross-linking to reported lipids, the following resources were crucial during development and testing of Goslin and the Goslin web application:</p>
                 <ol class="doc-refs">
