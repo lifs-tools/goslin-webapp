@@ -29,10 +29,13 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,16 +64,20 @@ import org.springframework.stereotype.Service;
 /**
  * Parses lipid names with jgoslin, under a time limit per name and per request.
  * <p>
- * Names are parsed on a bounded pool of daemon threads ({@code goslin.parser.threads}), a few names of one request
- * at a time. The caller waits for each name until its deadline: {@code goslin.parser.time-limit} from the moment it
- * is handed to the pool (time in the pool's queue counts), across all grammars tried for it, and never past the
- * request's deadline, {@code goslin.parser.request-time-limit} from the start of the request. A name that is not
- * done by its own deadline fails with {@link #timeLimitMessage(Duration)}; the names left when the request's
- * deadline passes fail with {@link #NOT_PROCESSED_MESSAGE}. Zero turns a limit off.
+ * Names are parsed on a bounded pool of daemon threads ({@code goslin.parser.threads}). The caller waits for each
+ * name until its deadline: {@code goslin.parser.time-limit} from the moment it starts waiting for a slot (waiting
+ * counts), across all grammars tried for it, and never past the request's deadline,
+ * {@code goslin.parser.request-time-limit} from the start of the request. A name that is not done by its own
+ * deadline fails with {@link #timeLimitMessage(Duration)}; the names left when the request's deadline passes fail
+ * with {@link #NOT_PROCESSED_MESSAGE}. Zero turns a limit off.
  * <p>
  * jgoslin's parser cannot be interrupted while it parses with one grammar, so a parse that ran out of time is
- * cancelled, but keeps running until that grammar is done; it does not go on to the next grammar. That is the
- * price of not changing jgoslin: such a parse occupies a pool thread a little longer, never the caller.
+ * cancelled, but keeps running until that grammar is done; it does not go on to the next grammar. Such a parse
+ * still burns CPU until then, so it keeps its slots: a parse takes a slot of the pool (one per thread, handed out
+ * in order) and one of its request ({@code goslin.parser.max-parallel-per-request}) before it is handed to the
+ * pool, and gives both back only when it ends. One request can therefore never hold more than its share of the
+ * pool, however many of its names run out of time, and the pool's queue never grows: a name that gets no slot
+ * before its deadline fails without being parsed.
  * <p>
  * Thread safety: the six jgoslin parsers are shared. A parser's grammar tables are only read while parsing, and the
  * parse tables are local to each call; everything a parse writes goes into its own event handler, which is created
@@ -135,7 +142,10 @@ public class LipidNameValidationService implements AutoCloseable {
     private final Duration timeLimit;
     private final Duration requestTimeLimit;
     private final int threads;
+    private final int maxParallelPerRequest;
     private final ThreadPoolExecutor pool;
+    /** One per pool thread: taken before a name is handed to the pool, given back when its parse ends. */
+    private final Semaphore poolSlots;
 
     @Autowired
     public LipidNameValidationService(ExternalDatabaseMappingLoader dbLoader, ParserProperties parserProperties) {
@@ -167,6 +177,8 @@ public class LipidNameValidationService implements AutoCloseable {
         this.timeLimit = parserProperties.timeLimit();
         this.requestTimeLimit = parserProperties.requestTimeLimit();
         this.threads = parserProperties.threads();
+        this.maxParallelPerRequest = parserProperties.maxParallelPerRequest();
+        this.poolSlots = new Semaphore(threads, true);
         AtomicInteger threadNumber = new AtomicInteger();
         ThreadFactory factory = runnable -> {
             Thread thread = new Thread(runnable, "goslin-parse-" + threadNumber.incrementAndGet());
@@ -230,48 +242,60 @@ public class LipidNameValidationService implements AutoCloseable {
         long requestDeadline = deadline(start, requestTimeLimit);
         List<String> names = lipidNames.stream().map(n -> n.replaceAll("\\s+", " ").trim()).toList();
         boolean anyGrammar = grammars.isEmpty();
-        List<Grammar> tried = anyGrammar ? defaultGrammars : List.copyOf(grammars);
+        // a grammar named twice is tried once
+        List<Grammar> tried = anyGrammar ? defaultGrammars : grammars.stream().distinct().toList();
+        Semaphore requestSlots = new Semaphore(maxParallelPerRequest);
         ParsedName[] parsed = new ParsedName[names.size()];
         Deque<Pending> pending = new ArrayDeque<>();
         int next = 0;
         boolean requestTimedOut = false;
         try {
             while (next < names.size() || !pending.isEmpty()) {
-                while (!requestTimedOut && pending.size() < threads && next < names.size()) {
-                    long submitted = System.nanoTime();
-                    if (submitted - requestDeadline >= 0) {
+                // start names while this request and the pool have free slots, without waiting
+                while (!requestTimedOut && next < names.size()) {
+                    long now = System.nanoTime();
+                    if (now - requestDeadline >= 0) {
                         requestTimedOut = true;
                         break;
                     }
-                    int index = next++;
-                    long nameDeadline = Math.min(deadline(submitted, timeLimit), requestDeadline);
-                    String name = names.get(index);
-                    pending.add(new Pending(index, nameDeadline,
-                            pool.submit(() -> parseName(name, tried, anyGrammar, nameDeadline))));
+                    if (!acquire(requestSlots, now)) {
+                        break;
+                    }
+                    long nameDeadline = Math.min(deadline(now, timeLimit), requestDeadline);
+                    pending.add(start(next, names.get(next), tried, anyGrammar, nameDeadline, requestSlots));
+                    next++;
                 }
                 if (pending.isEmpty()) {
-                    break;
+                    if (requestTimedOut || next >= names.size()) {
+                        break;
+                    }
+                    // Every slot this request may use is taken, also by parses that ran out of time and still run:
+                    // wait for one. The wait counts against the name's deadline; a name that gets no slot in time
+                    // fails without being parsed.
+                    long nameDeadline = Math.min(deadline(System.nanoTime(), timeLimit), requestDeadline);
+                    if (acquire(requestSlots, nameDeadline)) {
+                        pending.add(start(next, names.get(next), tried, anyGrammar, nameDeadline, requestSlots));
+                    } else {
+                        parsed[next] = expired(names.get(next), nameDeadline, requestDeadline);
+                        requestTimedOut = parsed[next].outcome() == Outcome.NOT_PROCESSED;
+                    }
+                    next++;
+                    continue;
                 }
                 Pending p = pending.poll();
                 try {
                     parsed[p.index()] = await(p);
                 } catch (TimeoutException e) {
-                    p.future().cancel(true);
-                    if (p.deadline() == requestDeadline && requestTimeLimit.isPositive()) {
-                        requestTimedOut = true;
-                        parsed[p.index()] = notProcessed(names.get(p.index()));
-                    } else {
-                        log.info("Parsing a name of {} characters took longer than {}.", names.get(p.index()).length(),
-                                timeLimit);
-                        parsed[p.index()] = timedOut(names.get(p.index()));
-                    }
+                    p.abandon();
+                    parsed[p.index()] = expired(names.get(p.index()), p.deadline(), requestDeadline);
+                    requestTimedOut = requestTimedOut || parsed[p.index()].outcome() == Outcome.NOT_PROCESSED;
                 }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             requestTimedOut = true;
         } finally {
-            pending.forEach(p -> p.future().cancel(true));
+            pending.forEach(Pending::abandon);
         }
         if (requestTimedOut) {
             int notProcessed = 0;
@@ -287,7 +311,102 @@ public class LipidNameValidationService implements AutoCloseable {
         return Arrays.asList(parsed);
     }
 
-    private record Pending(int index, long deadline, Future<ParsedName> future) {
+    /**
+     * Takes a slot of the request and one of the pool, waiting until the deadline at most; {@link Long#MAX_VALUE}
+     * waits as long as it takes, a deadline in the past does not wait. The pool's slots are handed out in the order
+     * they were asked for.
+     */
+    private boolean acquire(Semaphore requestSlots, long deadline) throws InterruptedException {
+        if (deadline == Long.MAX_VALUE) {
+            requestSlots.acquire();
+            try {
+                poolSlots.acquire();
+            } catch (InterruptedException e) {
+                requestSlots.release();
+                throw e;
+            }
+            return true;
+        }
+        if (!requestSlots.tryAcquire(Math.max(0, deadline - System.nanoTime()), TimeUnit.NANOSECONDS)) {
+            return false;
+        }
+        boolean acquired = false;
+        try {
+            acquired = poolSlots.tryAcquire(Math.max(0, deadline - System.nanoTime()), TimeUnit.NANOSECONDS);
+        } finally {
+            if (!acquired) {
+                requestSlots.release();
+            }
+        }
+        return acquired;
+    }
+
+    /**
+     * Hands a name to the pool; the caller holds a slot of the request and one of the pool. The parse gives both
+     * back when it ends, also after it ran out of time; if it never started, {@link Pending#abandon()} does.
+     */
+    private Pending start(int index, String name, List<Grammar> grammars, boolean anyGrammar, long deadline,
+            Semaphore requestSlots) {
+        Slots slots = new Slots(requestSlots, poolSlots);
+        try {
+            Future<ParsedName> future = pool.submit(() -> {
+                if (!slots.claim()) {
+                    return null; // abandoned before it started
+                }
+                try {
+                    return parseName(name, grammars, anyGrammar, deadline);
+                } finally {
+                    slots.release();
+                }
+            });
+            return new Pending(index, deadline, future, slots);
+        } catch (RejectedExecutionException e) {
+            slots.claim();
+            slots.release();
+            throw e;
+        }
+    }
+
+    /** A name whose deadline passed: over the time limit, or not processed if it was the request's deadline. */
+    private ParsedName expired(String name, long deadline, long requestDeadline) {
+        if (deadline == requestDeadline && requestTimeLimit.isPositive()) {
+            return notProcessed(name);
+        }
+        log.info("Parsing a name of {} characters took longer than {}.", name.length(), timeLimit);
+        return timedOut(name);
+    }
+
+    /** The slots one parse holds; given back exactly once, by the parse or, if it never ran, by the caller. */
+    private static final class Slots {
+
+        private final Semaphore requestSlots;
+        private final Semaphore poolSlots;
+        private final AtomicBoolean claimed = new AtomicBoolean();
+
+        Slots(Semaphore requestSlots, Semaphore poolSlots) {
+            this.requestSlots = requestSlots;
+            this.poolSlots = poolSlots;
+        }
+
+        boolean claim() {
+            return claimed.compareAndSet(false, true);
+        }
+
+        void release() {
+            poolSlots.release();
+            requestSlots.release();
+        }
+    }
+
+    private record Pending(int index, long deadline, Future<ParsedName> future, Slots slots) {
+
+        /** Stops waiting for the parse: if it has not started it never will; if it runs, it keeps its slots. */
+        void abandon() {
+            if (slots.claim()) {
+                slots.release();
+            }
+            future.cancel(true);
+        }
     }
 
     private static ParsedName await(Pending p) throws InterruptedException, TimeoutException {

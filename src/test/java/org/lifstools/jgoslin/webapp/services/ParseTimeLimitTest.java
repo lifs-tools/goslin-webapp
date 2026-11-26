@@ -46,8 +46,13 @@ class ParseTimeLimitTest {
     }
 
     private LipidNameValidationService service(Duration perName, Duration perRequest, int threads, GrammarStep step) {
+        return service(perName, perRequest, threads, null, step);
+    }
+
+    private LipidNameValidationService service(Duration perName, Duration perRequest, int threads,
+            Integer perRequestCap, GrammarStep step) {
         LipidNameValidationService s = new LipidNameValidationService(mock(ExternalDatabaseMappingLoader.class),
-                new ParserProperties(perName, perRequest, threads), step);
+                new ParserProperties(perName, perRequest, threads, perRequestCap), step);
         services.add(s);
         return s;
     }
@@ -185,5 +190,89 @@ class ParseTimeLimitTest {
         List<ValidationResult> results = s.validate(List.of(SLOW), List.of(Grammar.GOSLIN, Grammar.LIPIDMAPS));
         assertEquals(List.of(LipidNameValidationService.timeLimitMessage(Duration.ofMillis(200))),
                 results.get(0).getMessages());
+    }
+
+    /** Like jgoslin inside one grammar: ignores interruption, ends only when the test releases it. */
+    private void blockUninterruptibly() {
+        boolean interrupted = false;
+        while (true) {
+            try {
+                release.await();
+                break;
+            } catch (InterruptedException e) {
+                interrupted = true;
+            }
+        }
+        if (interrupted) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    @Test
+    void oneRequestNeverRunsMoreThanItsShareEvenAfterTimeouts() throws Exception {
+        AtomicInteger running = new AtomicInteger();
+        AtomicInteger maxRunning = new AtomicInteger();
+        AtomicInteger started = new AtomicInteger();
+        var s = service(Duration.ofMillis(100), Duration.ZERO, 4, 2, (grammar, name) -> {
+            if (name.startsWith("junk")) {
+                started.incrementAndGet();
+                maxRunning.accumulateAndGet(running.incrementAndGet(), Math::max);
+                try {
+                    blockUninterruptibly();
+                } finally {
+                    running.decrementAndGet();
+                }
+            }
+            return new Attempt(null, "");
+        });
+        List<String> junk = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            junk.add("junk" + i);
+        }
+        List<ParsedName> parsed = s.parse(junk);
+        parsed.forEach(p -> assertEquals(Outcome.TIME_LIMIT, p.outcome()));
+        // the two timed-out parses still run and still hold the request's share: no further name was started
+        assertEquals(2, started.get());
+        assertTrue(maxRunning.get() <= 2, "running at once: " + maxRunning.get());
+
+        // another request still gets one of the free threads while the runaways go on
+        ParsedName fast = s.parse(List.of("fast")).get(0);
+        assertEquals(Outcome.FAILED, fast.outcome());
+        assertEquals(2, running.get());
+    }
+
+    @Test
+    void concurrentRequestGetsASlotWhileAnotherIsBusy() throws Exception {
+        CountDownLatch slowStarted = new CountDownLatch(2);
+        var s = service(Duration.ofSeconds(5), Duration.ZERO, 2, 1, (grammar, name) -> {
+            if (name.startsWith("junk")) {
+                slowStarted.countDown();
+                blockUninterruptibly();
+            }
+            return new Attempt(null, "");
+        });
+        var busy = new Thread(() -> s.parse(List.of("junk1", "junk2", "junk3")));
+        busy.setDaemon(true);
+        busy.start();
+        Thread.sleep(200);
+        // the busy request holds one of two threads (its share), so this one parses at once
+        long t = System.nanoTime();
+        assertEquals(Outcome.FAILED, s.parse(List.of("fast")).get(0).outcome());
+        assertTrue(System.nanoTime() - t < Duration.ofSeconds(2).toNanos());
+        assertEquals(1, slowStarted.getCount(), "the busy request never ran two parses at once");
+    }
+
+    @Test
+    void duplicateGrammarIsParsedOnce() {
+        Map<Grammar, AtomicInteger> attempts = new ConcurrentHashMap<>();
+        var s = service(Duration.ofSeconds(5), Duration.ZERO, 2, (grammar, name) -> {
+            attempts.computeIfAbsent(grammar, g -> new AtomicInteger()).incrementAndGet();
+            return new Attempt(null, "");
+        });
+        List<ValidationResult> results = s.validate(List.of("x"),
+                List.of(Grammar.GOSLIN, Grammar.LIPIDMAPS, Grammar.GOSLIN, Grammar.LIPIDMAPS));
+        assertEquals(1, attempts.get(Grammar.GOSLIN).get());
+        assertEquals(1, attempts.get(Grammar.LIPIDMAPS).get());
+        assertEquals(Grammar.LIPIDMAPS, results.get(0).getGrammar());
     }
 }

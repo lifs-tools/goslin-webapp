@@ -30,7 +30,7 @@ import org.springframework.core.io.ClassPathResource;
 class ParserConcurrencyTest {
 
     private final LipidNameValidationService service = new LipidNameValidationService(
-            mock(ExternalDatabaseMappingLoader.class), new ParserProperties(Duration.ofSeconds(20), Duration.ZERO, 8));
+            mock(ExternalDatabaseMappingLoader.class), new ParserProperties(Duration.ofSeconds(20), Duration.ZERO, 8, null));
 
     @AfterEach
     void tearDown() {
