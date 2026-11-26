@@ -15,23 +15,21 @@
  */
 package org.lifstools.jgoslin.webapp.domain;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import java.io.IOException;
 import org.lifstools.jgoslin.domain.ElementTable;
-import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.boot.jackson.JacksonComponent;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  *
  * @author nilshoffmann
  */
-@JsonComponent
-public class ElementTableSerializer extends JsonSerializer<ElementTable> {
+@JacksonComponent
+public class ElementTableSerializer extends ValueSerializer<ElementTable> {
 
     @Override
-    public void serialize(ElementTable t, JsonGenerator jg, SerializerProvider sp) throws IOException {
+    public void serialize(ElementTable t, JsonGenerator jg, SerializationContext ctxt) {
         jg.writeString(t.getSumFormula());
     }
     

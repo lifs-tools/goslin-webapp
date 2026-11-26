@@ -15,7 +15,6 @@
  */
 package org.lifstools.jgoslin.webapp.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult;
 import java.util.Arrays;
@@ -23,14 +22,16 @@ import static org.hamcrest.Matchers.hasSize;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  *
@@ -39,13 +40,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class LipidNameValidationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper objectMapper;
 
     @Test
     public void validateNames() throws Exception {
@@ -54,14 +56,30 @@ public class LipidNameValidationTest {
         vfr.setLipidNames(Arrays.asList("CL 18:3(9Z,12Z,15Z)/16:0/22:5(16Z,10Z,19Z,13Z,7Z)/20:0"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/rest/validate")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(vfr))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results", hasSize(1)))
                 .andExpect(jsonPath("$.totalReceived", org.hamcrest.Matchers.is(1)))
                 .andExpect(jsonPath("$.totalParsed", org.hamcrest.Matchers.is(1)))
                 .andExpect(jsonPath("$.failedToParse", org.hamcrest.Matchers.is(0)));
+    }
+
+    @Test
+    public void keepsTheJsonFieldNamesOfJackson2() throws Exception {
+        // Jackson 3 would name getNDoubleBonds() "NDoubleBonds"; the REST API keeps "ndoubleBonds".
+        ValidationRequest vfr = new ValidationRequest();
+        vfr.setLipidNames(Arrays.asList("PC 18:1_16:0"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/rest/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(vfr))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].lipidAdduct.lipid.info.ndoubleBonds", org.hamcrest.Matchers.is(1)))
+                .andExpect(jsonPath("$.results[0].lipidAdduct.lipid.faList[0].ndoubleBonds", org.hamcrest.Matchers.is(1)))
+                .andExpect(jsonPath("$.results[0].lipidAdduct.lipid.info.NDoubleBonds").doesNotExist());
     }
 
 }

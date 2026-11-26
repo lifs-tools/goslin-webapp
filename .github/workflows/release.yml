@@ -1,0 +1,154 @@
+# Release: run from the Actions tab ("Release" → "Run workflow") on master.
+#  1. Runs the CI tests on the current master.
+#  2. Checks that the release depends only on released artifacts (release profile, requireReleaseDeps).
+#  3. Sets the release version (default: the current SNAPSHOT without -SNAPSHOT), commits "Release X.Y.Z"
+#     and tags vX.Y.Z (locally).
+#  4. Deploys the jar to m.lifs-tools.org and pushes the docker image
+#     docker.lifs-tools.org/lifs/lifs-goslin-webapp with the tags X.Y.Z and latest.
+#  5. Pushes the commit and tag, creates the GitHub release, and sets master to the next SNAPSHOT
+#     (default: X.Y.(Z+1)-SNAPSHOT).
+# Commits pushed with the GITHUB_TOKEN do not trigger the CI workflow, so the release is deployed only once.
+# SNAPSHOT builds from master (ci.yml) push only their version tag, never latest.
+# The "release" environment can be given required reviewers to approve each release.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-version:
+        description: Release version (X.Y.Z); empty for the current SNAPSHOT version without -SNAPSHOT
+        required: false
+        default: ''
+      next-version:
+        description: Next development version (X.Y.Z-SNAPSHOT); empty for the next patch version
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  MAVEN_ARGS: --no-transfer-progress
+
+jobs:
+  test:
+    name: Tests
+    if: github.ref == 'refs/heads/master'
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    name: Release
+    needs: test
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-build
+      - name: Determine versions
+        id: versions
+        env:
+          RELEASE_INPUT: ${{ inputs.release-version }}
+          NEXT_INPUT: ${{ inputs.next-version }}
+        # The version goes through a file because on a fresh runner ./mvnw prints its Maven
+        # download progress to stdout.
+        run: |
+          ./mvnw -B -q help:evaluate -Dexpression=project.version -Doutput="$RUNNER_TEMP/version.txt" > /dev/null
+          current=$(cat "$RUNNER_TEMP/version.txt")
+          if [[ ! "$current" =~ ^[0-9]+\.[0-9]+\.[0-9]+-SNAPSHOT$ ]]; then
+            echo "::error::master must be on an X.Y.Z-SNAPSHOT version, found '$current'"; exit 1
+          fi
+          release="${RELEASE_INPUT:-${current%-SNAPSHOT}}"
+          if [[ ! "$release" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::release version must be X.Y.Z, got $release"; exit 1
+          fi
+          IFS=. read -r major minor patch <<< "$release"
+          next="${NEXT_INPUT:-$major.$minor.$((patch + 1))-SNAPSHOT}"
+          if [[ ! "$next" =~ ^[0-9]+\.[0-9]+\.[0-9]+-SNAPSHOT$ ]]; then
+            echo "::error::next version must be X.Y.Z-SNAPSHOT, got $next"; exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v$release" >/dev/null; then
+            echo "::error::tag v$release already exists"; exit 1
+          fi
+          echo "Releasing $release (from $current), next $next"
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+          echo "next=$next" >> "$GITHUB_OUTPUT"
+      # The release profile's requireReleaseDeps: fails before anything is committed or pushed
+      # while a dependency (e.g. lifs-webapps-common) is still a SNAPSHOT.
+      - name: Check that the release depends only on released artifacts
+        run: ./mvnw -B -Prelease validate
+      - name: Set Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Commit and tag the release version
+        env:
+          RELEASE: ${{ steps.versions.outputs.release }}
+        run: |
+          ./mvnw -B -q versions:set -DnewVersion="$RELEASE"
+          git commit -am "Release $RELEASE"
+          git tag -a "v$RELEASE" -m "Release $RELEASE"
+      - name: Setup Maven settings.xml
+        # Maven resolves the ${env.*} placeholders at runtime; the secrets are never written to disk.
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<'SETTINGS'
+          <settings>
+            <servers>
+              <server>
+                <id>artifactory-releases</id>
+                <username>${env.ARTIFACTORY_USERNAME_REF}</username>
+                <password>${env.ARTIFACTORY_TOKEN_REF}</password>
+              </server>
+              <server>
+                <id>artifactory-snapshots</id>
+                <username>${env.ARTIFACTORY_USERNAME_REF}</username>
+                <password>${env.ARTIFACTORY_TOKEN_REF}</password>
+              </server>
+            </servers>
+          </settings>
+          SETTINGS
+      # Jib pushes to the registry during install and reads the credentials written by docker/login-action.
+      - name: Login to LIFS Tools registry
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: docker.lifs-tools.org
+          username: ${{ secrets.LIFS_TOOLS_DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.LIFS_TOOLS_DOCKER_REGISTRY_PW }}
+      - name: Deploy the jar and push the docker image (version and latest)
+        env:
+          ARTIFACTORY_USERNAME_REF: ${{ secrets.ARTIFACTORY_USER || 'github-deployer' }}
+          ARTIFACTORY_TOKEN_REF: ${{ secrets.ARTIFACTORY_NEW_TOKEN }}
+        run: ./mvnw -B deploy -Prelease,docker -DskipTests -Djib.to.tags=latest
+      - name: Push the release commit and tag
+        env:
+          RELEASE: ${{ steps.versions.outputs.release }}
+        run: git push --atomic origin "HEAD:${GITHUB_REF_NAME}" "v$RELEASE"
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE: ${{ steps.versions.outputs.release }}
+        run: |
+          cat > "$RUNNER_TEMP/notes.md" <<EOF
+          Docker image: \`docker.lifs-tools.org/lifs/lifs-goslin-webapp:$RELEASE\` (also \`latest\`)
+
+          Jar: https://m.lifs-tools.org/artifactory/lifs-libs-release-local/org/lifs-tools/lifs-goslin-webapp/$RELEASE/
+          EOF
+          gh release create "v$RELEASE" --verify-tag --title "Release $RELEASE" \
+            --notes-file "$RUNNER_TEMP/notes.md" --generate-notes \
+            target/lifs-goslin-webapp-"$RELEASE".jar
+      - name: Set the next development version
+        env:
+          NEXT: ${{ steps.versions.outputs.next }}
+        run: |
+          ./mvnw -B -q versions:set -DnewVersion="$NEXT"
+          git commit -am "Prepare next development version $NEXT"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

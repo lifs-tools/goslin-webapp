@@ -15,7 +15,6 @@
  */
 package org.lifstools.jgoslin.webapp.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.lifstools.jgoslin.webapp.Application;
 import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult.Grammar;
@@ -24,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -43,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  *
@@ -63,7 +63,7 @@ public class LipidNameValidationControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper objectMapper;
 
     @BeforeEach
     public void setUp() {

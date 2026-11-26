@@ -29,17 +29,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
-import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.lifstools.jgoslin.domain.FattyAcid;
 import org.lifstools.jgoslin.domain.FunctionalGroup;
 import org.lifstools.jgoslin.domain.LipidClassMeta;
@@ -65,6 +65,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -81,7 +82,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import com.google.common.io.Files;
 
 import org.lifstools.lifs.webapps.common.domain.StorageServiceSlot;
 import org.lifstools.lifs.webapps.common.domain.UserSessionFile;
@@ -135,7 +135,7 @@ public class LipidNameValidationController {
         ModelAndView model = new ModelAndView("index");
         model.addObject("page", createPage("Translate Lipid Names", Optional.ofNullable(principal)));
         ValidationRequest vr = new ValidationRequest();
-        vr.setLipidNames(Streams.asString(lipidnames.getInputStream(), "UTF8").lines().collect(Collectors.toList()));
+        vr.setLipidNames(lipidnames.getContentAsString(StandardCharsets.UTF_8).lines().collect(Collectors.toList()));
         model.addObject("validationRequest", vr);
         model.addObject("validationFileRequest", new ValidationFileRequest());
         if (appInfo != null) {
@@ -234,7 +234,7 @@ public class LipidNameValidationController {
             MediaType mediaType = MediaType.ALL;
             StorageServiceSlot slot = GoslinStorageServiceSlots.OUTPUT_TSV_FILE;
             UserSessionFile usf = storageService.load(resultSessionId, slot);
-            String ext = Files.getFileExtension(usf.getFilename()).toLowerCase();
+            String ext = Objects.requireNonNullElse(StringUtils.getFilenameExtension(usf.getFilename()), "").toLowerCase();
             switch (ext) {
                 case "zip":
                     mediaType = MediaType.valueOf("application/zip");

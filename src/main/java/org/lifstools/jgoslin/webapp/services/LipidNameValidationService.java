@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 
 /**
  *
@@ -95,7 +96,12 @@ public class LipidNameValidationService {
 
     public List<ValidationResult> validate(List<String> lipidNames, List<ValidationResult.Grammar> grammars) {
         UUID requestId = UUID.randomUUID();
-        tracker.count(requestId, getClass().getSimpleName(), "validate-with-grammars");
+        try {
+            tracker.count(requestId, getClass().getSimpleName(), "validate-with-grammars");
+        } catch (RestClientException e) {
+            // tracking must never break validation, e.g. while Matomo is unreachable
+            log.warn("Could not send tracking data: {}", e.getMessage());
+        }
         if (grammars.isEmpty()) {
             LipidParser lipidParser = new LipidParser();
             List<ValidationResult> results = lipidNames.stream().map((lipidName) -> {

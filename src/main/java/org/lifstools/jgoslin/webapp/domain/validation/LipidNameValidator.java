@@ -15,8 +15,8 @@
  */
 package org.lifstools.jgoslin.webapp.domain.validation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import org.lifstools.jgoslin.webapp.domain.annotations.ValidLipidName;
 import org.lifstools.jgoslin.parser.LipidParser;
 import org.slf4j.Logger;
