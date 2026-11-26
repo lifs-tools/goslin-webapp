@@ -54,6 +54,14 @@ public class ApiDocsTest {
     }
 
     @Test
+    public void apiDocsStateTheNameLengthLimit() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.paths['/rest/validate'].post.description", containsString("300 characters")))
+                .andExpect(jsonPath("$.paths['/rest/validate'].post.responses['400']").exists());
+    }
+
+    @Test
     public void apiDocsUseTheRestJsonFieldNames() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())

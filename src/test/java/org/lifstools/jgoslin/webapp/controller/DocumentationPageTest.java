@@ -66,6 +66,11 @@ public class DocumentationPageTest {
     }
 
     @Test
+    public void documentationIncludesTrackingScript() throws Exception {
+        assertThat(documentation().selectFirst("script[data-lifs-tracking][data-site-id]")).isNotNull();
+    }
+
+    @Test
     public void lipidClassTableHasFilter() throws Exception {
         Document doc = documentation();
         assertThat(doc.select("table#lipid-classes tbody tr").size()).isGreaterThan(100);

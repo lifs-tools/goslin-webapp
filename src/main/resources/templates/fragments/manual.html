@@ -176,6 +176,12 @@
                             </div>
                         </div>
                         <div>
+                            <p>Each lipid name may have at most 300 characters (after trimming and collapsing
+                                whitespace). If any name in a request is longer, the rest api rejects the whole
+                                request with a response code of 400 (Client error) and a message naming the position of the
+                                first offending name, e.g. <code>Name 3 is longer than 300 characters.</code>; no name is parsed.</p>
+                        </div>
+                        <div>
                             <p>Sending the http POST request with <code>curl</code> as an http client looks as
                                 follows:</p>
                         </div>

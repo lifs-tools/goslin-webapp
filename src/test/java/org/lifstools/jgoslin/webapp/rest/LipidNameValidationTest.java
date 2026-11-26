@@ -23,6 +23,14 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.Matchers.hasSize;
 import org.junit.jupiter.api.Test;
+import org.lifstools.jgoslin.webapp.services.LipidNameValidationService;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -109,6 +117,47 @@ public class LipidNameValidationTest {
         JsonNode result = objectMapper.readTree(body).get("results").get(0);
         List<String> names = new ArrayList<>(result.propertyNames());
         assertEquals(List.of("lipidName", "grammar", "messages", "lipidAdduct"), names.subList(0, 4));
+    }
+
+    @MockitoSpyBean
+    private LipidNameValidationService validationService;
+
+    private static String request(String... names) {
+        return "{\"lipidNames\":[" + String.join(",", java.util.Arrays.stream(names).map(n -> "\"" + n + "\"").toList()) + "]}";
+    }
+
+    @Test
+    public void restRejectsNameLongerThanLimit() throws Exception {
+        String tooLong = "C".repeat(301);
+        mockMvc.perform(MockMvcRequestBuilders.post("/rest/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request("PC 18:1_16:0", "PE 18:1_16:0", tooLong))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("Name 3 is longer than 300 characters.")))
+                .andExpect(content().string(not(containsString(tooLong))));
+        verifyNoInteractions(validationService);
+    }
+
+    @Test
+    public void restMeasuresTheLimitAfterNormalising() throws Exception {
+        // 300 characters plus surrounding and doubled blanks are 300 after normalising
+        doReturn(List.of()).when(validationService).validate(anyList());
+        mockMvc.perform(MockMvcRequestBuilders.post("/rest/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request("  " + "C".repeat(150) + "   " + "C".repeat(149) + " "))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void restAcceptsNameAtLimit() throws Exception {
+        doReturn(List.of()).when(validationService).validate(anyList());
+        mockMvc.perform(MockMvcRequestBuilders.post("/rest/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request("C".repeat(300)))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
 }
