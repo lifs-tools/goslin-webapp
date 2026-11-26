@@ -17,7 +17,10 @@ package org.lifstools.jgoslin.webapp.rest;
 
 import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.Matchers.hasSize;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -80,6 +84,31 @@ public class LipidNameValidationTest {
                 .andExpect(jsonPath("$.results[0].lipidAdduct.lipid.info.ndoubleBonds", org.hamcrest.Matchers.is(1)))
                 .andExpect(jsonPath("$.results[0].lipidAdduct.lipid.faList[0].ndoubleBonds", org.hamcrest.Matchers.is(1)))
                 .andExpect(jsonPath("$.results[0].lipidAdduct.lipid.info.NDoubleBonds").doesNotExist());
+    }
+
+    @Test
+    public void acceptsNullForSkipInvalid() throws Exception {
+        // Jackson 2 coerced null to false for the primitive skipInvalid; the REST API keeps doing so.
+        mockMvc.perform(MockMvcRequestBuilders.post("/rest/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"lipidNames\":[\"PC 18:1_16:0\"],\"skipInvalid\":null}")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalParsed", org.hamcrest.Matchers.is(1)));
+    }
+
+    @Test
+    public void writesTheResultFieldsInDeclarationOrder() throws Exception {
+        // Jackson 3 would sort the fields alphabetically; the REST API keeps the order of Jackson 2.
+        String body = mockMvc.perform(MockMvcRequestBuilders.post("/rest/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"lipidNames\":[\"PC 18:1_16:0\"]}")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        JsonNode result = objectMapper.readTree(body).get("results").get(0);
+        List<String> names = new ArrayList<>(result.propertyNames());
+        assertEquals(List.of("lipidName", "grammar", "messages", "lipidAdduct"), names.subList(0, 4));
     }
 
 }

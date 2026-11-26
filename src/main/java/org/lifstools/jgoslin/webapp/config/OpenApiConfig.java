@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     public OpenApiConfig(JacksonMixinModule jacksonMixinModule) {
+        // springdoc's public API for extra modules; the registry is keyed by module id, so this is idempotent
         ObjectMapperProvider.registerModules(jacksonMixinModule);
     }
 }
