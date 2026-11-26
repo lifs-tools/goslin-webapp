@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Goslin easter egg (mock)</title>
+<link rel="stylesheet" href="/files/lifs.css"/>
+<style>
+  body { background: #fff; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px 48px; display: flex; flex-direction: column; gap: 24px; }
+  .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .opt { border: 1px solid var(--lifs-line); padding: 18px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; background: #fff; }
+  .opt.selected { border-color: var(--lifs-primary); box-shadow: inset 0 0 0 1px var(--lifs-primary); background: var(--lifs-paper); }
+  .stage { display: flex; justify-content: center; align-items: center; height: 200px; background: var(--lifs-paper); border: 1px solid var(--lifs-line); position: relative; }
+  .tag { align-self: flex-start; }
+
+  /* ---- the logo and its effects ---- */
+  .goslin { position: relative; display: inline-block; width: 160px; height: 160px; }
+  .goslin svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .g-eye { transform-box: fill-box; transform-origin: center; }
+  .g-head { transform-box: fill-box; transform-origin: 0% 100%; }
+  .blink .g-eye { animation: g-blink 6s infinite; }
+  @keyframes g-blink { 0%, 92%, 96%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.12); } }
+  .honking .g-head { animation: g-peck 520ms ease-out; }
+  @keyframes g-peck { 0% { transform: rotate(0); } 35% { transform: rotate(-16deg); } 70% { transform: rotate(5deg); } 100% { transform: rotate(0); } }
+  .g-bubble { position: absolute; left: 78%; top: -6px; padding: 4px 9px; background: #fff; border: 1px solid var(--lifs-line);
+    font: 500 13px var(--lifs-mono); color: var(--lifs-ink); white-space: nowrap; opacity: 0; transform: translateY(6px);
+    transition: opacity 160ms, transform 160ms; pointer-events: none; box-shadow: 0 4px 12px rgba(22,48,74,.12); }
+  .g-bubble::before { content: ''; position: absolute; left: -6px; bottom: 6px; width: 10px; height: 10px; background: #fff;
+    border-left: 1px solid var(--lifs-line); border-bottom: 1px solid var(--lifs-line); transform: rotate(45deg); }
+  .honking .g-bubble { opacity: 1; transform: none; }
+  .honk { cursor: pointer; }
+  @media (prefers-reduced-motion: reduce) {
+    .blink .g-eye, .honking .g-head { animation: none; }
+  }
+
+  .hero-demo { display: flex; flex-wrap: wrap; gap: 24px 40px; align-items: center; border-top: 1px solid var(--lifs-line); padding-top: 24px; }
+  .hero-demo .lifs-hero__text { flex: 1 1 420px; display: flex; flex-direction: column; gap: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="lifs-stack">
+    <p class="lifs-eyebrow">Goslin · easter egg</p>
+    <h1 style="font-size:32px">Which effect should the logo get?</h1>
+    <p class="lifs-note">Each card runs live on an inline copy of the original logo. Click cards to select one or more; the preview at the bottom combines all three.</p>
+  </div>
+
+  <div class="opts" data-multiselect>
+    <div class="opt" data-choice="blink" onclick="toggleSelect(this)">
+      <div class="stage"><span class="goslin blink" data-logo></span></div>
+      <h3>A · Blink now and then</h3>
+      <p class="lifs-note">Every few seconds, at a slightly random interval, the eye closes for a moment. Most visitors never notice; the ones who do smile. It needs no script and works even when the logo is a plain <span class="lifs-mono">&lt;img&gt;</span>.</p>
+      <span class="lifs-badge tag">CSS only</span>
+    </div>
+
+    <div class="opt" data-choice="follow" onclick="toggleSelect(this)">
+      <div class="stage"><span class="goslin follow" data-logo></span></div>
+      <h3>B · The eye follows the pointer</h3>
+      <p class="lifs-note">Move the mouse around the page: the eye glances towards the pointer, staying inside the head. It is the most visible of the three, so it may distract from the form.</p>
+      <span class="lifs-badge tag">small script</span>
+    </div>
+
+    <div class="opt" data-choice="honk" onclick="toggleSelect(this)">
+      <div class="stage"><span class="goslin honk" data-logo></span></div>
+      <h3>C · Click for a honk</h3>
+      <p class="lifs-note">Clicking the logo makes the gosling peck once and say <span class="lifs-mono">Honk!</span>, which only someone who clicks will find. Every fifth click it says something else.</p>
+      <span class="lifs-badge tag">small script</span>
+    </div>
+  </div>
+
+  <section class="hero-demo" aria-label="Preview in the hero">
+    <div class="lifs-hero__text">
+      <p class="lifs-eyebrow">LIFS Tools · Lipid nomenclature</p>
+      <h1>Harmonize lipid names</h1>
+      <p class="lifs-lead">Preview with all three effects in place, at the hero size of 160 px. With reduced motion turned on in the operating system, the blink and the peck stay off and only the speech bubble appears.</p>
+    </div>
+    <span class="goslin blink follow honk" data-logo></span>
+  </section>
+</div>
+
+<script>
+  let n = 0;
+  const logo = () => {
+    const id = 'gg' + (n++);
+    return `<svg viewBox="0 0 33.5 33.44" role="img" aria-label="Goslin logo">
+      <defs><radialGradient id="${id}">
+        <stop offset="0.1139" stop-color="#f1fcf0"/><stop offset="0.8681" stop-color="#e0f5e2"/>
+        <stop offset="0.9395" stop-color="#b2e5b4"/><stop offset="1" stop-color="#0c6d00"/></radialGradient></defs>
+      <circle cx="16.77" cy="16.72" r="16.72" fill="#fff"/>
+      <circle cx="16.77" cy="16.72" r="16.72" fill="url(#${id})"/>
+      <g transform="scale(0.35277777)">
+        <path fill="#20bf00" d="M 69.715,66.879 V 51.219 H 50.23"/>
+        <path fill="#0c6d00" d="M 47.516,82.547 V 66.883 h 22.199"/>
+        <path fill="#20bf00" d="M 47.516,82.547 V 66.883 H 25.234"/>
+        <path fill="#0c6d00" d="M 40.902,66.879 H 25.238 V 47.398"/>
+        <path fill="#20bf00" d="M 25.234,47.398 H 40.902 V 66.879"/>
+        <path fill="#0c6d00" d="m 47.438,12.254 v 15.668 h -22.2"/>
+        <path fill="#0c6d00" d="M 40.902,47.398 H 25.238 V 27.922"/>
+        <path fill="#20bf00" d="M 25.234,27.922 H 40.902 V 47.398"/>
+        <g class="g-head">
+          <path fill="#20bf00" d="M 47.438,12.254 V 27.922 H 69.715"/>
+          <g class="g-look"><circle class="g-eye" cx="51.188" cy="21.045" r="0.96" fill="#000"/></g>
+        </g>
+      </g></svg><span class="g-bubble" aria-hidden="true">Honk!</span>`;
+  };
+  document.querySelectorAll('[data-logo]').forEach(el => {
+    el.innerHTML = logo();
+    // A: random offset so several logos do not blink in step
+    el.querySelector('.g-eye').style.animationDelay = (-Math.random() * 6).toFixed(2) + 's';
+  });
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // B: eye follows the pointer, at most 1.8 units (head coordinates) from its rest position
+  if (!reduce) addEventListener('pointermove', e => {
+    document.querySelectorAll('.goslin.follow').forEach(el => {
+      const eye = el.querySelector('.g-eye'), look = el.querySelector('.g-look');
+      look.removeAttribute('transform');
+      const r = eye.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 200) * 1.8;
+      look.setAttribute('transform', `translate(${(dx / d * k).toFixed(2)} ${(dy / d * k).toFixed(2)})`);
+    });
+  });
+
+  // C: click to honk; every fifth click says something else
+  const lines = ['Honk!', 'Honk!', 'Honk!', 'Honk!', 'PC 16:0/18:1(9Z), please.'];
+  document.querySelectorAll('.goslin.honk').forEach(el => {
+    let clicks = 0, t;
+    el.addEventListener('click', ev => {
+      ev.stopPropagation();
+      el.querySelector('.g-bubble').textContent = lines[clicks++ % lines.length];
+      el.classList.remove('honking'); void el.offsetWidth; el.classList.add('honking');
+      clearTimeout(t); t = setTimeout(() => el.classList.remove('honking'), 1400);
+    });
+  });
+</script>
+</body>
+</html>

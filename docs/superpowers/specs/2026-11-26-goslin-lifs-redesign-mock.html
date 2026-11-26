@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Goslin · LIFS Tools (mock)</title>
+<link rel="stylesheet" href="/files/lifs.css"/>
+<link rel="icon" type="image/svg+xml" href="/files/favicon.svg"/>
+<style>
+  /* ---- mock chrome (not part of the design) ---- */
+  .mockbar { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+    background: #1d2430; color: #cfd6df; padding: 8px 16px; font: 13px/1.3 system-ui, sans-serif; }
+  .mockbar b { color: #fff; font-weight: 600; }
+  .mockbar button { font: inherit; padding: 5px 12px; border: 1px solid #4b5563; background: transparent; color: #cfd6df; cursor: pointer; }
+  .mockbar button[aria-pressed="true"] { background: #fff; color: #1d2430; border-color: #fff; }
+  .mockbar label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; margin-left: auto; }
+  .screen[hidden] { display: none !important; }
+  .pin { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px;
+    border-radius: 10px; background: var(--lifs-rose); color: #fff; font: 600 11px/1 system-ui, sans-serif; vertical-align: middle; margin: 0 4px; }
+  body:not(.notes) .pin, body:not(.notes) .notes-panel { display: none; }
+  .notes-panel { border: 1px dashed var(--lifs-rose); background: #fbf4f8; padding: 14px 16px; }
+  .notes-panel h3 { font-size: 15px; margin-bottom: 8px; color: var(--lifs-rose); }
+  .notes-panel ol { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; font-size: 13px; }
+  .notes-panel li { display: flex; gap: 8px; align-items: baseline; }
+
+  /* ---- page building blocks proposed for Goslin ---- */
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+  @media (max-width: 899.98px) { .cols { grid-template-columns: 1fr; } }
+  .names { position: relative; }
+  .names textarea { width: 100%; min-height: 340px; resize: vertical; padding: 12px 14px; border: 1px solid var(--lifs-line);
+    font: 13px/1.7 var(--lifs-mono); color: var(--lifs-ink); background: #fff; border-radius: 0; }
+  .names textarea:focus { outline: none; border-color: var(--lifs-primary); box-shadow: inset 0 0 0 1px var(--lifs-primary); }
+  .names--drag textarea { border: 2px dashed var(--lifs-primary); background: var(--lifs-tint); }
+  .count { font: 12px var(--lifs-mono); color: var(--lifs-grey); }
+  .check { display: flex; gap: 10px; align-items: flex-start; }
+  .check input { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--lifs-primary); }
+  .check span { display: flex; flex-direction: column; gap: 2px; }
+  .notation { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 13px; }
+  .notation dt { font-family: var(--lifs-mono); color: var(--lifs-ink); }
+  .notation dd { margin: 0; color: var(--lifs-slate); }
+  .about { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; border-top: 1px solid var(--lifs-line); padding-top: 28px; }
+
+  .head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; }
+  .head__text { display: flex; flex-direction: column; gap: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
+  .fix { border-left: 4px solid var(--lifs-error); }
+  .fix__row { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 6px 12px; align-items: start; padding: 12px 0; border-top: 1px solid var(--lifs-line); }
+  .fix__row:first-of-type { border-top: 0; }
+  .fix__line { font: 12px var(--lifs-mono); color: var(--lifs-grey); padding-top: 10px; }
+  .fix__row input { font-family: var(--lifs-mono); }
+  .fix__row--ok input { border-color: var(--lifs-ok); }
+  .fix__msg { grid-column: 2 / 3; display: flex; flex-direction: column; gap: 4px; }
+  .trace { font: 12.5px var(--lifs-mono); }
+  .trace mark { background: var(--lifs-error-bg); color: var(--lifs-error); text-decoration: underline wavy var(--lifs-error); text-underline-offset: 3px; padding: 0 1px; }
+  .trace .caret { color: var(--lifs-error); }
+
+  .filters { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+  @media (max-width: 699.98px) { .filters { grid-template-columns: 1fr; } }
+  .mono { font-family: var(--lifs-mono); font-size: 12.5px; }
+  .lifs-table td { font-size: 13px; }
+  .xbtn { border: 0; background: none; cursor: pointer; color: var(--lifs-primary); padding: 0 4px; font: 14px var(--lifs-mono); }
+  tr.detail td { background: var(--lifs-paper) !important; padding: 16px 18px 18px; }
+  .kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px 24px; margin: 0 0 14px; }
+  .kv div { display: flex; flex-direction: column; gap: 2px; }
+  .kv dt { font: 10px var(--lifs-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--lifs-grey); }
+  .kv dd { margin: 0; }
+  .db { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pager { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .toast { display: none; }
+  .toast.on { display: flex; }
+  .goslin-hero-logo { flex: 0 1 160px; max-width: 160px; }
+</style>
+</head>
+<body class="notes">
+
+<div class="mockbar" role="toolbar" aria-label="Mock controls">
+  <b>Goslin mocks</b>
+  <button type="button" data-show="input" aria-pressed="true">1 · Input page</button>
+  <button type="button" data-show="result" aria-pressed="false">2 · Result page</button>
+  <label><input type="checkbox" id="toggleNotes" checked/> Show notes for #121</label>
+</div>
+
+<header id="top">
+  <a class="lifs-skip-link" href="#main">Skip to content</a>
+  <div class="lifs-bar">
+    <a class="lifs-bar__brand" href="#">
+      <img class="lifs-bar__logo" src="/files/lifs-bildmarke.png" alt="" width="37" height="46"/>
+      <span class="lifs-bar__name"><span>Goslin</span><small>LIFS Tools</small></span>
+    </a>
+    <nav class="lifs-bar__nav" aria-label="Main">
+      <a class="lifs-bar__item lifs-bar__item--active" href="#">Harmonize</a>
+      <a class="lifs-bar__item" href="#">Documentation</a>
+      <a class="lifs-bar__item" href="#">REST API</a>
+      <a class="lifs-bar__item" href="#">LIFS Tools ↗</a>
+    </nav>
+    <a class="lifs-bar__icon" href="#" aria-label="Goslin on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+  </div>
+</header>
+
+<!-- ===================== 1. INPUT PAGE ===================== -->
+<main id="main" class="lifs-main screen" data-screen="input">
+
+  <section class="lifs-hero" aria-labelledby="t1">
+    <div class="lifs-hero__text">
+      <p class="lifs-eyebrow">LIFS Tools · Lipid nomenclature</p>
+      <h1 id="t1">Harmonize lipid names <span class="pin">5</span><span class="pin">E</span></h1>
+      <p class="lifs-lead lifs-prose">Goslin reads lipid names written in the
+        <a href="#">updated shorthand nomenclature</a>, LIPID MAPS, SwissLipids, HMDB and older notations,
+        and returns one harmonized name per lipid with its structural level, sum formula, exact mass and
+        matching LIPID MAPS, SwissLipids and ChEBI entries.</p>
+      <p class="lifs-note lifs-prose">Is a lipid class supported? Check the <a href="#">list of supported lipid classes</a>.</p>
+    </div>
+    <img class="lifs-hero__art goslin-hero-logo" src="/files/goslin-logo.svg" alt="Goslin logo" width="160" height="160"/>
+  </section>
+
+  <div class="cols">
+    <form class="lifs-card" onsubmit="event.preventDefault(); show('result');">
+      <div class="lifs-card__head">
+        <h2 class="lifs-card__title">Lipid names</h2>
+        <span class="count" id="count" aria-live="polite">0 names · up to 5,000</span>
+      </div>
+
+      <div class="lifs-row">
+        <button type="button" class="lifs-btn lifs-btn--outlined lifs-btn--small" id="loadExample">Load example names</button><span class="pin">3</span>
+        <button type="button" class="lifs-btn lifs-btn--text lifs-btn--small" onclick="document.getElementById('file').click()">Upload a file…</button>
+        <input type="file" id="file" class="visually-hidden" accept=".txt,.csv,.tsv"/>
+        <span class="lifs-spacer"></span>
+        <button type="button" class="lifs-btn lifs-btn--text lifs-btn--small" id="clear">Clear</button>
+      </div>
+
+      <div class="names" id="names">
+        <label for="lipids" class="visually-hidden">Lipid names, one per line</label>
+        <textarea id="lipids" spellcheck="false" aria-describedby="lipids-help"
+          placeholder="One lipid name per line, for example&#10;PC 16:0/18:1(9Z)&#10;Cer(d18:1/16:0)&#10;TG 52:2&#10;SM d35:1 [M+H]1+"></textarea>
+      </div>
+      <p class="lifs-note" id="lipids-help">Type or paste names, one per line, or drop a <span class="lifs-mono">.txt</span> file onto the box (up to 10 MB).
+        <span class="pin">1</span><span class="pin">2</span></p>
+
+      <label class="check">
+        <input type="checkbox" checked/>
+        <span><b>Skip invalid names</b> <span class="pin">4</span>
+          <span class="lifs-note">Names that cannot be read are listed at the top of the result, where you can correct and re-run them.</span></span>
+      </label>
+
+      <div class="lifs-card__actions">
+        <button type="submit" class="lifs-btn lifs-btn--filled">Harmonize</button>
+      </div>
+    </form>
+
+    <div class="lifs-stack">
+      <section class="lifs-card lifs-card--accent" aria-labelledby="n-title">
+        <h2 id="n-title" class="lifs-card__title">Accepted notations</h2>
+        <dl class="notation">
+          <dt>PC 16:0/18:1(9Z)</dt><dd>Shorthand 2020</dd>
+          <dt>PC(16:0/18:1(9Z))</dt><dd>LIPID MAPS</dd>
+          <dt>Cer(d18:1/16:0)</dt><dd>Older shorthand</dd>
+          <dt>TG 52:2</dt><dd>Species level</dd>
+          <dt>SM d35:1 [M+H]1+</dt><dd>With adduct</dd>
+        </dl>
+        <a href="#">All supported lipid classes →</a>
+      </section>
+      <section class="lifs-card" aria-labelledby="s-title">
+        <h2 id="s-title" class="lifs-card__title">For scripts</h2>
+        <p class="lifs-note"><a href="#">REST API</a> · <a href="#">jgoslin</a> · <a href="#">pygoslin</a> · <a href="#">rgoslin</a> · <a href="#">cppgoslin</a></p>
+      </section>
+      <section class="lifs-card" aria-labelledby="c-title">
+        <h2 id="c-title" class="lifs-card__title">How to cite</h2>
+        <p class="lifs-note lifs-prose">Kopczynski et al., <i>Goslin 2.0 Implements the Recent Lipid Shorthand Nomenclature</i>, Anal. Chem. 2022. <a href="#">More</a></p>
+      </section>
+    </div>
+  </div>
+
+  <section class="about" aria-label="About Goslin">
+    <div class="lifs-stack">
+      <h2>About Goslin</h2>
+      <p class="lifs-note lifs-prose">Goslin parses lipid names with a set of grammars and reports the level at which a
+        name describes the lipid, from species (<span class="lifs-mono">PC 34:1</span>) to complete structure. Levels and names follow the
+        <a href="#">updated lipid shorthand nomenclature</a>. We work with the <a href="#">Lipidomics Standards Initiative</a> on the nomenclature used to report lipid identifications.</p>
+    </div>
+    <div class="lifs-stack">
+      <h2>Found a problem?</h2>
+      <p class="lifs-note lifs-prose">If a name is read incorrectly, <a href="#">report it on GitHub</a> or <a href="#">contact us</a>.
+        LIFS is funded by the BMFTR as part of <a href="#">de.NBI</a>.</p>
+    </div>
+  </section>
+
+  <aside class="notes-panel" aria-label="Notes">
+    <h3>What changed on this page, and why</h3>
+    <ol>
+      <li><span class="pin">1</span> One large text box replaces the numbered input rows. Pasting, typing and editing work as in any editor.</li>
+      <li><span class="pin">2</span> The +, −, "remove all" and "reset" buttons are gone. "Clear" empties the box. The separate "Lipid File Input" tab is gone too: "Upload a file…" or dropping a file puts its lines into the same box, so users can check them before submitting.</li>
+      <li><span class="pin">3</span> The box starts empty. "Load example names" fills in the 56 names that were preloaded until now.</li>
+      <li><span class="pin">4</span> "Skip invalid names" is checked by default. Unchecked, the page would come back with the names that cannot be parsed listed by line number above the box.</li>
+      <li><span class="pin">E</span> The Goslin logo (160 px) replaces the LIFS logo in the hero of the start page. The app bar keeps the shared LIFS mark, as in every LIFS tool.</li>
+      <li><span class="pin">5</span> "Harmonize" replaces "Normalize" in the title, the button, the navigation and the result page. The REST API keeps its paths.</li>
+    </ol>
+  </aside>
+</main>
+
+<!-- ===================== 2. RESULT PAGE ===================== -->
+<main class="lifs-main screen" data-screen="result" hidden>
+
+  <div class="head">
+    <div class="head__text">
+      <p class="lifs-eyebrow">Result · 56 names submitted</p>
+      <h1>Harmonized lipid names</h1>
+    </div>
+    <div class="lifs-row">
+      <a class="lifs-btn lifs-btn--filled" href="#"><svg class="lifs-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>Download table (TSV)</a><span class="pin">C</span>
+      <button type="button" class="lifs-btn lifs-btn--text" onclick="show('input')">New input</button>
+    </div>
+  </div>
+
+  <div class="lifs-callout lifs-callout--warn" role="status">
+    <div>
+      <b>53 of 56 names harmonized. 3 names could not be read.</b>
+      <div class="chips">
+        <span class="lifs-lvl lifs-lvl--ok">53 harmonized</span>
+        <span class="lifs-lvl lifs-lvl--error" id="failChip">3 not read</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="lifs-callout lifs-callout--ok toast" id="toast" role="status">
+    <span>2 corrected names were harmonized and added to the table. 1 name still needs attention.</span>
+    <button type="button" class="lifs-callout__close" onclick="this.parentElement.classList.remove('on')" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <section class="lifs-card fix" aria-labelledby="fix-title">
+    <div class="lifs-card__head">
+      <h2 id="fix-title" style="font-size:18px">Correct these names <span class="pin">A</span></h2>
+      <span class="count">3 names</span>
+    </div>
+    <p class="lifs-note">Edit a name and re-run it. The underlined part shows where Goslin stopped reading.</p>
+
+    <div class="fix__row" data-fixable="1">
+      <span class="fix__line">line 34</span>
+      <div class="lifs-stack" style="gap:6px">
+        <label class="visually-hidden" for="f1">Name from line 34</label>
+        <input class="lifs-input" id="f1" value="PC(18:2-20:4"/>
+        <div class="fix__msg">
+          <span class="trace">PC(18:2-20:4<mark>&nbsp;</mark></span>
+          <span class="lifs-note">The name ends after character 12. A closing bracket may be missing.</span>
+        </div>
+      </div>
+      <button type="button" class="lifs-btn lifs-btn--text lifs-btn--small" aria-label="Remove line 34">Remove</button>
+    </div>
+
+    <div class="fix__row" data-fixable="1">
+      <span class="fix__line">line 51</span>
+      <div class="lifs-stack" style="gap:6px">
+        <label class="visually-hidden" for="f2">Name from line 51</label>
+        <input class="lifs-input" id="f2" value="TG 16:0_18:1_18:2x"/>
+        <div class="fix__msg">
+          <span class="trace">TG 16:0_18:1_18:2<mark>x</mark></span>
+          <span class="lifs-note">Not a valid name after character 17.</span>
+        </div>
+      </div>
+      <button type="button" class="lifs-btn lifs-btn--text lifs-btn--small" aria-label="Remove line 51">Remove</button>
+    </div>
+
+    <div class="fix__row">
+      <span class="fix__line">line 9</span>
+      <div class="lifs-stack" style="gap:6px">
+        <label class="visually-hidden" for="f3">Name from line 9</label>
+        <input class="lifs-input" id="f3" value="Cholesterl"/>
+        <div class="fix__msg">
+          <span class="trace"><mark>Cholesterl</mark></span>
+          <span class="lifs-note lifs-prose">No grammar recognises this head group. Check the <a href="#">supported lipid classes</a>.</span>
+        </div>
+      </div>
+      <button type="button" class="lifs-btn lifs-btn--text lifs-btn--small" aria-label="Remove line 9">Remove</button>
+    </div>
+
+    <div class="lifs-card__actions">
+      <button type="button" class="lifs-btn lifs-btn--filled" id="rerun">Re-run corrected names</button>
+      <span class="lifs-note" style="align-self:center">The 53 harmonized names are kept.</span>
+    </div>
+  </section>
+
+  <section class="lifs-section" aria-labelledby="ok-title">
+    <div class="lifs-section__head">
+      <h2 id="ok-title">Harmonized <span class="lifs-badge" id="okCount">53</span> <span class="pin">B</span></h2>
+    </div>
+
+    <div class="filters">
+      <div class="lifs-field"><label for="q">Filter</label><input id="q" type="search" placeholder="Name, class or formula"/></div>
+      <div class="lifs-field"><label for="lvl">Level</label>
+        <select id="lvl"><option>All levels</option><option>Species</option><option>Molecular species</option><option>sn position</option><option>Structure defined</option><option>Full structure</option><option>Complete structure</option></select></div>
+      <div class="lifs-field"><label for="cat">LIPID MAPS category</label>
+        <select id="cat"><option>All categories</option><option>Fatty acyls [FA]</option><option>Glycerolipids [GL]</option><option>Glycerophospholipids [GP]</option><option>Sphingolipids [SP]</option><option>Sterol lipids [ST]</option></select></div>
+    </div>
+
+    <div class="lifs-table-wrap">
+      <table class="lifs-table" id="tbl">
+        <thead><tr>
+          <th scope="col" style="width:28px"><span class="visually-hidden">Details</span></th>
+          <th scope="col" class="lifs-num">Line <span class="pin">D</span></th>
+          <th scope="col">Submitted</th>
+          <th scope="col">Harmonized name</th>
+          <th scope="col">Level</th>
+          <th scope="col">Category</th>
+          <th scope="col">Formula</th>
+          <th scope="col" class="lifs-num">Exact mass</th>
+          <th scope="col">Databases</th>
+        </tr></thead>
+        <tbody>
+                              <tr><td><button class="xbtn" aria-expanded="false" aria-label="Show details">▸</button></td><td class="lifs-num">7</td><td class="mono">Cer(d18:1/18:0)</td><td class="mono"><b>Cer 18:1;O2/18:0</b></td><td>sn position</td><td>SP</td><td class="mono">C36H71NO3</td><td class="lifs-num">565.5434</td><td><span class="lifs-badge">LM 2</span> <span class="lifs-badge">SL 1</span> <span class="lifs-badge">ChEBI 1</span></td></tr>
+          <tr><td><button class="xbtn" aria-expanded="false" aria-label="Show details">▸</button></td><td class="lifs-num">11</td><td class="mono">DG(18:2_20:4)</td><td class="mono"><b>DG 18:2_20:4</b></td><td>Molecular species</td><td>GL</td><td class="mono">C41H68O5</td><td class="lifs-num">640.5067</td><td><span class="lifs-badge">LM 1</span> <span class="lifs-badge">SL 1</span></td></tr>
+          <tr><td><button class="xbtn" aria-expanded="true" aria-label="Hide details">▾</button></td><td class="lifs-num">45</td><td class="mono">PE(16:2(9Z,12Z)/18:1(6Z))</td><td class="mono"><b>PE 16:2(9Z,12Z)/18:1(6Z)</b></td><td>Full structure</td><td>GP</td><td class="mono">C39H72NO8P</td><td class="lifs-num">713.4996</td><td><span class="lifs-badge lifs-badge--plain">none</span></td></tr>
+          <tr class="detail"><td colspan="9">
+            <dl class="kv">
+              <div><dt>Grammar</dt><dd>LIPID MAPS</dd></div>
+              <div><dt>Adduct</dt><dd class="mono">[M]</dd></div>
+              <div><dt>LIPID MAPS category</dt><dd><a href="#">Glycerophospholipids [GP] ↗</a></dd></div>
+              <div><dt>LIPID MAPS class</dt><dd><a href="#">Diacylglycerophosphoethanolamines [GP0201] ↗</a></dd></div>
+              <div><dt>C atoms · double bonds</dt><dd class="mono">34 · 3</dd></div>
+              <div><dt>Database entries</dt><dd class="lifs-note">No LIPID MAPS, SwissLipids or ChEBI entry for this name</dd></div>
+            </dl>
+            <div class="lifs-table-wrap">
+              <table class="lifs-table">
+                <thead><tr><th>Chain</th><th>Position</th><th class="lifs-num"># C</th><th class="lifs-num"># DB</th><th>Bond to head group</th><th>DB positions</th><th>Functional groups</th></tr></thead>
+                <tbody>
+                  <tr><td>FA1</td><td>sn1</td><td class="lifs-num">16</td><td class="lifs-num">2</td><td>Ester</td><td class="mono">9Z, 12Z</td><td class="lifs-note">none</td></tr>
+                  <tr><td>FA2</td><td>sn2</td><td class="lifs-num">18</td><td class="lifs-num">1</td><td>Ester</td><td class="mono">6Z</td><td class="lifs-note">none</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </td></tr>
+          <tr class="new-row" hidden><td></td><td class="lifs-num">34</td><td class="mono">PC(18:2-20:4)</td><td class="mono"><b>PC 18:2_20:4</b> <span class="lifs-lvl lifs-lvl--ok">corrected</span></td><td>Molecular species</td><td>GP</td><td class="mono">C46H80NO8P</td><td class="lifs-num">805.5622</td><td><span class="lifs-badge">LM 1</span></td></tr>
+          <tr><td><button class="xbtn" aria-expanded="false" aria-label="Show details">▸</button></td><td class="lifs-num">35</td><td class="mono">PC(18:2_20:4)</td><td class="mono"><b>PC 18:2_20:4</b></td><td>Molecular species</td><td>GP</td><td class="mono">C46H80NO8P</td><td class="lifs-num">805.5622</td><td><span class="lifs-badge">LM 1</span> <span class="lifs-badge">SL 1</span></td></tr>
+          <tr><td><button class="xbtn" aria-expanded="false" aria-label="Show details">▸</button></td><td class="lifs-num">53</td><td class="mono">SM(d35:1)</td><td class="mono"><b>SM 35:1;O2</b></td><td>Species</td><td>SP</td><td class="mono">C40H81N2O6P</td><td class="lifs-num">716.5832</td><td><span class="lifs-badge">SL 1</span></td></tr>
+          <tr class="new-row" hidden><td></td><td class="lifs-num">51</td><td class="mono">TG 16:0_18:1_18:2</td><td class="mono"><b>TG 16:0_18:1_18:2</b> <span class="lifs-lvl lifs-lvl--ok">corrected</span></td><td>Molecular species</td><td>GL</td><td class="mono">C55H100O6</td><td class="lifs-num">856.7520</td><td><span class="lifs-badge">LM 1</span></td></tr>
+          <tr><td><button class="xbtn" aria-expanded="false" aria-label="Show details">▸</button></td><td class="lifs-num">52</td><td class="mono">SM d35:1 [M+H]1+</td><td class="mono"><b>SM 35:1;O2[M+H]1+</b></td><td>Species</td><td>SP</td><td class="mono">C40H82N2O6P</td><td class="lifs-num">717.5905</td><td><span class="lifs-badge">SL 1</span></td></tr>
+          <tr><td><button class="xbtn" aria-expanded="false" aria-label="Show details">▸</button></td><td class="lifs-num">55</td><td class="mono">TG(14:0_16:0_18:1)</td><td class="mono"><b>TG 14:0_16:0_18:1</b></td><td>Molecular species</td><td>GL</td><td class="mono">C51H96O6</td><td class="lifs-num">804.7207</td><td><span class="lifs-badge">LM 1</span> <span class="lifs-badge">SL 1</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pager">
+      <span class="lifs-note">Rows 1–25 of 53 · sorted by line</span>
+      <div class="lifs-row"><button class="lifs-btn lifs-btn--text lifs-btn--small" disabled>Previous</button><button class="lifs-btn lifs-btn--outlined lifs-btn--small">Next</button>
+        <a class="lifs-btn lifs-btn--filled lifs-btn--small" href="#"><svg class="lifs-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>Download table (TSV)</a></div>
+    </div>
+  </section>
+
+  <aside class="notes-panel" aria-label="Notes">
+    <h3>What changed on this page, and why</h3>
+    <ol>
+      <li><span class="pin">A</span> Names that could not be read come first, each with its line number, Goslin's message, and the part where reading stopped underlined. Users fix them in place and press "Re-run corrected names". Only those names are sent again, and the ones that now work join the table, marked "corrected". "Remove" drops a name from the result.</li>
+      <li><span class="pin">B</span> A filterable table replaces the collapsed card per name: one row per lipid with the main facts. ▸ opens the details that used to fill each card (grammar, LIPID MAPS links, database entries, chain table). Filtering by level or category helps with long lists.</li>
+      <li><span class="pin">C</span> "Download table (TSV)" is the main action of the page: a filled button next to the title, repeated under the table. The file has the same columns as the table plus every detail column, and includes the names that still fail, with their messages.</li>
+      <li><span class="pin">D</span> Every name keeps the line number it had in the text box or file (blank lines count, so the numbers match the user's own file). The table is sorted by line by default. Corrected names keep their original line and go back to their place in that order. The TSV starts with the same line column.</li>
+      <li>Masses and formulas are illustrative here, not taken from a Goslin run.</li>
+    </ol>
+  </aside>
+</main>
+
+<footer class="lifs-footer">
+  <div class="lifs-footer__build">2.3.0-SNAPSHOT · built 2026-11-26 from <a href="#">3a32d7a</a> on master · based on <a href="#">jgoslin</a> 2.2.1</div>
+  <div class="lifs-copyright">
+    <img src="/files/lifs-signet.png" alt="" width="89" height="30"/>
+    <span>© 2016 - 2026 LIFS Tools Consortium · Hosted on the de.NBI Cloud</span>
+    <a class="lifs-copyright__top" href="#top">Top <span aria-hidden="true">▲</span></a>
+  </div>
+</footer>
+
+<script>
+  const EXAMPLE = `12-HETE
+12S-HETE-d8
+13S-HODE-(d4)
+BMP 18:1-18:1
+CDP-DG 16:0/18:1(9Z)
+Cer 18:1;2/16:0
+Cer(d18:1/18:0)
+Cholesterol(d7)
+CL 18:3(9Z,12Z,15Z)/16:0/22:5(16Z,10Z,19Z,13Z,7Z)/20:0
+CL(16:0/16:0/16:0/20:0)
+DG(18:2_20:4)
+DGDG 16:0-16:1
+FA 23:0;3Me,13Me,19Me
+FA(16:0)
+FAHFA 16:0;7O(FA 18:1(9Z))
+GalCer(d18:1(4E)/20:0)
+GB3 18:1;2/24:1
+Gb3(d18:1(4E)/24:1(15Z))
+GlcCer(d18:1(4E)/20:0)
+Glucosylceramide (d18:1/25:0)
+Hex2Cer 18:1;2/12:0
+Hex2Cer 18:1;O3/22:0;O
+HexCer(d18:1/20:0)
+LBPA(18:1(11Z)/0:0/32:5(14Z,17Z,20Z,23Z,26Z)/0:0)
+LCB 17:1;2
+LPC(20:3)
+LPC(O-22:1)
+LPE O 19:1p
+M(IP)2C(t20:0/26:0(2OH))
+MAG 16:0
+MLCL (20:2(11Z,14Z)/20:1(11Z)/20:0/0:0)
+MLCL 18:1-18:1-18:1
+N-ethyl-5Z,8Z,11Z,14Z-eicosatetraenoyl amine
+Palmitic acid
+PC(18:2_20:4)
+PC(21:0/22:6(4Z,7Z,10Z,13Z,16Z,19Z))
+PC(O-40:7)
+PC(P-30:0)
+PE 16:1(6Z)/16:0;3oxo;5OH[R],8OH
+PE 16:2-18:3;1
+PE 16:2/18:3;1
+PE 18:3;1-16:2
+PE O 18:0a/22:6
+PE P-16:0/18:1(9)
+PE(16:2(9Z,12Z)/18:1(6Z))
+PE(P-16:0/22:6)
+PEt 16:0-18:1
+PIP[4'] 6:0/22:5(16Z,10Z,19Z,13Z,7Z)
+PIP2 21:0-22:6
+PS 18:2-22:1
+SHexCer 18:0;3/26:0;1
+SM d35:1 [M+H]1+
+SM(d35:1)
+TG(14:0_16:0_18:1)
+TG(18:1/10:0/16:0)
+TG(20:0/22:3(10Z,13Z,16Z)/22:5(7Z,10Z,13Z,16Z,19Z))[iso6]`;
+  const ta = document.getElementById('lipids'), count = document.getElementById('count');
+  const upd = () => { const n = ta.value.split('\n').filter(l => l.trim()).length; count.textContent = n.toLocaleString('en') + (n === 1 ? ' name' : ' names') + ' · up to 5,000'; };
+  ta.addEventListener('input', upd);
+  document.getElementById('loadExample').onclick = () => { ta.value = EXAMPLE; upd(); ta.focus(); };
+  document.getElementById('clear').onclick = () => { ta.value = ''; upd(); ta.focus(); };
+  const box = document.getElementById('names');
+  ['dragenter','dragover'].forEach(e => box.addEventListener(e, ev => { ev.preventDefault(); box.classList.add('names--drag'); }));
+  ['dragleave','drop'].forEach(e => box.addEventListener(e, ev => { ev.preventDefault(); box.classList.remove('names--drag'); }));
+  box.addEventListener('drop', ev => { const f = ev.dataTransfer.files[0]; if (f) f.text().then(t => { ta.value = t; upd(); }); });
+  document.getElementById('file').onchange = ev => { const f = ev.target.files[0]; if (f) f.text().then(t => { ta.value = t; upd(); }); };
+
+  function show(name) {
+    document.querySelectorAll('.screen').forEach(s => s.hidden = s.dataset.screen !== name);
+    document.querySelectorAll('[data-show]').forEach(b => b.setAttribute('aria-pressed', b.dataset.show === name));
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('[data-show]').forEach(b => b.onclick = () => show(b.dataset.show));
+  document.getElementById('toggleNotes').onchange = e => document.body.classList.toggle('notes', e.target.checked);
+
+  document.getElementById('rerun').onclick = () => {
+    document.querySelectorAll('.fix__row[data-fixable]').forEach(r => r.remove());
+    document.querySelectorAll('.new-row').forEach(r => r.hidden = false);
+    document.getElementById('okCount').textContent = '55';
+    document.getElementById('failChip').textContent = '1 not read';
+    document.querySelector('#fix-title + .count, .fix .count').textContent = '1 name';
+    document.getElementById('toast').classList.add('on');
+  };
+  document.querySelectorAll('.xbtn').forEach(b => b.onclick = () => {
+    const tr = b.closest('tr'), next = tr.nextElementSibling;
+    if (next && next.classList.contains('detail')) { next.hidden = !next.hidden; const open = !next.hidden; b.textContent = open ? '▾' : '▸'; b.setAttribute('aria-expanded', open); }
+  });
+</script>
+</body>
+</html>
