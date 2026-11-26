@@ -160,4 +160,39 @@ public class LipidNameValidationTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    public void restCapCountsNoBreakSpaceRuns() throws Exception {
+        // 150 x ("C" + 1 no-break space): 300 raw characters of text plus 150 spaces; normalised it is 299 characters
+        String name = "C\u00a0".repeat(150);
+        org.mockito.ArgumentCaptor<List<String>> captor = org.mockito.ArgumentCaptor.forClass(List.class);
+        doReturn(List.of()).when(validationService).validate(anyList());
+        mockMvc.perform(MockMvcRequestBuilders.post("/rest/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request(name + name))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        // a long run of no-break spaces collapses to one space
+        String runs = "C" + "\u00a0".repeat(1000) + "C";
+        mockMvc.perform(MockMvcRequestBuilders.post("/rest/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request(runs))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        org.mockito.Mockito.verify(validationService).validate(captor.capture());
+        assertEquals(List.of("C C"), captor.getValue());
+    }
+
+    @Test
+    public void restCapCountsLeadingUnicodeSpaces() throws Exception {
+        org.mockito.ArgumentCaptor<List<String>> captor = org.mockito.ArgumentCaptor.forClass(List.class);
+        doReturn(List.of()).when(validationService).validate(anyList());
+        mockMvc.perform(MockMvcRequestBuilders.post("/rest/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request("\u2003".repeat(10000) + "PC 32:0"))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        org.mockito.Mockito.verify(validationService).validate(captor.capture());
+        assertEquals(List.of("PC 32:0"), captor.getValue());
+    }
+
 }

@@ -71,13 +71,14 @@ public class LipidNameValidation {
     public ResponseEntity<ValidationResults> validate(
             //@ApiParam(value = "Validation request with list of lipid names and grammars to use. For each grammar, a specialized parser is instantiated and used to parse the lipid name. The first successful parser result is returned. If no parser was successful, the returned list will contain validation messages to help you track down the issue and the name of the last grammar / parser used to validate the lipid name. If you provide an empty list or null for grammars, jgoslin will use the LipidParser internally, which supports all grammars. skipInvalid is currently only relevant to the form based validation. REST service validation will commence on all lipid names.", required = true)
             @RequestBody ValidationRequest validationRequest) {
-        rejectNamesOverLimit(validationRequest.getLipidNames());
+        // The string that is measured is the string that is parsed.
+        List<String> names = normalizedNames(validationRequest.getLipidNames());
         List<ValidationResult> results;
         HttpStatus httpStatus = HttpStatus.OK;
         if (validationRequest.getGrammars() == null || validationRequest.getGrammars().isEmpty()) {
-            results = validationService.validate(validationRequest.getLipidNames());
+            results = validationService.validate(names);
         } else {
-            results = validationService.validate(validationRequest.getLipidNames(), validationRequest.getGrammars());
+            results = validationService.validate(names, validationRequest.getGrammars());
         }
         long failedResults = results.stream().filter((arg0) -> {
             return !arg0.getMessages().isEmpty();
@@ -88,7 +89,7 @@ public class LipidNameValidation {
         }
         ValidationResults validationResults = new ValidationResults();
         validationResults.setFailedToParse(failedResults);
-        validationResults.setTotalReceived(Long.valueOf(validationRequest.getLipidNames().size()));
+        validationResults.setTotalReceived(Long.valueOf(names.size()));
         validationResults.setTotalParsed(Long.valueOf(results.size()));
         validationResults.setResults(results);
         ResponseEntity re = ResponseEntity.status(httpStatus).body(validationResults);
@@ -101,17 +102,20 @@ public class LipidNameValidation {
         return ProblemDetail.forStatusAndDetail(e.getStatusCode(), e.getReason());
     }
 
-    /** Parse time grows steeply with name length, so long names are refused before anything is parsed. */
-    private static void rejectNamesOverLimit(List<String> names) {
+    /** Normalises every name once, as the web form does, and refuses any longer than the limit; parse time grows steeply with length. */
+    private static List<String> normalizedNames(List<String> names) {
         if (names == null) {
-            return;
+            return null;
         }
+        List<String> normalized = new java.util.ArrayList<>(names.size());
         for (int i = 0; i < names.size(); i++) {
-            String name = names.get(i);
-            if (name != null && NameEntries.normalize(name).length() > NameEntries.MAX_NAME_LENGTH) {
+            String name = names.get(i) == null ? null : NameEntries.normalize(names.get(i));
+            if (name != null && name.length() > NameEntries.MAX_NAME_LENGTH) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Name " + (i + 1) + " is longer than " + NameEntries.MAX_NAME_LENGTH + " characters.");
             }
+            normalized.add(name);
         }
+        return normalized;
     }
 }
