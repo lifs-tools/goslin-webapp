@@ -27,6 +27,17 @@ public final class NameEntries {
     }
 
     /**
+     * Trims, turns non-breaking spaces into spaces and collapses whitespace
+     * runs to one space.
+     *
+     * @param line the raw line
+     * @return the normalised line
+     */
+    public static String normalize(String line) {
+        return line.replace('\u00a0', ' ').strip().replaceAll("\\s+", " ");
+    }
+
+    /**
      * Splits text into entries. Line numbers are 1-based positions in the
      * submitted text; blank lines count but produce no entry.
      *
@@ -43,7 +54,7 @@ public final class NameEntries {
         List<NameEntry> entries = new ArrayList<>();
         int count = 0;
         for (int i = 0; i < lines.length; i++) {
-            String name = lines[i].replace(' ', ' ').strip().replaceAll("\\s+", " ");
+            String name = normalize(lines[i]);
             if (name.isEmpty()) {
                 continue;
             }
