@@ -71,14 +71,14 @@
                                            th:id="'edit-' + ${line}" th:name="'edit[' + ${line} + ']'" th:value="${name}"
                                            th:attr="maxlength=${maxNameLength},aria-describedby=${e != null ? 'hint-' + line : null}"/>
                                     <div class="fix__msg">
-                                        <span class="trace" th:if="${e != null}" th:with="marked=${e.marked(name)}"><span th:text="${e.beforeMark(name)}">PC(18:2-20:4</span><mark
+                                        <span class="trace" th:if="${e != null and e.hint().positional()}" th:with="marked=${e.marked(name)}"><span th:text="${e.beforeMark(name)}">PC(18:2-20:4</span><mark
                                               th:if="${!#strings.isEmpty(marked)}" th:text="${marked}">x</mark><mark th:if="${#strings.isEmpty(marked)}">&nbsp;</mark><span
                                               th:text="${e.afterMark(name)}"></span></span>
-                                        <span class="trace" th:if="${e == null}" th:text="${name}">name</span>
+                                        <span class="trace" th:if="${e == null or !e.hint().positional()}" th:text="${name}">name</span>
                                         <span class="lifs-note lifs-prose" th:id="'hint-' + ${line}" th:if="${e != null and e.hint().name() == 'HEAD_GROUP'}"
                                               th:utext="#{result.fix.headGroup(@{/documentation#lipid-classes})}">Goslin does not recognise the head group. …</span>
                                         <span class="lifs-note" th:id="'hint-' + ${line}" th:if="${e != null and e.hint().name() != 'HEAD_GROUP'}"
-                                              th:text="#{${'fix.hint.' + #strings.toLowerCase(e.hint().name())}(${e.position() + 1}, ${e.marked(name)})}">A closing bracket is missing.</span>
+                                              th:text="#{${'fix.hint.' + #strings.toLowerCase(e.hint().name())}(${e.position() + 1}, ${e.marked(name)}, ${timeLimitSeconds})}">A closing bracket is missing.</span>
                                         <details class="fix__original">
                                             <summary th:text="#{result.fix.original}">Goslin’s message</summary>
                                             <p class="lifs-mono" th:text="${e != null ? e.originalMessage() : #strings.listJoin(f.result().messages, ' | ')}">Parser message</p>

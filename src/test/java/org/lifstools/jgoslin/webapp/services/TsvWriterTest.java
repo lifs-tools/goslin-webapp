@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.lifstools.jgoslin.webapp.domain.NameEntry;
 import org.lifstools.jgoslin.webapp.domain.ResultView;
-import org.lifstools.lifs.webapps.common.service.AnalyticsTracker;
 import org.lifstools.lifs.webapps.common.service.DefaultSessionIdGenerator;
 import org.lifstools.lifs.webapps.common.service.storage.FileSystemStorageService;
 import org.lifstools.lifs.webapps.common.service.storage.StorageProperties;
@@ -31,10 +30,11 @@ class TsvWriterTest {
         StorageProperties props = new StorageProperties();
         props.setLocation(dir.toString());
         var storage = new FileSystemStorageService(props);
-        var validation = new LipidNameValidationService(mock(AnalyticsTracker.class), mock(ExternalDatabaseMappingLoader.class));
+        var validation = new LipidNameValidationService(mock(ExternalDatabaseMappingLoader.class),
+                org.lifstools.jgoslin.webapp.config.ParserProperties.defaults());
         writer = new TsvWriter(validation);
         service = new ResultService(new ResultStore(storage, new DefaultSessionIdGenerator()), validation,
-                new ParseStopLocator(), writer, storage, 20000);
+                writer, storage, 20000);
     }
 
     private ResultView view() {

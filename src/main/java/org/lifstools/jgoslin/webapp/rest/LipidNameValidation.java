@@ -19,6 +19,7 @@ import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
 import org.lifstools.jgoslin.webapp.domain.ValidationResult;
 import org.lifstools.jgoslin.webapp.domain.ValidationResults;
 import org.lifstools.jgoslin.webapp.services.LipidNameValidationService;
+import org.lifstools.jgoslin.webapp.services.UsageCounter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.List;
@@ -48,10 +49,12 @@ public class LipidNameValidation {
     private static final Logger log = LoggerFactory.getLogger(LipidGrammars.class);
 
     private final LipidNameValidationService validationService;
+    private final UsageCounter usageCounter;
 
     @Autowired
-    public LipidNameValidation(LipidNameValidationService validationService) {
+    public LipidNameValidation(LipidNameValidationService validationService, UsageCounter usageCounter) {
         this.validationService = validationService;
+        this.usageCounter = usageCounter;
     }
 
 //    @ApiOperation(value = "Parse and validate the provided lipid names.", response = ValidationResults.class)
@@ -63,7 +66,10 @@ public class LipidNameValidation {
 //    })
     @Operation(summary = "Parse and validate the provided lipid names.",
             description = "Each name may have at most 300 characters (after trimming and collapsing whitespace). "
-            + "If any name is longer, the whole request is rejected with 400 and no name is parsed.")
+            + "If any name is longer, the whole request is rejected with 400 and no name is parsed. "
+            + "Parsing has a time limit per name (20 seconds by default) and per request (120 seconds by default): "
+            + "a name that takes longer, and every name left when the request's limit is reached, is returned as "
+            + "a failed result whose message says so.")
     @ApiResponse(responseCode = "200", description = "Successfully parsed and validated all lipid names.")
     @ApiResponse(responseCode = "400", description = "At least one name could not be parsed (the body is the result object), "
             + "or a name is longer than 300 characters (the body is a problem detail naming its position; nothing was parsed).")
@@ -73,6 +79,7 @@ public class LipidNameValidation {
             @RequestBody ValidationRequest validationRequest) {
         // The string that is measured is the string that is parsed.
         List<String> names = normalizedNames(validationRequest.getLipidNames());
+        usageCounter.countValidation();
         List<ValidationResult> results;
         HttpStatus httpStatus = HttpStatus.OK;
         if (validationRequest.getGrammars() == null || validationRequest.getGrammars().isEmpty()) {

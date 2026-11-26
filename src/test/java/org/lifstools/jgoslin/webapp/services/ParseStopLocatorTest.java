@@ -8,8 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ParseStopLocatorTest {
 
-    private final ParseStopLocator locator = new ParseStopLocator();
-
     @Test
     void unsupportedCharacterWins() {
         String name = "PC 16:0–18:1";
@@ -64,28 +62,10 @@ public class ParseStopLocatorTest {
     }
 
     @Test
-    void realStopShorthand() {
-        assertEquals(7, locator.furthestStop("PC 34:1x"));
-    }
-
-    @Test
-    void realStopGoslinMolecular() {
-        assertEquals(17, locator.furthestStop("TG 16:0_18:1_18:2x"));
-    }
-
-    @Test
-    void realStopLipidMapsStyle() {
-        assertEquals(13, locator.furthestStop("SM d18:1/24:0)"));
-    }
-
-    @Test
-    void realStopUnclosedBracket() {
-        assertEquals(2, locator.furthestStop("PC(18:2-20:4"));
-        assertEquals(Hint.MISSING_CLOSING_BRACKET, locator.explain("PC(18:2-20:4", "m").hint());
-    }
-
-    @Test
-    void realStopUnknownHeadGroup() {
-        assertEquals(Hint.HEAD_GROUP, locator.explain("Cholesterl", "m").hint());
+    void stopIsTheErrorMessageIfThatBeginsTheName() {
+        assertEquals(7, ParseStopLocator.stopOf("PC 34:1x", "PC 34:1"));
+        assertEquals(0, ParseStopLocator.stopOf("PC 34:1x", "TG"));
+        assertEquals(0, ParseStopLocator.stopOf("PC 34:1x", ""));
+        assertEquals(0, ParseStopLocator.stopOf("PC 34:1x", null));
     }
 }

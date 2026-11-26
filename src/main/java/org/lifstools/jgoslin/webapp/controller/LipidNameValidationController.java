@@ -37,6 +37,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.lifstools.jgoslin.domain.LipidCategory;
 import org.lifstools.jgoslin.domain.LipidClasses;
 import org.lifstools.jgoslin.webapp.config.NewsPropertyConfig;
+import org.lifstools.jgoslin.webapp.config.ParserProperties;
 import org.lifstools.jgoslin.webapp.domain.AppInfo;
 import org.lifstools.jgoslin.webapp.domain.GoslinStorageServiceSlots;
 import org.lifstools.jgoslin.webapp.domain.HarmonizeForm;
@@ -48,8 +49,10 @@ import org.lifstools.jgoslin.webapp.domain.RerunOutcome;
 import org.lifstools.jgoslin.webapp.domain.ResultTableRow;
 import org.lifstools.jgoslin.webapp.domain.ResultView;
 import org.lifstools.jgoslin.webapp.domain.TooManyNamesException;
+import org.lifstools.jgoslin.webapp.services.LipidNameValidationService;
 import org.lifstools.jgoslin.webapp.services.PageBuilderService;
 import org.lifstools.jgoslin.webapp.services.ResultService;
+import org.lifstools.jgoslin.webapp.services.UsageCounter;
 import org.lifstools.lifs.webapps.common.domain.PageMessage;
 import org.lifstools.lifs.webapps.common.domain.StorageServiceSlot;
 import org.lifstools.lifs.webapps.common.domain.UserSessionFile;
@@ -96,6 +99,7 @@ public class LipidNameValidationController {
     private final AppInfo appInfo;
     private final StorageService storageService;
     private final ResultService resultService;
+    private final UsageCounter usageCounter;
     private final PageBuilderService pageBuilderService;
     private final LocaleResolver localeResolver;
     private final MessageSource messageSource;
@@ -107,15 +111,19 @@ public class LipidNameValidationController {
     private final int retentionDays;
     /** Largest text accepted, pasted or read from a file: the upload limit, or less if no valid list can be longer. */
     private final long maxTextBytes;
+    /** The parse time limit per name in seconds, for the hint on names that took longer. */
+    private final java.math.BigDecimal timeLimitSeconds;
 
     @Autowired
-    public LipidNameValidationController(ResultService resultService, StorageService storageService,
+    public LipidNameValidationController(ResultService resultService, UsageCounter usageCounter,
+            StorageService storageService,
             PageBuilderService pageBuilderService, AppInfo appInfo, LocaleResolver localeResolver,
             MessageSource messageSource, @Value("classpath:lipidnames.txt") Resource lipidnames,
             NewsPropertyConfig newsPropertyConfig, @Value("${jgoslin.maxItemsInRequest}") int maxItemsInRequest,
             @Value("${spring.servlet.multipart.max-file-size}") DataSize maxFileSize,
-            @Value("${minCleanupAge}") int retentionDays) throws IOException {
+            @Value("${minCleanupAge}") int retentionDays, ParserProperties parserProperties) throws IOException {
         this.resultService = resultService;
+        this.usageCounter = usageCounter;
         this.storageService = storageService;
         this.pageBuilderService = pageBuilderService;
         this.appInfo = appInfo;
@@ -128,6 +136,7 @@ public class LipidNameValidationController {
         this.retentionDays = retentionDays;
         this.maxTextBytes = Math.min(maxFileSize.toBytes(),
                 (long) maxItemsInRequest * (NameEntries.MAX_NAME_LENGTH + 2));
+        this.timeLimitSeconds = new java.math.BigDecimal(LipidNameValidationService.seconds(parserProperties.timeLimit()));
     }
 
     /** The input page; {@code ?example} fills the text area with the example names, {@code ?lang=de} switches the language. */
@@ -177,6 +186,8 @@ public class LipidNameValidationController {
         if (entries.isEmpty()) {
             return inputPage(form, 0, List.of(PageMessage.error(message("index.error.empty", locale))), List.of(), locale);
         }
+        // One count per submitted list, also when the check below sends it back.
+        usageCounter.countValidation();
         if (!form.isSkipInvalid()) {
             List<ResultView.FailedRow> failures = resultService.preview(entries);
             if (!failures.isEmpty()) {
@@ -210,6 +221,7 @@ public class LipidNameValidationController {
         model.addObject("maxTextSize", formatSize(maxTextBytes, locale));
         model.addObject("exampleNames", exampleNames);
         model.addObject("appInfo", appInfo);
+        model.addObject("timeLimitSeconds", timeLimitSeconds);
         return model;
     }
 
@@ -305,6 +317,7 @@ public class LipidNameValidationController {
                 .forEach(r -> categories.putIfAbsent(r.category(), r.categoryName()));
         model.addObject("categories", categories);
         model.addObject("maxNameLength", NameEntries.MAX_NAME_LENGTH);
+        model.addObject("timeLimitSeconds", timeLimitSeconds);
         model.addObject("notFound", false);
         // goslin.js moves the focus to this callout after a re-run, so that screen readers announce it.
         model.addObject("outcome", outcomeText);

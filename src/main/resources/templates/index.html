@@ -49,7 +49,7 @@
                                 <ul class="failures">
                                     <li th:each="f : ${failures}"><span th:text="#{index.failure.line(${f.entry().line()})}">line 3</span>: <span class="lifs-mono" th:text="${f.entry().current()}">PC(18:2</span>:
                                         <span th:if="${f.explanation() != null}"
-                                              th:text="#{${'fix.hint.' + #strings.toLowerCase(f.explanation().hint().name())}(${f.explanation().position() + 1}, ${f.explanation().marked(f.entry().current())})}">A closing bracket is missing.</span>
+                                              th:text="#{${'fix.hint.' + #strings.toLowerCase(f.explanation().hint().name())}(${f.explanation().position() + 1}, ${f.explanation().marked(f.entry().current())}, ${timeLimitSeconds})}">A closing bracket is missing.</span>
                                         <span th:if="${f.explanation() == null and f.result().messages != null}" th:text="${#strings.listJoin(f.result().messages, ' | ')}">Parser message</span>
                                     </li>
                                 </ul>

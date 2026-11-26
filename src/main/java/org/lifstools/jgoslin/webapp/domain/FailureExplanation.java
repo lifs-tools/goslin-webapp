@@ -25,7 +25,21 @@ package org.lifstools.jgoslin.webapp.domain;
 public record FailureExplanation(int position, Hint hint, String originalMessage) {
 
     public enum Hint {
-        UNSUPPORTED_CHARACTER, MISSING_CLOSING_BRACKET, EXTRA_CLOSING_BRACKET, HEAD_GROUP, AT_POSITION
+        UNSUPPORTED_CHARACTER, MISSING_CLOSING_BRACKET, EXTRA_CLOSING_BRACKET, HEAD_GROUP, AT_POSITION,
+        /** Parsing took longer than the time limit for one name. */
+        TIME_LIMIT,
+        /** Not parsed: the request reached its time limit. */
+        NOT_PROCESSED;
+
+        /** Whether the hint points at a place in the name; the time limits do not. */
+        public boolean positional() {
+            return this != TIME_LIMIT && this != NOT_PROCESSED;
+        }
+    }
+
+    /** A name that was not parsed in time: nothing is marked. */
+    public static FailureExplanation timeLimit(Hint hint, String originalMessage) {
+        return new FailureExplanation(0, hint, originalMessage);
     }
 
     public int markFrom() {
@@ -35,6 +49,7 @@ public record FailureExplanation(int position, Hint hint, String originalMessage
     public int markTo(String name) {
         return switch (hint) {
             case UNSUPPORTED_CHARACTER, EXTRA_CLOSING_BRACKET -> position + 1;
+            case TIME_LIMIT, NOT_PROCESSED -> position;
             default -> name.length();
         };
     }

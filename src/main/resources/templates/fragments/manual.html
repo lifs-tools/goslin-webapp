@@ -86,6 +86,7 @@
                     <em>Load example names</em> fills the box with example names to try out. Goslin harmonizes all of them; to see how invalid names are reported, add a name it cannot read.</p>
                 <p>You can also use <em>Upload a file</em> or drop a text file (<code>.txt</code>, <code>.csv</code> or <code>.tsv</code>) onto the box. The file content
                     is placed in the text box, so you can check and edit it before you submit it. Names can be at most 300 characters long.
+                    Goslin parses a name for at most 20 seconds and a list or REST request for at most 120 seconds; a name that is not parsed in that time is reported as failed.
                     Files and texts larger than the size limit shown on the page, or with more than 5,000 names, are refused with a message.</p>
                 <figure>
                     <a id="fig:goslin-webapp-form-01"><img th:src="@{/img/goslin-webapp-form-01.png}" alt="The Harmonize page with an empty text box" style="max-width:100%;"/></a>

@@ -15,59 +15,33 @@
  */
 package org.lifstools.jgoslin.webapp.services;
 
-import java.util.List;
-import org.lifstools.jgoslin.domain.KnownFunctionalGroups;
-import org.lifstools.jgoslin.domain.LipidAdduct;
-import org.lifstools.jgoslin.parser.BaseParserEventHandler;
-import org.lifstools.jgoslin.parser.FattyAcidParser;
-import org.lifstools.jgoslin.parser.GoslinParser;
-import org.lifstools.jgoslin.parser.HmdbParser;
-import org.lifstools.jgoslin.parser.LipidMapsParser;
-import org.lifstools.jgoslin.parser.Parser;
-import org.lifstools.jgoslin.parser.ShorthandParser;
-import org.lifstools.jgoslin.parser.SwissLipidsParser;
 import org.lifstools.jgoslin.webapp.domain.FailureExplanation;
 import org.lifstools.jgoslin.webapp.domain.FailureExplanation.Hint;
-import org.springframework.stereotype.Service;
 
 /**
- * Finds where parsing of a failed lipid name stopped and classifies the
- * failure. Safe for concurrent use: the parsers keep no per-parse state (the
- * dynamic programming tables are local to each parse call); the event handler
- * is created per call.
+ * Classifies the failure of a lipid name that no grammar read, from where parsing stopped. Where parsing stopped
+ * is found while the name is parsed ({@link LipidNameValidationService.ParsedName#stop()}): the longest
+ * beginning of the name that one of the grammars read.
  */
-@Service
-public class ParseStopLocator {
+public final class ParseStopLocator {
 
-    private final List<Parser<LipidAdduct>> parsers;
-
-    public ParseStopLocator() {
-        KnownFunctionalGroups groups = new KnownFunctionalGroups();
-        parsers = List.of(
-                new ShorthandParser(groups),
-                new FattyAcidParser(groups),
-                new GoslinParser(groups),
-                new LipidMapsParser(groups),
-                new SwissLipidsParser(groups),
-                new HmdbParser(groups));
+    private ParseStopLocator() {
     }
 
-    public int furthestStop(String name) {
-        int best = 0;
-        for (Parser<LipidAdduct> parser : parsers) {
-            BaseParserEventHandler<LipidAdduct> handler = parser.newEventHandler();
-            parser.parse(name, handler, false);
-            String prefix = handler.getErrorMessage();
-            if (prefix != null && !prefix.isEmpty() && prefix.length() <= name.length()
-                    && name.startsWith(prefix)) {
-                best = Math.max(best, prefix.length());
-            }
+    /**
+     * Where one grammar stopped: the length of the parser's error message if that is the beginning of the name
+     * (jgoslin puts the part it could read there), otherwise 0.
+     *
+     * @param name the name
+     * @param errorMessage the error message of the grammar's event handler
+     * @return the position
+     */
+    static int stopOf(String name, String errorMessage) {
+        if (errorMessage != null && !errorMessage.isEmpty() && errorMessage.length() <= name.length()
+                && name.startsWith(errorMessage)) {
+            return errorMessage.length();
         }
-        return best;
-    }
-
-    public FailureExplanation explain(String name, String originalMessage) {
-        return classify(name, furthestStop(name), originalMessage);
+        return 0;
     }
 
     static FailureExplanation classify(String name, int position, String originalMessage) {
