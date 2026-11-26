@@ -15,6 +15,7 @@
  */
 package org.lifstools.jgoslin.webapp.services;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -26,7 +27,7 @@ import org.lifstools.jgoslin.webapp.domain.StoredResult;
 import org.lifstools.lifs.webapps.common.domain.UserSessionFile;
 import org.lifstools.lifs.webapps.common.service.SessionIdGenerator;
 import org.lifstools.lifs.webapps.common.service.StorageService;
-import org.lifstools.lifs.webapps.common.service.storage.StorageException;
+import org.lifstools.lifs.webapps.common.service.storage.StorageFileNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -54,16 +55,38 @@ public class ResultStore {
         this.ids = ids;
     }
 
+    /**
+     * Creates and stores a new result with revision 1.
+     *
+     * @param entries the entries
+     * @return the stored result
+     * @throws org.lifstools.lifs.webapps.common.service.storage.StorageException if storing fails
+     * @throws JacksonException if serialisation fails
+     */
     public StoredResult create(List<NameEntry> entries) {
         StoredResult result = new StoredResult(ids.generate(), 1, entries);
         save(result);
         return result;
     }
 
+    /**
+     * Stores the result, replacing the previous revision.
+     *
+     * @param result the result
+     * @throws org.lifstools.lifs.webapps.common.service.storage.StorageException if storing fails
+     * @throws JacksonException if serialisation fails
+     */
     public void save(StoredResult result) {
         storage.store(mapper.writeValueAsString(result), result.id(), GoslinStorageServiceSlots.INPUT_ENTRIES);
     }
 
+    /**
+     * Loads a result. Empty if it is missing or unreadable as JSON; other
+     * storage failures propagate.
+     *
+     * @param id the result id
+     * @return the result, if any
+     */
     public Optional<StoredResult> load(UUID id) {
         try {
             UserSessionFile file = storage.load(id, GoslinStorageServiceSlots.INPUT_ENTRIES);
@@ -73,9 +96,9 @@ public class ResultStore {
             }
             Path path = storage.load(file, GoslinStorageServiceSlots.INPUT_ENTRIES);
             return Optional.of(mapper.readValue(Files.readString(path), StoredResult.class));
-        } catch (StorageException e) {
+        } catch (StorageFileNotFoundException e) {
             return Optional.empty();
-        } catch (JacksonException | java.io.IOException e) {
+        } catch (JacksonException | IOException e) {
             log.warn("Stored result {} could not be read: {}", id, e.getMessage());
             return Optional.empty();
         }

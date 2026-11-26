@@ -41,7 +41,7 @@ public record StoredResult(UUID id, int revision, List<NameEntry> entries) {
         List<NameEntry> updated = new ArrayList<>(entries.size());
         for (NameEntry entry : entries) {
             String edit = edits.get(entry.line());
-            if (edit != null) {
+            if (edit != null && !entry.removed()) {
                 String normalized = NameEntries.normalize(edit);
                 if (!normalized.isEmpty() && !normalized.equals(entry.current())) {
                     entry = entry.withCorrection(normalized);
@@ -57,9 +57,12 @@ public record StoredResult(UUID id, int revision, List<NameEntry> entries) {
      * Marks a line as removed.
      *
      * @param line the line number
-     * @return a result with revision + 1
+     * @return a result with revision + 1, or this if no active entry has that line
      */
     public StoredResult withRemoved(int line) {
+        if (entries.stream().noneMatch(e -> e.line() == line && !e.removed())) {
+            return this;
+        }
         List<NameEntry> updated = entries.stream()
                 .map(e -> e.line() == line ? e.asRemoved() : e)
                 .toList();

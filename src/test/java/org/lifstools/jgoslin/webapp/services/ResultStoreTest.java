@@ -16,6 +16,8 @@
 package org.lifstools.jgoslin.webapp.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -32,6 +34,7 @@ import org.lifstools.jgoslin.webapp.domain.StoredResult;
 import org.lifstools.lifs.webapps.common.service.DefaultSessionIdGenerator;
 import org.lifstools.lifs.webapps.common.service.StorageService;
 import org.lifstools.lifs.webapps.common.service.storage.FileSystemStorageService;
+import org.lifstools.lifs.webapps.common.service.storage.StorageException;
 import org.lifstools.lifs.webapps.common.service.storage.StorageProperties;
 
 class ResultStoreTest {
@@ -99,5 +102,43 @@ class ResultStoreTest {
         UUID id = UUID.randomUUID();
         storage.store("Line\tName\n", id, GoslinStorageServiceSlots.OUTPUT_TSV_FILE);
         assertTrue(store.load(id).isEmpty());
+    }
+
+    @Test
+    void corruptJsonIsEmpty() throws Exception {
+        UUID id = UUID.randomUUID();
+        storage.store("{not json", id, GoslinStorageServiceSlots.INPUT_ENTRIES);
+        assertTrue(store.load(id).isEmpty());
+    }
+
+    @Test
+    void blankOrUnchangedEditsReturnSameInstance() {
+        StoredResult r = sample();
+        assertSame(r, r.withEdits(Map.of(34, "  ", 35, "PC  32:0")));
+        assertSame(r, r.withEdits(Map.of(99, "X")));
+    }
+
+    @Test
+    void editsSkipRemovedEntries() {
+        StoredResult r = sample().withRemoved(34);
+        assertSame(r, r.withEdits(Map.of(34, "PC(18:2)")));
+    }
+
+    @Test
+    void removingUnknownOrRemovedLineReturnsSameInstance() {
+        StoredResult r = sample();
+        assertSame(r, r.withRemoved(99));
+        StoredResult removed = r.withRemoved(34);
+        assertSame(removed, removed.withRemoved(34));
+    }
+
+    @Test
+    void plainStorageFailurePropagates() {
+        StorageService failing = org.mockito.Mockito.mock(StorageService.class);
+        org.mockito.Mockito.when(failing.load(org.mockito.ArgumentMatchers.any(UUID.class),
+                org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new StorageException("Failed to read stored files"));
+        ResultStore broken = new ResultStore(failing, new DefaultSessionIdGenerator());
+        assertThrows(StorageException.class, () -> broken.load(UUID.randomUUID()));
     }
 }
