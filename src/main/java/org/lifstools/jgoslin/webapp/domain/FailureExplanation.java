@@ -28,12 +28,14 @@ public record FailureExplanation(int position, Hint hint, String originalMessage
         UNSUPPORTED_CHARACTER, MISSING_CLOSING_BRACKET, EXTRA_CLOSING_BRACKET, HEAD_GROUP, AT_POSITION,
         /** Parsing took longer than the time limit for one name. */
         TIME_LIMIT,
+        /** Not parsed: no parse slot became free within the time limit for one name. */
+        BUSY,
         /** Not parsed: the request reached its time limit. */
         NOT_PROCESSED;
 
         /** Whether the hint points at a place in the name; the time limits do not. */
         public boolean positional() {
-            return this != TIME_LIMIT && this != NOT_PROCESSED;
+            return this != TIME_LIMIT && this != BUSY && this != NOT_PROCESSED;
         }
     }
 
@@ -49,7 +51,7 @@ public record FailureExplanation(int position, Hint hint, String originalMessage
     public int markTo(String name) {
         return switch (hint) {
             case UNSUPPORTED_CHARACTER, EXTRA_CLOSING_BRACKET -> position + 1;
-            case TIME_LIMIT, NOT_PROCESSED -> position;
+            case TIME_LIMIT, BUSY, NOT_PROCESSED -> position;
             default -> name.length();
         };
     }

@@ -48,6 +48,22 @@ class TimeLimitPageTest {
         assertThat(slow.selectFirst(".trace mark")).isNull();
         assertThat(slow.selectFirst(".trace").text()).isEqualTo(junk);
 
+        // line 3 waited for the one thread, which the runaway parse of line 2 still holds: it was never parsed
+        Element waited = doc.selectFirst(".fix__row[data-line=3]");
+        assertThat(waited).isNotNull();
+        assertThat(waited.text()).contains("Goslin could not start parsing this name within 0.2 seconds because the "
+                + "server was busy. Please try again.");
+        assertThat(waited.text()).doesNotContain("stopped parsing");
+        assertThat(waited.selectFirst(".trace mark")).isNull();
+
+        Document de = Jsoup.parse(mockMvc.perform(get(location + "?lang=de")).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8));
+        assertThat(de.selectFirst(".fix__row[data-line=2]").text())
+                .contains("Goslin hat das Lesen dieses Namens nach 0,2 Sekunden abgebrochen.");
+        assertThat(de.selectFirst(".fix__row[data-line=3]").text())
+                .contains("Goslin konnte das Lesen dieses Namens nicht innerhalb von 0,2 Sekunden beginnen, weil der "
+                        + "Server ausgelastet war.");
+
         Element last = doc.selectFirst(".fix__row[data-line=6]");
         assertThat(last).isNotNull();
         assertThat(last.text()).contains("Not processed: the time limit for this request was reached.");

@@ -118,6 +118,9 @@ public class AboutPageTest {
         assertThat(note).doesNotContain("The REST API is unchanged");
         assertThat(note).contains("300 characters", "400", "problem detail", "Non-breaking spaces", "lipidName",
                 "OpenAPI 3.1", "time limit", "German translation is partial");
+        assertThat(note).contains("position of the first such name", "by default 20 seconds per name",
+                "\"not processed\"");
+        assertThat(note).doesNotContain("naming the first such name");
     }
 
     @Test

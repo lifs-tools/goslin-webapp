@@ -213,6 +213,7 @@ public class ResultService {
                 String message = result.getMessages() == null ? "" : String.join(" | ", result.getMessages());
                 FailureExplanation explanation = switch (parsed.outcome()) {
                     case TIME_LIMIT -> FailureExplanation.timeLimit(Hint.TIME_LIMIT, message);
+                    case BUSY -> FailureExplanation.timeLimit(Hint.BUSY, message);
                     case NOT_PROCESSED -> FailureExplanation.timeLimit(Hint.NOT_PROCESSED, message);
                     default -> ParseStopLocator.classify(entry.current(), parsed.stop(), message);
                 };

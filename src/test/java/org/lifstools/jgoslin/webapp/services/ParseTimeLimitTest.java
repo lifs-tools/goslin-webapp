@@ -107,6 +107,14 @@ class ParseTimeLimitTest {
     }
 
     @Test
+    void busyMessageSaysSecondsAsConfigured() {
+        assertEquals("Goslin could not start parsing this name within 20 seconds because the server was busy. "
+                + "Please try again.", LipidNameValidationService.busyMessage(Duration.ofSeconds(20)));
+        assertEquals("Goslin could not start parsing this name within 1 second because the server was busy. "
+                + "Please try again.", LipidNameValidationService.busyMessage(Duration.ofSeconds(1)));
+    }
+
+    @Test
     void deadlineCoversAllGrammarsOfOneName() throws Exception {
         // Each grammar takes 200 ms, well under the 500 ms limit; the six grammars together take 1.2 s.
         AtomicInteger attempts = new AtomicInteger();
@@ -230,7 +238,14 @@ class ParseTimeLimitTest {
             junk.add("junk" + i);
         }
         List<ParsedName> parsed = s.parse(junk);
-        parsed.forEach(p -> assertEquals(Outcome.TIME_LIMIT, p.outcome()));
+        // the first two ran out of time; the others never got a slot and were not parsed at all
+        assertEquals(Outcome.TIME_LIMIT, parsed.get(0).outcome());
+        assertEquals(Outcome.TIME_LIMIT, parsed.get(1).outcome());
+        for (int i = 2; i < parsed.size(); i++) {
+            assertEquals(Outcome.BUSY, parsed.get(i).outcome(), "name " + i);
+            assertEquals(List.of("Goslin could not start parsing this name within 0.1 seconds because the server "
+                    + "was busy. Please try again."), parsed.get(i).result().getMessages());
+        }
         // the two timed-out parses still run and still hold the request's share: no further name was started
         assertEquals(2, started.get());
         assertTrue(maxRunning.get() <= 2, "running at once: " + maxRunning.get());

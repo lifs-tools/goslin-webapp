@@ -68,8 +68,9 @@ import org.springframework.stereotype.Service;
  * name until its deadline: {@code goslin.parser.time-limit} from the moment it starts waiting for a slot (waiting
  * counts), across all grammars tried for it, and never past the request's deadline,
  * {@code goslin.parser.request-time-limit} from the start of the request. A name that is not done by its own
- * deadline fails with {@link #timeLimitMessage(Duration)}; the names left when the request's deadline passes fail
- * with {@link #NOT_PROCESSED_MESSAGE}. Zero turns a limit off.
+ * deadline fails with {@link #timeLimitMessage(Duration)}, or with {@link #busyMessage(Duration)} if it never got
+ * a slot; the names left when the request's deadline passes fail with {@link #NOT_PROCESSED_MESSAGE}. Zero turns
+ * a limit off.
  * <p>
  * jgoslin's parser cannot be interrupted while it parses with one grammar, so a parse that ran out of time is
  * cancelled, but keeps running until that grammar is done; it does not go on to the next grammar. Such a parse
@@ -107,6 +108,8 @@ public class LipidNameValidationService implements AutoCloseable {
         FAILED,
         /** The name was not parsed within {@code goslin.parser.time-limit}. */
         TIME_LIMIT,
+        /** The name got no parse slot within {@code goslin.parser.time-limit}; it was not parsed at all. */
+        BUSY,
         /** The name was not parsed: its request reached {@code goslin.parser.request-time-limit}. */
         NOT_PROCESSED
     }
@@ -276,7 +279,7 @@ public class LipidNameValidationService implements AutoCloseable {
                     if (acquire(requestSlots, nameDeadline)) {
                         pending.add(start(next, names.get(next), tried, anyGrammar, nameDeadline, requestSlots));
                     } else {
-                        parsed[next] = expired(names.get(next), nameDeadline, requestDeadline);
+                        parsed[next] = noSlot(names.get(next), nameDeadline, requestDeadline);
                         requestTimedOut = parsed[next].outcome() == Outcome.NOT_PROCESSED;
                     }
                     next++;
@@ -376,6 +379,18 @@ public class LipidNameValidationService implements AutoCloseable {
         return timedOut(name);
     }
 
+    /**
+     * A name that got no slot before its deadline: it was never parsed. Not processed if it was the request's
+     * deadline, otherwise the server was busy.
+     */
+    private ParsedName noSlot(String name, long deadline, long requestDeadline) {
+        if (deadline == requestDeadline && requestTimeLimit.isPositive()) {
+            return notProcessed(name);
+        }
+        log.info("A name got no parse slot within {}.", timeLimit);
+        return failed(name, busyMessage(timeLimit), Outcome.BUSY);
+    }
+
     /** The slots one parse holds; given back exactly once, by the parse or, if it never ran, by the caller. */
     private static final class Slots {
 
@@ -454,9 +469,24 @@ public class LipidNameValidationService implements AutoCloseable {
      * @return "Goslin stopped parsing this name after 20 seconds. …"
      */
     public static String timeLimitMessage(Duration limit) {
-        String seconds = seconds(limit);
-        return "Goslin stopped parsing this name after " + seconds + ("1".equals(seconds) ? " second" : " seconds")
+        return "Goslin stopped parsing this name after " + secondsText(limit)
                 + ". Names that take this long are almost never valid lipid names.";
+    }
+
+    /**
+     * The message of a name that got no parse slot within the time limit, so was never parsed.
+     *
+     * @param limit the time limit
+     * @return "Goslin could not start parsing this name within 20 seconds because the server was busy. …"
+     */
+    public static String busyMessage(Duration limit) {
+        return "Goslin could not start parsing this name within " + secondsText(limit)
+                + " because the server was busy. Please try again.";
+    }
+
+    private static String secondsText(Duration limit) {
+        String seconds = seconds(limit);
+        return seconds + ("1".equals(seconds) ? " second" : " seconds");
     }
 
     /**
