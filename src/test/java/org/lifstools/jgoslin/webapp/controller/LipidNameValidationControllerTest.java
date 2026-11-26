@@ -16,16 +16,12 @@
 package org.lifstools.jgoslin.webapp.controller;
 
 import org.lifstools.jgoslin.webapp.Application;
-import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
-import org.lifstools.jgoslin.webapp.domain.ValidationResult.Grammar;
-import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 //import org.springframework.test.context.junit4.SpringRunner;
@@ -33,10 +29,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  *
@@ -56,49 +52,24 @@ public class LipidNameValidationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private JsonMapper objectMapper;
-
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .build();
     }
 
-// /* This test currently has issues with object serialization of the multipart file */
-//    @Test
-//    public void validateFile() throws Exception {
-//        ValidationFileRequest vfr = new ValidationFileRequest();
-//        String fileName = "filename.txt";
-//        File file = File.createTempFile(fileName, "");
-//        file.delete();
-//        Files.writeString(file.toPath(), "CL 18:3(9Z,12Z,15Z)/16:0/22:5(16Z,10Z,19Z,13Z,7Z)/20:0\n");
-//
-//        MockMultipartFile lipidNamesFile = new MockMultipartFile("file", fileName, "text/plain", Files.readAllBytes(file.toPath()));
-//        vfr.setFile(lipidNamesFile);
-//
-//        MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-//        mockMvc.perform(MockMvcRequestBuilders.post("/validatefile")
-//                .contentType(MediaType.MULTIPART_FORM_DATA)
-//                .content(objectMapper.writeValueAsString(vfr))
-//                .accept(MediaType.MULTIPART_FORM_DATA))
-//                .andExpect(status().isOk())
-//                //                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-//                .andExpect(view().name("index"));
-////                    .andExpect(content().string("success"));
-//    }
     @Test
-    public void validateNames() throws Exception {
-        ValidationRequest vfr = new ValidationRequest();
-        vfr.setGrammars(Arrays.asList(Grammar.values()));
-        vfr.setLipidNames(Arrays.asList("CL 18:3(9Z,12Z,15Z)/16:0/22:5(16Z,10Z,19Z,13Z,7Z)/20:0"));
-
-        MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    public void validateNamesRedirectsToResult() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/validate")
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .content(objectMapper.writeValueAsString(vfr))
-                .accept(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk())
-                .andExpect(view().name("validationResult"));
+                .param("lipidNames", "CL 18:3(9Z,12Z,15Z)/16:0/22:5(16Z,10Z,19Z,13Z,7Z)/20:0"))
+                .andExpect(status().isSeeOther())
+                .andExpect(redirectedUrlPattern("/result/*"));
+    }
+
+    @Test
+    public void getValidateRedirectsHome() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/validate"))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl("/"));
     }
 }

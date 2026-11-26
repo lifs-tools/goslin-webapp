@@ -75,6 +75,7 @@
         <lifs.webapps.common.version>2.0.1-SNAPSHOT</lifs.webapps.common.version>
         <jgoslin.version>2.2.1</jgoslin.version>
         <jacoco.version>0.8.16</jacoco.version>
+        <jsoup.version>1.21.2</jsoup.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
         <app.name>goslin</app.name>
         <contextPath>/goslin</contextPath>
@@ -162,6 +163,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

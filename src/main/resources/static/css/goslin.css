@@ -1,0 +1,71 @@
+/*
+ * Goslin pages on top of the LIFS design system (lifs-webapps-common static/lifs/css/lifs.css).
+ * Only LIFS tokens are used; no new colours. The logo greens belong to the Goslin logo itself.
+ */
+
+/* lifs.css sets display on these classes, which would otherwise override the hidden attribute. */
+.lifs-callout[hidden], .lifs-btn[hidden] { display: none; }
+
+/* ---------- input page ---------- */
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+@media (max-width: 899.98px) { .cols { grid-template-columns: 1fr; } }
+
+.count { font: 12px var(--lifs-mono); color: var(--lifs-grey); white-space: nowrap; }
+
+.goslin-names { position: relative; }
+.goslin-names textarea {
+  display: block; width: 100%; min-height: 340px; resize: vertical; padding: 12px 14px;
+  border: 1px solid var(--lifs-line); border-radius: var(--lifs-radius-none);
+  font: 13px/1.7 var(--lifs-mono); color: var(--lifs-ink); background: #fff;
+}
+.goslin-names textarea:focus { outline: none; border-color: var(--lifs-primary); box-shadow: inset 0 0 0 1px var(--lifs-primary); }
+.goslin-names--drag textarea { border: 2px dashed var(--lifs-primary); background: var(--lifs-tint); }
+
+/* The file input stays focusable (visually hidden); its label looks like a button and shows the focus. */
+.goslin-upload { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0; }
+.goslin-upload label { cursor: pointer; }
+.goslin-upload input:focus-visible + label { outline: 2px solid var(--lifs-primary); outline-offset: 2px; }
+
+.check { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.check input { width: 16px; height: 16px; margin: 2px 0 0; flex: 0 0 auto; accent-color: var(--lifs-primary); }
+.check > span { display: flex; flex-direction: column; gap: 2px; }
+
+.failures { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; }
+
+.notation { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 13px; }
+.notation dt { font-family: var(--lifs-mono); color: var(--lifs-ink); }
+.notation dd { margin: 0; color: var(--lifs-slate); }
+
+.about {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;
+  border-top: 1px solid var(--lifs-line); padding-top: 28px;
+}
+
+/* ---------- Goslin logo: blink (CSS) and honk on click (goslin.js) ---------- */
+.goslin-hero-logo { flex: 0 1 160px; max-width: 160px; }
+.goslin-logo { position: relative; display: inline-block; width: 160px; max-width: 100%; aspect-ratio: 1; cursor: pointer; }
+.goslin-logo svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.goslin-logo .g-eye { transform-box: fill-box; transform-origin: center; animation: g-blink 6s infinite; }
+.goslin-logo .g-head { transform-box: fill-box; transform-origin: 0% 100%; }
+.goslin-logo--honking .g-head { animation: g-peck 520ms ease-out; }
+@keyframes g-blink { 0%, 92%, 96%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.12); } }
+@keyframes g-peck { 0% { transform: rotate(0); } 35% { transform: rotate(-16deg); } 70% { transform: rotate(5deg); } 100% { transform: rotate(0); } }
+
+/* Above the beak rather than beside it, so that "PC 16:0/18:1(9Z), please." never runs off the page. */
+.g-bubble {
+  position: absolute; right: -8px; bottom: calc(100% + 6px); padding: 4px 9px; background: #fff; border: 1px solid var(--lifs-line);
+  font: 500 13px var(--lifs-mono); color: var(--lifs-ink); white-space: nowrap; pointer-events: none;
+  opacity: 0; transform: translateY(6px); transition: opacity 160ms, transform 160ms;
+  box-shadow: 0 4px 12px var(--lifs-shadow-color);
+}
+.g-bubble::before {
+  content: ''; position: absolute; right: 46px; bottom: -6px; width: 10px; height: 10px; background: #fff;
+  border-right: 1px solid var(--lifs-line); border-bottom: 1px solid var(--lifs-line); transform: rotate(45deg);
+}
+.goslin-logo--honking .g-bubble { opacity: 1; transform: none; }
+
+/* Reduced motion: no blink, no peck; the bubble still appears (without sliding in). */
+@media (prefers-reduced-motion: reduce) {
+  .goslin-logo .g-eye, .goslin-logo--honking .g-head { animation: none; }
+  .g-bubble { transition: none; transform: none; }
+}

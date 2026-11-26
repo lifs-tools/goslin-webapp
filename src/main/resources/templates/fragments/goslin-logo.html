@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<!--
+  The Goslin logo (goslin/goslin.svg without the Inkscape metadata, same geometry) as an inline SVG,
+  so that the head can peck and the eye can blink (static/css/goslin.css, static/js/goslin.js).
+  It is decorative: no tab stop, the speech bubble is aria-hidden.
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <span th:fragment="logo" class="goslin-logo" data-goslin-logo><svg viewBox="0 0 33.5 33.44" width="160" height="160" role="img" aria-label="Goslin logo" focusable="false">
+                <defs>
+                    <radialGradient id="goslin-logo-gradient">
+                        <stop offset="0.1139" stop-color="#f1fcf0"/>
+                        <stop offset="0.8681" stop-color="#e0f5e2"/>
+                        <stop offset="0.9395" stop-color="#b2e5b4"/>
+                        <stop offset="1" stop-color="#0c6d00"/>
+                    </radialGradient>
+                </defs>
+                <circle cx="16.77" cy="16.72" r="16.72" fill="#fff"/>
+                <circle cx="16.77" cy="16.72" r="16.72" fill="url(#goslin-logo-gradient)"/>
+                <g transform="scale(0.35277777)">
+                    <path fill="#20bf00" d="M 69.715,66.879 V 51.219 H 50.23"/>
+                    <path fill="#0c6d00" d="M 47.516,82.547 V 66.883 h 22.199"/>
+                    <path fill="#20bf00" d="M 47.516,82.547 V 66.883 H 25.234"/>
+                    <path fill="#0c6d00" d="M 40.902,66.879 H 25.238 V 47.398"/>
+                    <path fill="#20bf00" d="M 25.234,47.398 H 40.902 V 66.879"/>
+                    <path fill="#0c6d00" d="m 47.438,12.254 v 15.668 h -22.2"/>
+                    <path fill="#0c6d00" d="M 40.902,47.398 H 25.238 V 27.922"/>
+                    <path fill="#20bf00" d="M 25.234,27.922 H 40.902 V 47.398"/>
+                    <g class="g-head">
+                        <path fill="#20bf00" d="M 47.438,12.254 V 27.922 H 69.715"/>
+                        <circle class="g-eye" cx="51.188" cy="21.045" r="0.96" fill="#000"/>
+                    </g>
+                </g>
+            </svg><span class="g-bubble" aria-hidden="true">Honk!</span></span>
+    </body>
+</html>

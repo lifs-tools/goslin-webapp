@@ -20,79 +20,57 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 
-import org.lifstools.jgoslin.domain.FattyAcid;
-import org.lifstools.jgoslin.domain.FunctionalGroup;
-import org.lifstools.jgoslin.domain.LipidClassMeta;
 import org.lifstools.jgoslin.domain.LipidClasses;
-import org.lifstools.jgoslin.domain.LipidLevel;
-import org.lifstools.jgoslin.domain.LipidSpeciesInfo;
 import org.lifstools.jgoslin.webapp.config.NewsPropertyConfig;
 import org.lifstools.jgoslin.webapp.domain.AppInfo;
-import org.lifstools.jgoslin.webapp.domain.Page;
 import org.lifstools.jgoslin.webapp.domain.GoslinStorageServiceSlots;
-import org.lifstools.jgoslin.webapp.domain.ValidationFileRequest;
-import org.lifstools.jgoslin.webapp.domain.ValidationRequest;
-import org.lifstools.jgoslin.webapp.domain.ValidationResult;
-import org.lifstools.jgoslin.webapp.domain.ValidationResults;
-import org.lifstools.jgoslin.webapp.services.LipidNameValidationService;
+import org.lifstools.jgoslin.webapp.domain.HarmonizeForm;
+import org.lifstools.jgoslin.webapp.domain.NameEntries;
 import org.lifstools.jgoslin.webapp.domain.NameEntry;
 import org.lifstools.jgoslin.webapp.domain.ResultView;
+import org.lifstools.jgoslin.webapp.domain.TooManyNamesException;
 import org.lifstools.jgoslin.webapp.services.PageBuilderService;
-import org.lifstools.jgoslin.webapp.services.TsvWriter;
+import org.lifstools.jgoslin.webapp.services.ResultService;
+import org.lifstools.lifs.webapps.common.domain.PageMessage;
+import org.lifstools.lifs.webapps.common.domain.StorageServiceSlot;
+import org.lifstools.lifs.webapps.common.domain.UserSessionFile;
+import org.lifstools.lifs.webapps.common.service.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-
-import org.lifstools.lifs.webapps.common.domain.StorageServiceSlot;
-import org.lifstools.lifs.webapps.common.domain.UserSessionFile;
-import org.lifstools.lifs.webapps.common.service.SessionIdGenerator;
-import org.lifstools.lifs.webapps.common.service.StorageService;
-//import uk.ac.ebi.pride.jmztab2.utils.errors.MZTabErrorType;
-
 /**
+ * The input page, its form posts, the documentation page and the TSV download.
  *
  * @author Nils Hoffmann &lt;nils.hoffmann@isas.de&gt;
  */
@@ -100,57 +78,112 @@ import org.lifstools.lifs.webapps.common.service.StorageService;
 public class LipidNameValidationController {
 
     private static final Logger log = LoggerFactory.getLogger(LipidNameValidationController.class);
+    private static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
+
     private final AppInfo appInfo;
     private final StorageService storageService;
-    private final SessionIdGenerator sessionIdGenerator;
-    private final LipidNameValidationService lipidNameValidationService;
+    private final ResultService resultService;
     private final PageBuilderService pageBuilderService;
     private final LocaleResolver localeResolver;
-    private final Resource lipidnames;
+    private final MessageSource messageSource;
+    private final String exampleNames;
     private final NewsPropertyConfig newsPropertyConfig;
-    private final LipidClasses lipidClasses = LipidClasses.getInstance();
-    private final Integer maxItemsInRequest;
-    private final TsvWriter tsvWriter;
+    private final int maxItemsInRequest;
+    private final long maxFileBytes;
 
     @Autowired
-    public LipidNameValidationController(LipidNameValidationService lipidNameValidationService, StorageService storageService, PageBuilderService pageBuilderService,
-            AppInfo appInfo, SessionIdGenerator sessionIdGenerator, LocaleResolver localeResolver, @Value("classpath:lipidnames.txt") Resource lipidnames, NewsPropertyConfig newsPropertyConfig, @Value("${jgoslin.maxItemsInRequest}") Integer maxItemsInRequest, TsvWriter tsvWriter) {
-        this.tsvWriter = tsvWriter;
-        this.appInfo = appInfo;
-        this.lipidNameValidationService = lipidNameValidationService;
+    public LipidNameValidationController(ResultService resultService, StorageService storageService,
+            PageBuilderService pageBuilderService, AppInfo appInfo, LocaleResolver localeResolver,
+            MessageSource messageSource, @Value("classpath:lipidnames.txt") Resource lipidnames,
+            NewsPropertyConfig newsPropertyConfig, @Value("${jgoslin.maxItemsInRequest}") int maxItemsInRequest,
+            @Value("${spring.servlet.multipart.max-file-size}") DataSize maxFileSize) throws IOException {
+        this.resultService = resultService;
         this.storageService = storageService;
         this.pageBuilderService = pageBuilderService;
-        this.sessionIdGenerator = sessionIdGenerator;
+        this.appInfo = appInfo;
         this.localeResolver = localeResolver;
-        this.lipidnames = lipidnames;
+        this.messageSource = messageSource;
+        this.exampleNames = lipidnames.getContentAsString(StandardCharsets.UTF_8);
         this.newsPropertyConfig = newsPropertyConfig;
         this.maxItemsInRequest = maxItemsInRequest;
-    }
-    
-    @InitBinder
-    public void initBinder(WebDataBinder dataBinder) {
-        dataBinder.setAutoGrowCollectionLimit(this.maxItemsInRequest);
+        this.maxFileBytes = maxFileSize.toBytes();
     }
 
+    /** The input page; {@code ?example} fills the text area with the example names, {@code ?lang=de} switches the language. */
     @GetMapping("/")
-    public ModelAndView handleHome(@RequestParam(value = "lang", required = false) String language, HttpServletRequest request, HttpServletResponse response, Principal principal) throws IOException {
-        if (language != null) {
-            localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
+    public ModelAndView handleHome(HttpServletRequest request, Locale locale) {
+        // "?example" has no value, so look for the parameter's presence.
+        boolean example = request.getParameterMap().containsKey("example");
+        HarmonizeForm form = new HarmonizeForm(example ? exampleNames : "", true);
+        return inputPage(form, List.of(), List.of(), locale);
+    }
+
+    /** Old bookmarks and reloads of the former result page land on the input page. */
+    @GetMapping("/validate")
+    public String validateGet() {
+        return "redirect:/";
+    }
+
+    @PostMapping("/validate")
+    public ModelAndView validate(@ModelAttribute("harmonizeForm") HarmonizeForm harmonizeForm, Locale locale) {
+        return harmonize(harmonizeForm, locale);
+    }
+
+    /** Fallback for browsers without JavaScript: the file is posted instead of read into the text area. */
+    @PostMapping("/validatefile")
+    public ModelAndView validateFile(@RequestParam(value = "file", required = false) MultipartFile file,
+            Locale locale) throws IOException {
+        String text = file == null ? "" : new String(file.getBytes(), StandardCharsets.UTF_8);
+        return harmonize(new HarmonizeForm(text, true), locale);
+    }
+
+    private ModelAndView harmonize(HarmonizeForm form, Locale locale) {
+        List<NameEntry> entries;
+        try {
+            entries = NameEntries.fromText(form.getLipidNames(), maxItemsInRequest);
+        } catch (TooManyNamesException e) {
+            return inputPage(form, List.of(PageMessage.error(
+                    message("index.error.tooMany", locale, e.getCount(), e.getMax()))), List.of(), locale);
         }
-        ModelAndView model = new ModelAndView("index");
-        model.addObject("page", createPage("Translate Lipid Names", Optional.ofNullable(principal)));
-        ValidationRequest vr = new ValidationRequest();
-        vr.setLipidNames(lipidnames.getContentAsString(StandardCharsets.UTF_8).lines().collect(Collectors.toList()));
-        model.addObject("validationRequest", vr);
-        model.addObject("validationFileRequest", new ValidationFileRequest());
-        if (appInfo != null) {
-            if (appInfo.getVersionNumber().endsWith("-SNAPSHOT")) {
-                model.addObject("message", "This is a development version, please be aware that it may not be stable and expect bugs and errors!");
-                model.addObject("messageLevel", "alert-warning");
+        if (entries.isEmpty()) {
+            return inputPage(form, List.of(PageMessage.error(message("index.error.empty", locale))), List.of(), locale);
+        }
+        if (!form.isSkipInvalid()) {
+            List<ResultView.FailedRow> failures = resultService.preview(entries);
+            if (!failures.isEmpty()) {
+                return inputPage(form, List.of(), failures, locale);
             }
-            model.addObject("appInfo", appInfo);
         }
+        ResultView view = resultService.harmonize(entries);
+        log.info("Harmonized {} names into result {}: {} failed.", view.submitted(), view.id(), view.failed().size());
+        RedirectView redirect = new RedirectView("/result/" + view.id(), true);
+        redirect.setStatusCode(HttpStatus.SEE_OTHER);
+        redirect.setExposeModelAttributes(false);
+        return new ModelAndView(redirect);
+    }
+
+    private ModelAndView inputPage(HarmonizeForm form, List<PageMessage> pageMessages,
+            List<ResultView.FailedRow> failures, Locale locale) {
+        ModelAndView model = new ModelAndView("index");
+        model.addObject("page", pageBuilderService.createPage(message("index.page.title", locale)));
+        List<PageMessage> messages = new ArrayList<>();
+        if (appInfo.getVersionNumber() != null && appInfo.getVersionNumber().endsWith(SNAPSHOT_SUFFIX)) {
+            messages.add(PageMessage.warn(message("index.snapshot", locale)));
+        }
+        messages.addAll(pageMessages);
+        model.addObject("messages", messages);
+        model.addObject("harmonizeForm", form);
+        model.addObject("failures", failures);
+        model.addObject("nameCount", NameEntries.fromText(form.getLipidNames(), Integer.MAX_VALUE).size());
+        model.addObject("maxNames", maxItemsInRequest);
+        model.addObject("maxFileBytes", maxFileBytes);
+        model.addObject("exampleNames", exampleNames);
+        model.addObject("appInfo", appInfo);
         return model;
+    }
+
+    private String message(String key, Locale locale, Object... args) {
+        return messageSource.getMessage(key, args, locale);
     }
 
     @GetMapping("/documentation")
@@ -160,7 +193,7 @@ public class LipidNameValidationController {
         }
         log.debug("Retrieved the following news items: {}", newsPropertyConfig.getNews());
         ModelAndView model = new ModelAndView("documentation");
-        model.addObject("page", createPage("Goslin Webapp Information", Optional.ofNullable(principal)));
+        model.addObject("page", pageBuilderService.createPage("Goslin Webapp Information"));
         model.addObject("news", newsPropertyConfig.getNews());
         model.addObject("lipidClasses", LipidClasses.getInstance().stream().sorted((t, t1) -> {
             int cmp = t.lipidCategory.name().compareTo(t1.lipidCategory.name());
@@ -170,62 +203,6 @@ public class LipidNameValidationController {
             return t.lipidClassName.compareTo(t1.lipidClassName);
         }).collect(Collectors.toList()));
         return model;
-    }
-
-    @PostMapping("/validatefile")
-    public RedirectView validate(@ModelAttribute("validationFileRequest") ValidationFileRequest validationFileRequest, BindingResult bindingResult,
-            RedirectAttributes redirectAttributes, HttpServletRequest request,
-            HttpSession session, Principal principal) throws IOException {
-        ValidationRequest validationRequest = new ValidationRequest();
-        validationRequest.setLipidNames(new String(validationFileRequest.getFile().getBytes(), StandardCharsets.UTF_8).
-            lines().
-            filter((t) -> !t.isEmpty()).
-            map((t) -> t.trim().replaceAll("\\s+", " ")).
-            collect(Collectors.toList())
-        );
-        redirectAttributes.addFlashAttribute("validationRequest", validationRequest);
-        return new RedirectView("/validate", true);
-    }
-
-    @RequestMapping(path = {"/validate"}, method = {RequestMethod.GET,
-        RequestMethod.POST})
-    public ModelAndView validate(@Valid @ModelAttribute("validationRequest") ValidationRequest validationRequest, BindingResult bindingResult,
-            RedirectAttributes redirectAttributes, HttpServletRequest request,
-            HttpSession session, Principal principal) {
-        if (bindingResult.hasErrors() && !validationRequest.isSkipInvalid()) {
-            log.warn("Binding result has errors: {}", bindingResult);
-            ModelAndView modelAndView = new ModelAndView("index");
-            modelAndView.addObject("page", createPage("Translate Lipid Names", Optional.ofNullable(principal)));
-            modelAndView.addObject("validationRequest", validationRequest);
-            modelAndView.addObject("hasBeenSubmitted", true);
-            modelAndView.addObject("validationFileRequest", new ValidationFileRequest());
-            return modelAndView;
-        }
-        ModelAndView mav = new ModelAndView("validationResult");
-        mav.addObject("page", createPage("Lipid Name Validation Results", Optional.ofNullable(principal)));
-        List<ValidationResult> validationResults = lipidNameValidationService.validate(
-                Optional.ofNullable(validationRequest.getLipidNames()).orElse(Collections.emptyList()),
-                Collections.emptyList()
-        );
-        log.info("Received {} validation results!", validationResults.size());
-        ValidationResults results = new ValidationResults();
-        results.setResults(validationResults);
-        UUID sessionId = sessionIdGenerator.generate();
-        UserSessionFile usf = storageService.store(tsvWriter.write(toView(validationResults)),
-                sessionId, GoslinStorageServiceSlots.OUTPUT_TSV_FILE);
-        mav.addObject("validationResults", results);
-        mav.addObject("validationResultsTsv", "OUTPUT_TSV_FILE");
-        mav.addObject(new ValidationFileRequest());
-        mav.addObject("userSessionId", usf.getUserSessionId());
-        long parsingErrors = validationResults.stream().filter((t) -> {
-            return t.getLipidAdduct() == null;
-        }).count();
-        log.info("Encountered {} parsing errors!", parsingErrors);
-        if (parsingErrors > 0) {
-            mav.addObject("message", "Encountered " + parsingErrors + " parsing errors!");
-            mav.addObject("messageLevel", "alert-danger");
-        }
-        return mav;
     }
 
     @GetMapping("/download/{sessionId:.+}/{storageServiceSlot:.+}")
@@ -281,25 +258,6 @@ public class LipidNameValidationController {
         } else {
             throw new FileNotFoundException("No such file!");
         }
-    }
-
-    private static ResultView toView(List<ValidationResult> results) {
-        List<ResultView.Row> harmonized = new ArrayList<>();
-        List<ResultView.FailedRow> failed = new ArrayList<>();
-        for (int i = 0; i < results.size(); i++) {
-            ValidationResult r = results.get(i);
-            NameEntry entry = NameEntry.of(i + 1, r.getLipidName());
-            if (r.getLipidAdduct() == null) {
-                failed.add(new ResultView.FailedRow(entry, r, null));
-            } else {
-                harmonized.add(new ResultView.Row(entry, r));
-            }
-        }
-        return new ResultView(null, 0, results.size(), harmonized, failed);
-    }
-
-    protected Page createPage(String title, Optional<Principal> principal) {
-        return pageBuilderService.createPage(title);
     }
 
 }

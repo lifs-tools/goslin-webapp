@@ -2,6 +2,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xmlns:th="http://www.thymeleaf.org">
     <head><title/></head>
     <body>
+        <!-- Navigation items of the LIFS app bar; "active" names the current page (harmonize, documentation). -->
+        <th:block th:fragment="nav-items">
+            <a class="lifs-bar__item" th:href="@{/}" href="/" th:classappend="${active == 'harmonize'} ? 'lifs-bar__item--active'"
+               th:attr="aria-current=${active == 'harmonize'} ? 'page'" th:text="#{nav.harmonize}">Harmonize</a>
+            <a class="lifs-bar__item" th:href="@{/documentation}" href="/documentation" th:classappend="${active == 'documentation'} ? 'lifs-bar__item--active'"
+               th:attr="aria-current=${active == 'documentation'} ? 'page'" th:text="#{nav.documentation}">Documentation</a>
+            <a class="lifs-bar__item" th:href="@{/swagger-ui/index.html}" href="/swagger-ui/index.html" th:text="#{nav.api}">REST API</a>
+        </th:block>
+
+        <!-- The whole LIFS app bar (lifs-webapps-common templates/lifs/layout.html), without actions. -->
+        <header th:fragment="app-bar"
+                th:replace="~{lifs/layout :: app-bar('Goslin', ~{fragments/nav :: nav-items}, ~{})}"></header>
+
+        <!-- Old Bootstrap navigation, still used by documentation.html until it moves to the LIFS layout. -->
         <header class="masthead clearfix" th:fragment="nav">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <span class="navbar-brand text-muted"><small th:if="${page != null && page.appVersion !=null}" th:text="${page.appVersion}">0.0.0</small><small th:if="${page == null || page.appVersion ==null}">0.0.0</small></span>
