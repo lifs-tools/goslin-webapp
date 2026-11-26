@@ -130,6 +130,25 @@ public class AboutPageTest {
     }
 
     @Test
+    public void privacyExplainsWhyWeAskForConsent() throws Exception {
+        String[][] cases = {{"/about", "Why we ask for your consent: we use these usage statistics to report to our funders", "With your consent"},
+            {"/about?lang=de", "Warum wir um Ihre Einwilligung bitten: Mit diesen Nutzungsstatistiken berichten wir unseren F\u00f6rdergebern", "Mit Ihrer Einwilligung"}};
+        for (String[] c : cases) {
+            var paragraphs = page(c[0]).select("#privacy p");
+            int why = -1, consent = -1, server = -1;
+            for (int i = 0; i < paragraphs.size(); i++) {
+                String text = paragraphs.get(i).text();
+                if (text.startsWith(c[1])) why = i;
+                if (text.startsWith(c[2])) consent = i;
+                if (text.contains("Matomo") && text.contains("never") || text.contains("niemals")) server = i;
+            }
+            assertThat(why).as(c[0]).isGreaterThan(-1);
+            assertThat(consent).isGreaterThan(-1).isLessThan(why);
+            assertThat(server).isGreaterThan(why);
+        }
+    }
+
+    @Test
     public void versionShowsWebappAndJgoslin() throws Exception {
         String text = page("/about").getElementById("version").text();
         assertThat(appInfo.getVersionNumber()).isNotBlank();
