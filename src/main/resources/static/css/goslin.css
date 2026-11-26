@@ -41,6 +41,73 @@
   border-top: 1px solid var(--lifs-line); padding-top: 28px;
 }
 
+/* ---------- result page ---------- */
+.head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.head__text { display: flex; flex-direction: column; gap: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
+/* "Correct these names": an error accent on the left border */
+.fix { border-left: 4px solid var(--lifs-error); }
+.fix__title { font-size: 18px; }
+.fix__row {
+  display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 6px 12px; align-items: start;
+  padding: 12px 0; border-top: 1px solid var(--lifs-line);
+}
+.fix__row:first-child { border-top: 0; }
+.fix__line { font: 12px var(--lifs-mono); color: var(--lifs-grey); padding-top: 10px; white-space: nowrap; }
+.fix__body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.fix__body .lifs-input { width: 100%; font-family: var(--lifs-mono); }
+.fix__remove { margin-top: 4px; }
+.fix__msg { display: flex; flex-direction: column; gap: 4px; }
+.fix__kept { align-self: center; }
+.trace { font: 12.5px var(--lifs-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.trace mark {
+  background: var(--lifs-error-bg); color: var(--lifs-error); padding: 0 1px;
+  text-decoration: underline wavy var(--lifs-error); text-underline-offset: 3px;
+}
+.fix__original > summary { cursor: pointer; font-size: 12px; color: var(--lifs-grey); width: max-content; }
+.fix__original > p { margin: 4px 0 0; font-size: 12px; color: var(--lifs-slate); overflow-wrap: anywhere; }
+@media (max-width: 599.98px) {
+  .fix__row { grid-template-columns: minmax(0, 1fr) auto; }
+  .fix__line { grid-column: 1 / -1; padding-top: 0; }
+}
+
+/* Filters and table; goslin.js shows the filters and the pager buttons */
+.filters { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+.filters[hidden], .xbtn[hidden], tr[hidden] { display: none; }
+@media (max-width: 699.98px) { .filters { grid-template-columns: 1fr; } }
+.mono { font-family: var(--lifs-mono); font-size: 12.5px; }
+#results td { font-size: 13px; }
+#results td.mono { overflow-wrap: anywhere; min-width: 9em; }
+#results td.formula { white-space: nowrap; overflow-wrap: normal; min-width: 0; }
+#results .col-toggle { width: 28px; padding-left: 4px; padding-right: 0; }
+#results s { color: var(--lifs-grey); }
+#results .db { white-space: nowrap; }
+.xbtn { border: 0; background: none; cursor: pointer; color: var(--lifs-primary); padding: 0 4px; font: 14px var(--lifs-mono); }
+.xbtn:focus-visible, .sort-btn:focus-visible { outline: 2px solid var(--lifs-primary); outline-offset: 2px; }
+.sort-btn {
+  border: 0; background: none; padding: 0; cursor: pointer; display: inline-flex; gap: 4px; align-items: baseline;
+  font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit;
+}
+.sort-btn::after { content: '\2195'; opacity: 0.35; }
+th[aria-sort=ascending] .sort-btn::after { content: '\25B2'; opacity: 1; font-size: 0.8em; }
+th[aria-sort=descending] .sort-btn::after { content: '\25BC'; opacity: 1; font-size: 0.8em; }
+
+/* Details row: a closed <details> without JavaScript, opened by the ▸ button with it */
+#results tr.detail > td { background: var(--lifs-paper); padding: 6px 12px; }
+#results tr.detail > td:has(details[open]) { padding: 16px 18px 18px; }
+#results tr.detail summary { cursor: pointer; font-size: 12px; color: var(--lifs-primary); width: max-content; }
+#results tr.detail details[open] > summary { margin-bottom: 12px; }
+.results--js tr.detail summary { display: none; }
+.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px 24px; margin: 0 0 14px; }
+.kv > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.kv dt { font: 10px var(--lifs-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--lifs-grey); }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+.kv .kv__wide { grid-column: 1 / -1; }
+.dbs { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.chains td, .chains th { font-size: 12.5px; }
+.pager { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
 /* ---------- Goslin logo: blink (CSS) and honk on click (goslin.js) ---------- */
 .goslin-hero-logo { flex: 0 1 160px; max-width: 160px; }
 .goslin-logo { position: relative; display: inline-block; width: 160px; max-width: 100%; aspect-ratio: 1; cursor: pointer; }

@@ -40,8 +40,24 @@ public record FailureExplanation(int position, Hint hint, String originalMessage
     }
 
     public String marked(String name) {
-        int from = Math.min(markFrom(), name.length());
-        int to = Math.min(markTo(name), name.length());
-        return name.substring(from, Math.max(from, to));
+        return name.substring(from(name), to(name));
+    }
+
+    /** The text before the marked part. */
+    public String beforeMark(String name) {
+        return name.substring(0, from(name));
+    }
+
+    /** The text after the marked part. */
+    public String afterMark(String name) {
+        return name.substring(to(name));
+    }
+
+    private int from(String name) {
+        return Math.min(markFrom(), name.length());
+    }
+
+    private int to(String name) {
+        return Math.max(from(name), Math.min(markTo(name), name.length()));
     }
 }

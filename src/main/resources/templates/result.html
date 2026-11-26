@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+    <head th:replace="~{lifs/layout :: head(${page?.title})}"></head>
+    <body>
+        <link rel="stylesheet" th:href="@{/css/goslin.css}" href="/css/goslin.css"/>
+        <header th:replace="~{fragments/nav :: app-bar(active='harmonize')}"></header>
+
+        <main id="main" class="lifs-main" tabindex="-1">
+            <div th:replace="~{lifs/layout :: messages}"></div>
+
+            <!-- Unknown or expired id -->
+            <th:block th:if="${notFound}">
+                <div class="head">
+                    <div class="head__text">
+                        <h1 th:text="#{result.notFound.title}">Result not found</h1>
+                    </div>
+                </div>
+                <div class="lifs-callout lifs-callout--warn" role="status">
+                    <span class="lifs-prose"><th:block th:text="#{result.notFound}">Result not found or expired. Results are kept for 7 days.</th:block>
+                        <a th:href="@{/}" href="/" th:text="#{result.notFound.link}">Harmonize lipid names</a></span>
+                </div>
+            </th:block>
+
+            <th:block th:unless="${notFound}" th:with="nFailed=${#lists.size(result.failed())}, nHarmonized=${#lists.size(result.harmonized())},
+                      downloadUrl=@{/download/{id}/OUTPUT_TSV_FILE(id=${result.id()})}">
+                <!-- Header: the download is the page's main action (mock note C) -->
+                <div class="head">
+                    <div class="head__text">
+                        <p class="lifs-eyebrow" th:text="#{result.eyebrow(${result.submitted()})}">Result · 56 names submitted</p>
+                        <h1 th:text="#{result.title}">Harmonized lipid names</h1>
+                    </div>
+                    <div class="lifs-row">
+                        <a id="download-tsv" class="lifs-btn lifs-btn--filled" th:href="${downloadUrl}" href="#" download>
+                            <svg class="lifs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg><span th:text="#{result.download}">Download table (TSV)</span></a>
+                        <a class="lifs-btn lifs-btn--text" th:href="@{/}" href="/" th:text="#{result.new}">New input</a>
+                    </div>
+                </div>
+
+                <!-- Banner with the counts -->
+                <div class="lifs-callout" th:classappend="${nFailed == 0 ? 'lifs-callout--ok' : 'lifs-callout--warn'}" role="status">
+                    <div>
+                        <b th:if="${result.submitted() == 0}" th:text="#{result.banner.empty}">No names are left in this result.</b>
+                        <b th:if="${result.submitted() > 0 and nFailed == 0}" th:text="#{result.banner.all(${nHarmonized})}">All 56 names were harmonized.</b>
+                        <b th:if="${nFailed > 0}" th:text="#{result.banner.some(${nHarmonized}, ${result.submitted()}, ${nFailed})}">53 of 56 names harmonized. 3 names could not be read.</b>
+                        <div class="chips" th:if="${result.submitted() > 0}">
+                            <span class="lifs-lvl lifs-lvl--ok" th:text="#{result.chip.harmonized(${nHarmonized})}">53 harmonized</span>
+                            <span th:if="${nFailed > 0}" class="lifs-lvl lifs-lvl--error" th:text="#{result.chip.failed(${nFailed})}">3 not read</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Names that could not be read come first (mock note A) -->
+                <form th:if="${nFailed > 0}" id="rerun-form" method="post" th:action="@{/result/{id}/rerun(id=${result.id()})}" action="#">
+                    <section id="fix" class="lifs-card fix" aria-labelledby="fix-title">
+                        <!-- Enter in a correction field submits with the first submit button: re-run, never remove. -->
+                        <button type="submit" id="rerun-default" class="visually-hidden" tabindex="-1" aria-hidden="true" th:text="#{result.fix.rerun}">Re-run corrected names</button>
+                        <div class="lifs-card__head">
+                            <h2 id="fix-title" class="fix__title" th:text="#{result.fix.title}">Correct these names</h2>
+                            <span class="count" th:text="#{result.fix.count(${nFailed})}">3 names</span>
+                        </div>
+                        <p class="lifs-note" th:text="#{result.fix.help}">Edit a name and re-run it. The underlined part shows where Goslin stopped reading.</p>
+
+                        <div class="fix__rows">
+                            <div class="fix__row" th:each="f : ${result.failed()}"
+                                 th:with="line=${f.entry().line()}, name=${f.entry().current()}, e=${f.explanation()}"
+                                 th:attr="data-line=${line}">
+                                <span class="fix__line" th:text="#{result.fix.line(${line})}">line 34</span>
+                                <div class="fix__body">
+                                    <label class="visually-hidden" th:for="'edit-' + ${line}" th:text="#{result.fix.label(${line})}">Name from line 34</label>
+                                    <input class="lifs-input" type="text" spellcheck="false" autocomplete="off"
+                                           th:id="'edit-' + ${line}" th:name="'edit[' + ${line} + ']'" th:value="${name}"
+                                           th:attr="maxlength=${maxNameLength},aria-describedby='hint-' + ${line}"/>
+                                    <div class="fix__msg" th:id="'hint-' + ${line}">
+                                        <span class="trace" th:if="${e != null}" th:with="marked=${e.marked(name)}"><span th:text="${e.beforeMark(name)}">PC(18:2-20:4</span><mark
+                                              th:if="${!#strings.isEmpty(marked)}" th:text="${marked}">x</mark><mark th:if="${#strings.isEmpty(marked)}">&nbsp;</mark><span
+                                              th:text="${e.afterMark(name)}"></span></span>
+                                        <span class="trace" th:if="${e == null}" th:text="${name}">name</span>
+                                        <span class="lifs-note lifs-prose" th:if="${e != null and e.hint().name() == 'HEAD_GROUP'}"
+                                              th:utext="#{result.fix.headGroup(@{/documentation#lipid-classes})}">Goslin does not recognise the head group. …</span>
+                                        <span class="lifs-note" th:if="${e != null and e.hint().name() != 'HEAD_GROUP'}"
+                                              th:text="#{${'fix.hint.' + #strings.toLowerCase(e.hint().name())}(${e.position() + 1}, ${e.marked(name)})}">A closing bracket is missing.</span>
+                                        <details class="fix__original">
+                                            <summary th:text="#{result.fix.original}">Goslin’s message</summary>
+                                            <p class="lifs-mono" th:text="${e != null ? e.originalMessage() : #strings.listJoin(f.result().messages, ' | ')}">Parser message</p>
+                                        </details>
+                                    </div>
+                                </div>
+                                <button type="submit" class="lifs-btn lifs-btn--text lifs-btn--small fix__remove" name="line" th:value="${line}"
+                                        th:formaction="@{/result/{id}/remove(id=${result.id()})}" th:aria-label="#{result.fix.remove.label(${line})}"
+                                        th:text="#{result.fix.remove}">Remove</button>
+                            </div>
+                        </div>
+
+                        <div class="lifs-card__actions">
+                            <button type="submit" id="rerun" class="lifs-btn lifs-btn--filled" th:text="#{result.fix.rerun}">Re-run corrected names</button>
+                            <span class="lifs-note fix__kept" th:text="#{result.fix.kept(${nHarmonized})}">The 53 harmonized names are kept.</span>
+                        </div>
+                    </section>
+                </form>
+
+                <!-- The harmonized names (mock note B); every row keeps its line (note D) -->
+                <section class="lifs-section" aria-labelledby="table-title">
+                    <div class="lifs-section__head">
+                        <h2 id="table-title"><th:block th:text="#{result.table.title}">Harmonized</th:block> <span class="lifs-badge" th:text="${nHarmonized}">53</span></h2>
+                    </div>
+
+                    <!-- Shown by goslin.js; without JavaScript every row is listed. -->
+                    <div class="filters" id="filters" hidden>
+                        <div class="lifs-field">
+                            <label for="filter-text" th:text="#{result.filter.text}">Filter</label>
+                            <input id="filter-text" type="search" autocomplete="off" th:placeholder="#{result.filter.text.placeholder}"/>
+                        </div>
+                        <div class="lifs-field">
+                            <label for="filter-level" th:text="#{result.filter.level}">Level</label>
+                            <select id="filter-level">
+                                <option value="" th:text="#{result.filter.level.all}">All levels</option>
+                                <option th:each="l : ${levels}" th:value="${l}" th:text="#{${l}}">Species</option>
+                            </select>
+                        </div>
+                        <div class="lifs-field">
+                            <label for="filter-category" th:text="#{result.filter.category}">LIPID MAPS category</label>
+                            <select id="filter-category">
+                                <option value="" th:text="#{result.filter.category.all}">All categories</option>
+                                <option th:each="c : ${categories}" th:value="${c.key}" th:text="${c.value}">Glycerophospholipids [GP]</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="lifs-table-wrap">
+                        <table class="lifs-table" id="results">
+                            <caption class="visually-hidden" th:text="#{result.table.caption}">Harmonized names, sorted by line</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="lifs-num" data-sort="num" aria-sort="ascending" th:text="#{result.col.line}">Line</th>
+                                    <th scope="col" class="col-toggle"><span class="visually-hidden" th:text="#{result.col.details}">Details</span></th>
+                                    <th scope="col" data-sort="text" th:text="#{result.col.submitted}">Submitted</th>
+                                    <th scope="col" data-sort="text" th:text="#{result.col.harmonized}">Harmonized name</th>
+                                    <th scope="col" data-sort="num" th:text="#{result.col.level}">Level</th>
+                                    <th scope="col" data-sort="text" th:text="#{result.col.category}">Category</th>
+                                    <th scope="col" data-sort="text" th:text="#{result.col.formula}">Formula</th>
+                                    <th scope="col" class="lifs-num" data-sort="num" th:text="#{result.col.mass}">Exact mass</th>
+                                    <th scope="col" th:text="#{result.col.databases}">Databases</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(rows)}" class="empty">
+                                    <td colspan="9" class="lifs-note" th:text="#{result.table.empty}">No names are harmonized yet.</td>
+                                </tr>
+                                <th:block th:each="r : ${rows}" th:with="line=${r.entry().line()}, res=${r.result()}">
+                                    <tr class="result-row" th:attr="data-line=${line},data-level=${r.level()},data-category=${r.category()},data-search=${r.search()}">
+                                        <td class="lifs-num" th:text="${line}">7</td>
+                                        <td class="col-toggle"><button type="button" class="xbtn" hidden aria-expanded="false"
+                                                th:attr="aria-controls='detail-' + ${line},data-show=#{result.details.show(${line})},data-hide=#{result.details.hide(${line})}"
+                                                th:aria-label="#{result.details.show(${line})}">▸</button></td>
+                                        <td class="mono" th:attr="data-value=${r.entry().current()}"><span th:text="${r.entry().current()}">Cer(d18:1/18:0)</span><th:block th:if="${r.entry().corrected()}"><br/><span
+                                                class="visually-hidden" th:text="#{result.submittedAs}">submitted as</span> <s th:text="${r.entry().original()}">Cer(d18:1/18:0</s></th:block></td>
+                                        <td class="mono" th:attr="data-value=${res.normalizedName}"><strong th:text="${res.normalizedName}">Cer 18:1;O2/18:0</strong>
+                                            <span th:if="${r.entry().corrected()}" class="lifs-lvl lifs-lvl--ok chip-corrected" th:text="#{result.chip.corrected}">corrected</span></td>
+                                        <td th:attr="data-value=${r.levelOrder()}" th:text="#{${r.level()}}">sn position</td>
+                                        <td><abbr th:title="${r.categoryName()}" th:text="${r.category()}">SP</abbr></td>
+                                        <td class="mono formula" th:text="${res.sumFormula}">C36H71NO3</td>
+                                        <td class="lifs-num" th:attr="data-value=${r.mass() == null ? '' : r.mass()}"
+                                            th:text="${r.mass() == null ? '' : #numbers.formatDecimal(r.mass(), 1, 4)}">565.5434</td>
+                                        <td class="db">
+                                            <span th:unless="${r.lipidMapsEntries().isEmpty()}" class="lifs-badge" th:text="'LM ' + ${r.lipidMapsEntries().size()}">LM 2</span>
+                                            <span th:unless="${r.swissLipidsEntries().isEmpty()}" class="lifs-badge" th:text="'SL ' + ${r.swissLipidsEntries().size()}">SL 1</span>
+                                            <span th:unless="${r.chebiEntries().isEmpty()}" class="lifs-badge" th:text="'ChEBI ' + ${r.chebiEntries().size()}">ChEBI 1</span>
+                                            <span th:unless="${r.hasDatabaseEntries()}" class="lifs-badge lifs-badge--plain" th:text="#{result.db.none}">none</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="detail" th:id="'detail-' + ${line}">
+                                        <td colspan="9">
+                                            <details>
+                                                <summary th:text="#{result.details}">Details</summary>
+                                                <dl class="kv">
+                                                    <div><dt th:text="#{result.details.grammar}">Grammar</dt><dd th:text="${res.grammar}">LIPIDMAPS</dd></div>
+                                                    <div><dt th:text="#{result.details.adduct}">Adduct</dt><dd class="mono" th:text="${r.adduct()}">[M]</dd></div>
+                                                    <div><dt th:text="#{result.details.category}">LIPID MAPS category</dt>
+                                                        <dd th:if="${r.hasLipidMapsCategory()}"><a target="_blank" rel="noopener"
+                                                               th:href="'https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM' + ${res.lipidMapsCategory}"
+                                                               th:title="#{result.details.external}"><th:block th:text="${r.categoryName()}">Glycerophospholipids [GP]</th:block> ↗</a></dd>
+                                                        <dd th:unless="${r.hasLipidMapsCategory()}" th:text="${r.categoryName()}">Glycerophospholipids [GP]</dd></div>
+                                                    <div><dt th:text="#{result.details.class}">LIPID MAPS class</dt>
+                                                        <dd th:if="${res.lipidMapsClass != null}"><a target="_blank" rel="noopener"
+                                                               th:href="'https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM' + ${res.lipidMapsClass}"
+                                                               th:title="#{result.details.external}"><th:block th:text="${r.className()}">Diacylglycerophosphoethanolamines [GP0201]</th:block> ↗</a></dd>
+                                                        <dd th:if="${res.lipidMapsClass == null}" th:text="${r.className()}">Class</dd></div>
+                                                    <div><dt th:text="#{result.details.level}">Level</dt><dd th:text="#{${r.level()}}">Full structure</dd></div>
+                                                    <div th:if="${r.numCarbon() != null}"><dt th:text="#{result.details.carbons}">C atoms · double bonds</dt>
+                                                        <dd class="mono" th:text="${r.numCarbon()} + ' · ' + ${r.doubleBonds() != null ? r.doubleBonds() : '–'}">34 · 3</dd></div>
+                                                    <div th:if="${res.functionalGroupCounts != null and !#maps.isEmpty(res.functionalGroupCounts)}"><dt th:text="#{result.details.functionalGroups}">Functional groups</dt>
+                                                        <dd class="mono"><th:block th:each="g, s : ${res.functionalGroupCounts}" th:text="${g.key} + ' ' + ${g.value} + (${s.last} ? '' : ', ')">OH 1</th:block></dd></div>
+                                                    <div th:if="${r.mass() != null}"><dt th:text="#{result.details.mass}">Exact mass</dt><dd class="mono" th:text="${#numbers.formatDecimal(r.mass(), 1, 4)}">713.4996</dd></div>
+                                                    <div th:if="${res.sumFormula != null and !#strings.isEmpty(res.sumFormula)}"><dt th:text="#{result.details.formula}">Formula</dt><dd class="mono" th:text="${res.sumFormula}">C39H72NO8P</dd></div>
+                                                    <div th:if="${r.faBondType() != null}"><dt th:text="#{result.details.bondType}">Bond to head group</dt><dd th:text="#{${r.faBondType()}}">Ester</dd></div>
+                                                    <div th:if="${res.messages != null and !#lists.isEmpty(res.messages)}" class="kv__wide"><dt th:text="#{result.details.messages}">Goslin’s messages</dt>
+                                                        <dd><th:block th:each="m : ${res.messages}"><span th:text="${m}">Message</span><br/></th:block></dd></div>
+                                                    <div class="kv__wide"><dt th:text="#{result.details.databases}">Database entries</dt>
+                                                        <dd th:unless="${r.hasDatabaseEntries()}" class="lifs-note" th:text="#{result.details.noDatabases}">No LIPID MAPS, SwissLipids or ChEBI entry for this name</dd>
+                                                        <dd th:if="${r.hasDatabaseEntries()}" class="dbs">
+                                                            <span th:each="d : ${r.lipidMapsEntries()}"><a target="_blank" rel="noopener" th:href="${d.databaseUrl + d.databaseElementId}" th:title="${d.databaseElementId}"><span
+                                                                class="lifs-badge">LM</span> <th:block th:text="${d.nativeName != null and !#strings.isEmpty(d.nativeName) ? d.nativeName : d.databaseElementId}">name</th:block> ↗</a></span>
+                                                            <span th:each="d : ${r.swissLipidsEntries()}"><a target="_blank" rel="noopener" th:href="${d.databaseUrl + d.databaseElementId}" th:title="${d.databaseElementId}"><span
+                                                                class="lifs-badge">SL</span> <th:block th:text="${d.nativeName != null and !#strings.isEmpty(d.nativeName) ? d.nativeName : d.databaseElementId}">name</th:block> ↗</a></span>
+                                                            <span th:each="d : ${r.chebiEntries()}"><a target="_blank" rel="noopener" th:href="${d.databaseUrl}" th:title="${d.databaseElementId}"><span
+                                                                class="lifs-badge">ChEBI</span> <th:block th:text="${d.nativeName != null and !#strings.isEmpty(d.nativeName) ? d.nativeName : d.databaseElementId}">name</th:block> ↗</a></span>
+                                                        </dd></div>
+                                                </dl>
+                                                <div class="lifs-table-wrap" th:unless="${#lists.isEmpty(r.chains())}">
+                                                    <table class="lifs-table chains">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col" th:text="#{result.chain.name}">Chain</th>
+                                                                <th scope="col" th:text="#{result.chain.position}">Position</th>
+                                                                <th scope="col" class="lifs-num" th:text="#{result.chain.carbons}"># C</th>
+                                                                <th scope="col" class="lifs-num" th:text="#{result.chain.doubleBonds}"># DB</th>
+                                                                <th scope="col" th:text="#{result.chain.bondType}">Bond to head group</th>
+                                                                <th scope="col" th:text="#{result.chain.dbPositions}">DB positions</th>
+                                                                <th scope="col" th:text="#{result.chain.functionalGroups}">Functional groups</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr th:each="c : ${r.chains()}">
+                                                                <td th:text="${c.name()}">FA1</td>
+                                                                <td><th:block th:if="${c.position() != null}" th:text="${c.position()}">sn1</th:block><abbr th:if="${c.position() == null}" th:title="#{result.chain.notDefined.title}" th:text="#{result.chain.notDefined}">N.D.</abbr></td>
+                                                                <td class="lifs-num" th:text="${c.numCarbon()}">16</td>
+                                                                <td class="lifs-num" th:text="${c.doubleBonds()}">2</td>
+                                                                <td th:text="${c.bondType() != null} ? #{${c.bondType()}} : ''">Ester</td>
+                                                                <td class="mono"><th:block th:if="${c.doubleBondPositions() != null}" th:text="${c.doubleBondPositions()}">9Z, 12Z</th:block><abbr th:if="${c.doubleBondPositions() == null}" th:title="#{result.chain.notDefined.title}" th:text="#{result.chain.notDefined}">N.D.</abbr></td>
+                                                                <td class="mono"><th:block th:if="${c.functionalGroups() != null}" th:text="${c.functionalGroups()}">{OH:[OH]}</th:block><abbr th:if="${c.functionalGroups() == null}" th:title="#{result.chain.notDefined.title}" th:text="#{result.chain.notDefined}">N.D.</abbr></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </details>
+                                        </td>
+                                    </tr>
+                                </th:block>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pager" id="pager" th:attr="data-range=#{result.pager.range},data-filtered=#{result.pager.filtered},data-sorted=#{result.pager.sorted},data-none=#{result.pager.none}">
+                        <span class="lifs-note" id="pager-status" aria-live="polite" th:text="#{result.pager.rows(${nHarmonized})}">Rows 1–25 of 53 · sorted by line</span>
+                        <div class="lifs-row">
+                            <button type="button" id="pager-previous" class="lifs-btn lifs-btn--text lifs-btn--small" hidden th:text="#{result.pager.previous}">Previous</button>
+                            <button type="button" id="pager-next" class="lifs-btn lifs-btn--outlined lifs-btn--small" hidden th:text="#{result.pager.next}">Next</button>
+                            <a id="download-tsv-bottom" class="lifs-btn lifs-btn--filled lifs-btn--small" th:href="${downloadUrl}" href="#" download>
+                                <svg class="lifs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg><span th:text="#{result.download}">Download table (TSV)</span></a>
+                        </div>
+                    </div>
+                </section>
+            </th:block>
+        </main>
+
+        <footer th:replace="~{lifs/layout :: footer}"></footer>
+        <th:block th:replace="~{lifs/layout :: tracking}"></th:block>
+        <script th:src="@{/js/goslin.js}" src="/js/goslin.js" defer></script>
+    </body>
+</html>
