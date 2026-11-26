@@ -15,9 +15,6 @@
  */
 package org.lifstools.jgoslin.webapp.services;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.lifstools.jgoslin.webapp.domain.ExternalDatabaseReference;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -35,6 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 /**
  *

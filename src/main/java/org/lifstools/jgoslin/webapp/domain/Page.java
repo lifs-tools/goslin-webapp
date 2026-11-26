@@ -33,6 +33,9 @@ public class Page extends DefaultPage {
 
     private String maxFileSize;
 
+    /** The Goslin head as favicon; lifs/layout :: head links it, with /img/favicon.png as the PNG fallback. */
+    public static final String FAVICON_URL = "/img/goslin-favicon.svg";
+
     public Page(String title, AppInfo appInfo) {
         this(
                 title,
@@ -60,7 +63,8 @@ public class Page extends DefaultPage {
     }
 
     public Page(String title, String appVersion, String gaId, String description, String author, String buildDate, String scmCommitId, String scmBranch, String scmUrl, String supportUrl, String toolTitle, String toolDescription, String toolAuthor, String toolLicense, String toolLicenseUrl, String toolVersionNumber, String toolUrl, String toolContact, String authServerBaseUrl, String authServerRealm, String maxFileSize) {
-        super(title, appVersion, gaId, description, author, buildDate, scmCommitId, scmBranch, scmUrl, supportUrl, toolTitle, toolDescription, toolAuthor, toolLicense, toolLicenseUrl, toolVersionNumber, toolUrl, toolContact, authServerBaseUrl, authServerRealm);
+        super(title, appVersion, gaId, description, author, buildDate, scmCommitId, scmBranch, scmUrl, supportUrl, toolTitle, toolDescription, toolAuthor, toolLicense, toolLicenseUrl, toolVersionNumber, toolUrl, toolContact, authServerBaseUrl, authServerRealm,
+                FAVICON_URL);
         this.maxFileSize = maxFileSize;
     }
 

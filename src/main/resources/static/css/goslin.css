@@ -1,0 +1,178 @@
+/*
+ * Goslin pages on top of the LIFS design system (lifs-webapps-common static/lifs/css/lifs.css).
+ * Only LIFS tokens are used; no new colours. The logo greens belong to the Goslin logo itself.
+ */
+
+/* lifs.css sets display on these classes, which would otherwise override the hidden attribute. */
+.lifs-callout[hidden], .lifs-btn[hidden] { display: none; }
+
+/* ---------- input page ---------- */
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+@media (max-width: 899.98px) { .cols { grid-template-columns: 1fr; } }
+
+.count { font: 12px var(--lifs-mono); color: var(--lifs-grey); white-space: nowrap; }
+
+.goslin-names { position: relative; }
+.goslin-names textarea {
+  display: block; width: 100%; min-height: 340px; resize: vertical; padding: 12px 14px;
+  border: 1px solid var(--lifs-line); border-radius: var(--lifs-radius-none);
+  font: 13px/1.7 var(--lifs-mono); color: var(--lifs-ink); background: #fff;
+}
+.goslin-names textarea:focus { outline: none; border-color: var(--lifs-primary); box-shadow: inset 0 0 0 1px var(--lifs-primary); }
+.goslin-names--drag textarea { border: 2px dashed var(--lifs-primary); background: var(--lifs-tint); }
+
+/* The file input stays focusable (visually hidden); its label looks like a button and shows the focus. */
+.goslin-upload { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0; }
+.goslin-upload label { cursor: pointer; }
+.goslin-upload input:focus-visible + label { outline: 2px solid var(--lifs-primary); outline-offset: 2px; }
+
+.check { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.check input { width: 16px; height: 16px; margin: 2px 0 0; flex: 0 0 auto; accent-color: var(--lifs-primary); }
+.check > span { display: flex; flex-direction: column; gap: 2px; }
+
+.failures { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; }
+
+.notation { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 13px; }
+.notation dt { font-family: var(--lifs-mono); color: var(--lifs-ink); }
+.notation dd { margin: 0; color: var(--lifs-slate); }
+
+.about {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;
+  border-top: 1px solid var(--lifs-line); padding-top: 28px;
+}
+
+/* ---------- result page ---------- */
+.head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.head__text { display: flex; flex-direction: column; gap: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
+/* "Correct these names": an error accent on the left border */
+.fix { border-left: 4px solid var(--lifs-error); }
+.fix__title { font-size: 18px; }
+.fix__row {
+  display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 6px 12px; align-items: start;
+  padding: 12px 0; border-top: 1px solid var(--lifs-line);
+}
+.fix__row:first-child { border-top: 0; }
+.fix__line { font: 12px var(--lifs-mono); color: var(--lifs-grey); padding-top: 10px; white-space: nowrap; }
+.fix__body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.fix__body .lifs-input { width: 100%; font-family: var(--lifs-mono); }
+.fix__remove { margin-top: 4px; }
+.fix__msg { display: flex; flex-direction: column; gap: 4px; }
+.fix__kept { align-self: center; }
+.trace { font: 12.5px var(--lifs-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.trace mark {
+  background: var(--lifs-error-bg); color: var(--lifs-error); padding: 0 1px;
+  text-decoration: underline wavy var(--lifs-error); text-underline-offset: 3px;
+}
+.fix__original > summary { cursor: pointer; font-size: 12px; color: var(--lifs-grey); width: max-content; }
+.fix__original > p { margin: 4px 0 0; font-size: 12px; color: var(--lifs-slate); overflow-wrap: anywhere; }
+@media (max-width: 599.98px) {
+  .fix__row { grid-template-columns: minmax(0, 1fr) auto; }
+  .fix__line { grid-column: 1 / -1; padding-top: 0; }
+}
+
+/* Filters and table; goslin.js shows the filters and the pager buttons */
+.filters { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+.filters[hidden], .xbtn[hidden], tr[hidden] { display: none; }
+@media (max-width: 699.98px) { .filters { grid-template-columns: 1fr; } }
+.mono { font-family: var(--lifs-mono); font-size: 12.5px; }
+#results td { font-size: 13px; }
+/* Columns are styled by position: the 5,000 rows carry no classes. 1 line, 3 submitted, 4 harmonized, 7 formula, 8 mass, 9 databases */
+#results > tbody > tr.result-row > td:nth-child(1), #results > tbody > tr.result-row > td:nth-child(8) { text-align: right; font-family: var(--lifs-mono); }
+#results > tbody > tr.result-row > td:nth-child(3), #results > tbody > tr.result-row > td:nth-child(4),
+#results > tbody > tr.result-row > td:nth-child(7) { font-family: var(--lifs-mono); font-size: 12.5px; overflow-wrap: anywhere; min-width: 9em; }
+#results > tbody > tr.result-row > td:nth-child(7) { white-space: nowrap; overflow-wrap: normal; min-width: 0; }
+#results > tbody > tr.result-row > td:nth-child(9) { white-space: nowrap; }
+#results > tbody > tr.result-row > td:nth-child(9) .lifs-badge + .lifs-badge { margin-left: 4px; }
+#results .col-toggle, #results > tbody > tr.result-row > td:nth-child(2) { width: 28px; padding-left: 4px; padding-right: 0; }
+#results s { color: var(--lifs-grey); }
+.xbtn { border: 0; background: none; cursor: pointer; color: var(--lifs-primary); padding: 0 4px; font: 14px var(--lifs-mono); }
+.xbtn:focus-visible, .sort-btn:focus-visible { outline: 2px solid var(--lifs-primary); outline-offset: 2px; }
+.sort-btn {
+  border: 0; background: none; padding: 0; cursor: pointer; display: inline-flex; gap: 4px; align-items: baseline;
+  font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit;
+}
+.sort-btn::after { content: '\2195'; opacity: 0.35; }
+th[aria-sort=ascending] .sort-btn::after { content: '\25B2'; opacity: 1; font-size: 0.8em; }
+th[aria-sort=descending] .sort-btn::after { content: '\25BC'; opacity: 1; font-size: 0.8em; }
+
+/* Details row: a closed <details> without JavaScript, opened by the ▸ button with it */
+#results tr.detail > td { background: var(--lifs-paper); padding: 6px 12px; }
+#results tr.detail > td:has(details[open]) { padding: 16px 18px 18px; }
+#results tr.detail summary { cursor: pointer; font-size: 12px; color: var(--lifs-primary); width: max-content; }
+#results tr.detail details[open] > summary { margin-bottom: 12px; }
+.results--js tr.detail summary { display: none; }
+.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px 24px; margin: 0 0 14px; }
+.kv > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.kv dt { font: 10px var(--lifs-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--lifs-grey); }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+.kv .kv__wide { grid-column: 1 / -1; }
+.dbs { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+#results tr.detail a[target=_blank]::after { content: ' \2197'; }
+.chains { margin-top: 4px; border: 1px solid var(--lifs-line); }
+.chains td, .chains th { font-size: 12.5px; }
+.chains td:nth-child(3), .chains td:nth-child(4), .chains th:nth-child(3), .chains th:nth-child(4) { text-align: right; font-family: var(--lifs-mono); }
+.chains td:nth-child(6), .chains td:nth-child(7) { font-family: var(--lifs-mono); }
+.pager { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- Goslin logo: blink (CSS) and honk on click (goslin.js) ---------- */
+.goslin-hero-logo { flex: 0 1 160px; max-width: 160px; }
+.goslin-logo { position: relative; display: inline-block; width: 160px; max-width: 100%; aspect-ratio: 1; cursor: pointer; }
+.goslin-logo svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.goslin-logo .g-eye { transform-box: fill-box; transform-origin: center; animation: g-blink 6s infinite; }
+.goslin-logo .g-head { transform-box: fill-box; transform-origin: 0% 100%; }
+.goslin-logo--honking .g-head { animation: g-peck 520ms ease-out; }
+@keyframes g-blink { 0%, 92%, 96%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.12); } }
+@keyframes g-peck { 0% { transform: rotate(0); } 35% { transform: rotate(-16deg); } 70% { transform: rotate(5deg); } 100% { transform: rotate(0); } }
+
+/* Above the beak rather than beside it, so that "PC 16:0/18:1(9Z), please." never runs off the page. */
+.g-bubble {
+  position: absolute; right: -8px; bottom: calc(100% + 6px); padding: 4px 9px; background: #fff; border: 1px solid var(--lifs-line);
+  font: 500 13px var(--lifs-mono); color: var(--lifs-ink); white-space: nowrap; pointer-events: none;
+  opacity: 0; transform: translateY(6px); transition: opacity 160ms, transform 160ms;
+  box-shadow: 0 4px 12px var(--lifs-shadow-color);
+}
+.g-bubble::before {
+  content: ''; position: absolute; right: 46px; bottom: -6px; width: 10px; height: 10px; background: #fff;
+  border-right: 1px solid var(--lifs-line); border-bottom: 1px solid var(--lifs-line); transform: rotate(45deg);
+}
+.goslin-logo--honking .g-bubble { opacity: 1; transform: none; }
+
+/* Reduced motion: no blink, no peck; the bubble still appears (without sliding in). */
+@media (prefers-reduced-motion: reduce) {
+  .goslin-logo .g-eye, .goslin-logo--honking .g-head { animation: none; }
+  .g-bubble { transition: none; transform: none; }
+}
+
+/* ---------- documentation ---------- */
+.doc { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; align-items: start; }
+@media (max-width: 899.98px) { .doc { grid-template-columns: 1fr; gap: 20px; } }
+.doc__toc { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; border-left: 2px solid var(--lifs-line); padding-left: 16px; }
+@media (max-width: 899.98px) { .doc__toc { position: static; max-height: none; border-left: 0; border-bottom: 1px solid var(--lifs-line); padding: 0 0 12px; } }
+.doc__toc ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.doc__toc a { color: var(--lifs-slate); text-decoration: none; }
+.doc__toc a:hover, .doc__toc a:focus-visible, .doc__toc a[aria-current=true] { color: var(--lifs-primary); text-decoration: underline; }
+.doc__content { display: grid; gap: 48px; min-width: 0; }
+.doc-section { scroll-margin-top: 16px; min-width: 0; }
+.doc-section > h2 { margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--lifs-line); }
+.doc-section h3 { margin: 28px 0 8px; font-size: 18px; }
+.doc-section figure { margin: 20px 0; }
+.doc-section figure img { display: block; max-width: 100%; height: auto; border: 1px solid var(--lifs-line); }
+.doc-section figcaption, .doc-caption { margin-top: 8px; font-size: 13px; color: var(--lifs-slate); }
+.doc-section pre { margin: 12px 0; padding: 12px 14px; overflow-x: auto; background: var(--lifs-paper); border: 1px solid var(--lifs-line); font: 12.5px/1.6 var(--lifs-mono); }
+.doc-section code, .doc-section kbd { font-family: var(--lifs-mono); font-size: 0.92em; }
+.doc-section pre code { font-size: inherit; }
+.doc-refs { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 14px; }
+.doc-filter { max-width: 420px; margin-bottom: 12px; }
+.news { display: grid; gap: 8px; }
+.news__entry { border: 1px solid var(--lifs-line); background: #fff; }
+.news__entry > summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 12px 16px; cursor: pointer; }
+.news__entry > summary:focus-visible { outline: 2px solid var(--lifs-primary); outline-offset: -2px; }
+.news__title { font-weight: 600; color: var(--lifs-ink); }
+.news__date { font: 12px var(--lifs-mono); color: var(--lifs-grey); }
+.news__body { padding: 0 16px 14px; }
+.doc-section tr[hidden] { display: none; }
+.about-version { display: grid; grid-template-columns: max-content 1fr; gap: 8px 24px; margin: 0; }
+.about-version dt { color: var(--lifs-grey); }
+.about-version dd { margin: 0; color: var(--lifs-ink); overflow-wrap: anywhere; }

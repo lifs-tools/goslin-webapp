@@ -1,0 +1,45 @@
+name: Set up the build
+description: >-
+  JDK 25 with the Maven cache. While goslin-webapp depends on a SNAPSHOT of lifs-webapps-common,
+  that SNAPSHOT is built from source (repository variable LIFS_WEBAPPS_COMMON_REF, default master),
+  so pull requests do not depend on a published snapshot.
+inputs:
+  common-ref:
+    description: Branch, tag or commit of lifs-tools/lifs-webapps-common for SNAPSHOT builds
+    required: false
+    default: master
+runs:
+  using: composite
+  steps:
+    - name: Set up JDK 25
+      uses: actions/setup-java@v6
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: 'maven'
+    - name: Read the lifs-webapps-common version
+      id: common
+      shell: bash
+      run: |
+        version=$(sed -n 's:.*<lifs.webapps.common.version>\(.*\)</lifs.webapps.common.version>.*:\1:p' pom.xml | head -n 1)
+        [[ "$version" =~ ^[0-9A-Za-z._-]+$ ]] || { echo "Unexpected lifs-webapps-common version: '$version'" >&2; exit 1; }
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+        if [[ "$version" == *-SNAPSHOT ]]; then echo "snapshot=true" >> "$GITHUB_OUTPUT"; else echo "snapshot=false" >> "$GITHUB_OUTPUT"; fi
+    - name: Check out lifs-webapps-common
+      if: steps.common.outputs.snapshot == 'true'
+      uses: actions/checkout@v7
+      with:
+        repository: lifs-tools/lifs-webapps-common
+        ref: ${{ inputs.common-ref }}
+        path: .lifs-webapps-common
+    - name: Build lifs-webapps-common ${{ steps.common.outputs.version }}
+      if: steps.common.outputs.snapshot == 'true'
+      shell: bash
+      working-directory: .lifs-webapps-common
+      run: |
+        actual=$(sed -n '0,/<version>/s:.*<version>\(.*\)</version>.*:\1:p' pom.xml)
+        if [[ "$actual" != "${{ steps.common.outputs.version }}" ]]; then
+          echo "lifs-webapps-common@${{ inputs.common-ref }} is $actual, goslin-webapp needs ${{ steps.common.outputs.version }}" >&2
+          exit 1
+        fi
+        ./mvnw -B --no-transfer-progress install -DskipTests

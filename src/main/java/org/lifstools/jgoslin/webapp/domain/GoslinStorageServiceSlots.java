@@ -58,4 +58,21 @@ public final class GoslinStorageServiceSlots {
         }
     };
     
+    public static final StorageServiceSlot INPUT_ENTRIES = new StorageServiceSlot() {
+        @Override
+        public String getExtension() {
+            return ".json";
+        }
+
+        @Override
+        public String getName() {
+            return "inputEntries";
+        }
+
+        @Override
+        public boolean isDirectory() {
+            return false;
+        }
+    };
+
 }

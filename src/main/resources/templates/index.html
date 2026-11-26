@@ -1,29 +1,127 @@
-<!DOCTYPE HTML>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/layout}">
-    <head>
-    <th:block th:include="fragments/html-head :: html-head"></th:block>
-</head>
-<body>
-    <div class="container">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+    <head th:replace="~{lifs/layout :: head(${page?.title})}"></head>
+    <body>
+        <link rel="stylesheet" th:href="@{/css/goslin.css}" href="/css/goslin.css"/>
+        <header th:replace="~{fragments/nav :: app-bar(active='harmonize')}"></header>
 
-        <div class="row">
+        <main id="main" class="lifs-main" tabindex="-1">
+            <div th:replace="~{lifs/layout :: messages}"></div>
 
-            <div class="container">
-                <th:block th:include="fragments/nav :: nav"></th:block>
+            <section class="lifs-hero" aria-labelledby="page-title">
+                <div class="lifs-hero__text">
+                    <p class="lifs-eyebrow" th:text="#{index.eyebrow}">LIFS Tools · Lipid nomenclature</p>
+                    <h1 id="page-title" th:text="#{index.title}">Harmonize lipid names</h1>
+                    <p class="lifs-lead lifs-prose" th:utext="#{index.lead('https://pubmed.ncbi.nlm.nih.gov/33037133/')}">Goslin reads lipid names …</p>
+                    <p class="lifs-note lifs-prose" th:utext="#{index.classes(@{/documentation#lipid-classes})}">Is a lipid class supported? …</p>
+                </div>
+                <div class="lifs-hero__art goslin-hero-logo">
+                    <span th:replace="~{fragments/goslin-logo :: logo}"></span>
+                </div>
+            </section>
 
-                <main role="main" class="my-3">
-                    <th:block th:include="fragments/overview :: overview"></th:block>
-                    <th:block th:include="fragments/lipid-names-form :: validate-lipid-names-card"></th:block>
-                </main>
+            <div class="cols">
+                <section class="lifs-card" aria-labelledby="names-title">
+                    <div class="lifs-card__head">
+                        <h2 id="names-title" class="lifs-card__title" th:text="#{index.form.title}">Lipid names</h2>
+                        <span class="count" id="lipid-count" aria-live="polite"
+                              th:data-one="#{index.count.one}" th:data-many="#{index.count.many}" th:data-max="#{index.count.max(${maxNames})}"
+                              th:text="${#numbers.formatInteger(nameCount, 1, 'DEFAULT')} + ' ' + (${nameCount == 1} ? #{index.count.one} : #{index.count.many}) + ' · ' + #{index.count.max(${maxNames})}">0 names · up to 5,000</span>
+                    </div>
 
-                <th:block th:include="fragments/footer :: footer"></th:block>
+                    <div class="lifs-row">
+                        <a id="load-example" class="lifs-btn lifs-btn--outlined lifs-btn--small" th:href="@{/?example}" href="/?example" th:text="#{index.example}">Load example names</a>
+                        <form id="upload-fallback" class="goslin-upload" method="post" enctype="multipart/form-data" th:action="@{/validatefile}" action="/validatefile">
+                            <input type="file" id="file" name="file" class="visually-hidden" accept=".txt,.csv,.tsv,text/plain" th:data-max-bytes="${maxTextBytes}"/>
+                            <label for="file" class="lifs-btn lifs-btn--text lifs-btn--small" th:text="#{index.upload}">Upload a file…</label>
+                            <noscript><button type="submit" class="lifs-btn lifs-btn--outlined lifs-btn--small" th:text="#{index.upload.submit}">Harmonize the file</button></noscript>
+                        </form>
+                        <span class="lifs-spacer"></span>
+                        <button type="button" id="clear" class="lifs-btn lifs-btn--text lifs-btn--small" hidden th:text="#{index.clear}">Clear</button>
+                    </div>
+                    <template id="example-names" th:text="${exampleNames}"></template>
 
+                    <form id="harmonize-form" class="lifs-stack" method="post" th:action="@{/validate}" action="/validate" th:object="${harmonizeForm}">
+                        <div th:if="${failures != null and !#lists.isEmpty(failures)}" id="failures" class="lifs-callout lifs-callout--error" role="alert">
+                            <div class="lifs-stack">
+                                <b th:text="#{index.failures.title(${#lists.size(failures)})}">1 name could not be read. Nothing was harmonized.</b>
+                                <span th:text="#{index.failures.help}">Correct it in the box, or check “Skip invalid names” …</span>
+                                <ul class="failures">
+                                    <li th:each="f : ${failures}"><span th:text="#{index.failure.line(${f.entry().line()})}">line 3</span>: <span class="lifs-mono" th:text="${f.entry().current()}">PC(18:2</span>:
+                                        <span th:if="${f.explanation() != null}"
+                                              th:text="#{${'fix.hint.' + #strings.toLowerCase(f.explanation().hint().name())}(${f.explanation().position() + 1}, ${f.explanation().marked(f.entry().current())}, ${timeLimitSeconds})}">A closing bracket is missing.</span>
+                                        <span th:if="${f.explanation() == null and f.result().messages != null}" th:text="${#strings.listJoin(f.result().messages, ' | ')}">Parser message</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="goslin-names">
+                            <label for="lipids" class="visually-hidden" th:text="#{index.names.label}">Lipid names, one per line</label>
+                            <textarea id="lipids" th:field="*{lipidNames}" rows="16" spellcheck="false" autocomplete="off" required
+                                      aria-describedby="lipids-help" th:placeholder="#{index.names.placeholder}"></textarea>
+                        </div>
+                        <p class="lifs-note" id="lipids-help" th:utext="#{index.names.help(${maxTextSize})}">Type or paste names, one per line, …</p>
+                        <p id="file-error" class="lifs-callout lifs-callout--error" role="alert" hidden
+                           th:data-too-large="#{index.file.tooLarge(${maxTextSize})}" th:data-not-text="#{index.file.notText}"
+                           th:data-unreadable="#{index.file.unreadable}"></p>
+
+                        <label class="check">
+                            <input type="checkbox" id="skipInvalid" th:field="*{skipInvalid}"/>
+                            <span><b th:text="#{index.skip.label}">Skip invalid names</b>
+                                <span class="lifs-note" th:text="#{index.skip.help}">Names that cannot be read are listed at the top of the result, …</span></span>
+                        </label>
+
+                        <div class="lifs-card__actions">
+                            <button type="submit" id="harmonize" class="lifs-btn lifs-btn--filled" th:text="#{index.harmonize}">Harmonize</button>
+                        </div>
+                    </form>
+                </section>
+
+                <div class="lifs-stack">
+                    <section class="lifs-card lifs-card--accent" aria-labelledby="notations-title">
+                        <h2 id="notations-title" class="lifs-card__title" th:text="#{index.notations.title}">Accepted notations</h2>
+                        <dl class="notation">
+                            <dt>PC 16:0/18:1(9Z)</dt><dd th:text="#{index.notations.shorthand}">Shorthand 2020</dd>
+                            <dt>PC(16:0/18:1(9Z))</dt><dd th:text="#{index.notations.lipidmaps}">LIPID MAPS</dd>
+                            <dt>Cer(d18:1/16:0)</dt><dd th:text="#{index.notations.older}">Older shorthand</dd>
+                            <dt>TG 52:2</dt><dd th:text="#{index.notations.species}">Species level</dd>
+                            <dt>SM d35:1 [M+H]1+</dt><dd th:text="#{index.notations.adduct}">With adduct</dd>
+                        </dl>
+                        <a th:href="@{/documentation#lipid-classes}" href="/documentation#lipid-classes" th:text="#{index.notations.all}">All supported lipid classes →</a>
+                    </section>
+                    <section class="lifs-card" aria-labelledby="scripts-title">
+                        <h2 id="scripts-title" class="lifs-card__title" th:text="#{index.scripts.title}">For scripts</h2>
+                        <p class="lifs-note"><a th:href="@{/swagger-ui/index.html}" href="/swagger-ui/index.html" th:text="#{index.scripts.api}">REST API</a>
+                            · <a href="https://github.com/lifs-tools/jgoslin" target="_blank" rel="noopener">jgoslin</a>
+                            · <a href="https://github.com/lifs-tools/pygoslin" target="_blank" rel="noopener">pygoslin</a>
+                            · <a href="https://github.com/lifs-tools/rgoslin" target="_blank" rel="noopener">rgoslin</a>
+                            · <a href="https://github.com/lifs-tools/cppgoslin" target="_blank" rel="noopener">cppgoslin</a></p>
+                    </section>
+                    <section class="lifs-card" aria-labelledby="cite-title">
+                        <h2 id="cite-title" class="lifs-card__title" th:text="#{index.cite.title}">How to cite</h2>
+                        <p class="lifs-note lifs-prose"><th:block th:utext="#{index.cite.text}">Kopczynski et al., …</th:block>
+                            <a th:href="@{/about#citing}" href="/about#citing" th:text="#{index.cite.more}">More</a></p>
+                    </section>
+                </div>
             </div>
 
-        </div>
+            <section class="about" th:aria-label="#{index.about.title}" aria-label="About Goslin">
+                <div class="lifs-stack">
+                    <h2 th:text="#{index.about.title}">About Goslin</h2>
+                    <p class="lifs-note lifs-prose" th:utext="#{index.about.text('https://pubmed.ncbi.nlm.nih.gov/33037133/', 'https://lipidomics-standards-initiative.org/')}">Goslin parses lipid names …</p>
+                    <p class="lifs-note"><a th:href="@{/about}" href="/about" th:text="#{index.about.more}">More about Goslin</a></p>
+                </div>
+                <div class="lifs-stack">
+                    <h2 th:text="#{index.problem.title}">Found a problem?</h2>
+                    <p class="lifs-note lifs-prose"
+                       th:utext="#{index.problem.text('https://github.com/lifs-tools/goslin-webapp/issues', ${page.supportUrl != null and page.supportUrl != '' ? page.supportUrl : 'https://lifs-tools.org/support.html'}, 'https://www.denbi.de/')}">If a name is read incorrectly, …</p>
+                </div>
+            </section>
+        </main>
 
-    </div>
-<th:block th:include="fragments/script-footer :: script-footer"></th:block>
-</body>
+        <footer th:replace="~{lifs/layout :: footer}"></footer>
+        <th:block th:replace="~{lifs/layout :: tracking}"></th:block>
+        <script th:src="@{/js/goslin.js}" src="/js/goslin.js" defer></script>
+    </body>
 </html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!-- The error page for all statuses (LifsErrorController); it replaces the Bootstrap error templates of lifs-webapps-common. -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+    <head th:replace="~{lifs/layout :: head(${page?.title})}"></head>
+    <body>
+        <header th:replace="~{fragments/nav :: app-bar(active='')}"></header>
+
+        <main id="main" class="lifs-main" tabindex="-1">
+            <section class="lifs-hero" aria-labelledby="error-title">
+                <div class="lifs-hero__text">
+                    <p class="lifs-eyebrow" th:text="${'Error ' + (status ?: 500)}" data-testid="error-status">Error 404</p>
+                    <h1 id="error-title" th:text="${title != null ? title : (status == 404 ? #messages.msg('error.notFound') : (status == 403 ? #messages.msg('error.forbidden') : #messages.msg('error.generic')))}">Sorry, that should not have happened.</h1>
+                    <p class="lifs-lead" th:text="${title != null ? error : statusReason}">Not Found</p>
+                    <div class="lifs-row">
+                        <a class="lifs-btn lifs-btn--filled" th:href="@{/}" href="/" th:text="#{error.home}">Harmonize lipid names</a>
+                        <a class="lifs-btn lifs-btn--outlined" th:href="@{/documentation}" href="/documentation" th:text="#{nav.documentation}">Documentation</a>
+                        <a class="lifs-btn lifs-btn--text" href="https://lifs-tools.org/support.html" target="_blank" rel="noopener" th:text="#{nav.issue}">Report Issue</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer th:replace="~{lifs/layout :: footer}"></footer>
+    </body>
+</html>

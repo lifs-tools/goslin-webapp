@@ -4,7 +4,11 @@ Nils Hoffmann &lt;nils.hoffmann@cebitec.uni-bielefeld.de&gt;
 image:https://zenodo.org/badge/DOI/10.5281/zenodo.3829054.svg["DOI", link="https://doi.org/10.5281/zenodo.3829054"]
 //Build status: image:https://travis-ci.org/nilshoffmann/jmzTab-m-webapp.svg?branch=master["Build Status", link="https://travis-ci.org/nilshoffmann/jmzTab-m-webapp"]
 
-This project provides a webapplication for the jgoslin library.
+This project provides a webapplication for the jgoslin library. It reads lipid names, one per line, checks them against the lipid shorthand nomenclature and returns them in the harmonized shorthand notation with classification, mass, sum formula and links to external databases. Names that cannot be read are listed on the result page, where they can be corrected and re-run.
+
+image::src/main/resources/static/img/goslin-webapp-form-01.png["The Harmonize page", width=800]
+
+image::src/main/resources/static/img/goslin-webapp-result-03.png["The result page", width=800]
 
 == Related Projects
 - https://github.com/lifs-tools/goslin[Goslin grammars and test files]
@@ -18,15 +22,17 @@ Further documentation about the projects is available https://github.com/lifs-to
 
 == Building the project from the command-line
 
-In order to build the project and run the unit tests, execute the following command from a terminal:
+The project needs Java 25 (the Maven wrapper downloads Maven). To build the project and run the unit tests, execute the following command from a terminal:
 
 	./mvnw install
 
 == Running the Web Application 
-The web-application is based on https://projects.spring.io/spring-boot/[Spring-Boot], http://www.thymeleaf.org/[Thymeleaf], https://jquery.com/[jQuery], https://datatables.net/[jQuery Datatables] and https://getbootstrap.com/[Bootstrap 4].
+The web-application is based on https://projects.spring.io/spring-boot/[Spring-Boot] and http://www.thymeleaf.org/[Thymeleaf], with plain CSS and JavaScript in the design of the LIFS application portal (no JavaScript libraries).
 The `target` folder holds all necessary dependencies and resources as a stand-alone, executable JAR file that can be run as follows (please replace <VERSION> with the correct one)
 
-  ./goslin-webapp-<VERSION>.jar
+  java -jar lifs-goslin-webapp-<VERSION>.jar
+
+Results are stored as files below `storage.location` (default: the temporary directory) and are kept for 7 days. To use another folder, add `--storage.location=/path/to/folder`.
 
 This will start the application with a default configuration, running on http port 8083. 
 The application can then be accessed from your web browser at

@@ -23,25 +23,17 @@ import org.lifstools.lifs.webapps.common.config.TrackingConfig;
 import org.lifstools.lifs.webapps.common.service.StorageService;
 import org.lifstools.lifs.webapps.common.service.storage.FileSystemStorageService;
 import org.lifstools.lifs.webapps.common.service.storage.StorageProperties;
-import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.context.MessageSourceProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
@@ -105,31 +97,7 @@ public class WebConfig implements WebMvcConfigurer {
 //                addResourceLocations("classpath:/META-INF/resources/webjars/");
 //    }
 
-    @Bean
-    @ConfigurationProperties(prefix = "spring.messages")
-    public MessageSourceProperties messageSourceProperties() {
-        return new MessageSourceProperties();
-    }
-
-    @Bean
-    public MessageSource messageSource(MessageSourceProperties properties) {
-        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        if (StringUtils.hasText(properties.getBasename())) {
-            messageSource.setBasenames(StringUtils
-                    .commaDelimitedListToStringArray(StringUtils.trimAllWhitespace(properties.getBasename())));
-        }
-        if (properties.getEncoding() != null) {
-            messageSource.setDefaultEncoding(properties.getEncoding().name());
-        }
-        messageSource.setFallbackToSystemLocale(properties.isFallbackToSystemLocale());
-        Duration cacheDuration = properties.getCacheDuration();
-        if (cacheDuration != null) {
-            messageSource.setCacheMillis(cacheDuration.toMillis());
-        }
-        messageSource.setAlwaysUseMessageFormat(properties.isAlwaysUseMessageFormat());
-        messageSource.setUseCodeAsDefaultMessage(properties.isUseCodeAsDefaultMessage());
-        return messageSource;
-    }
+    // The MessageSource comes from Spring Boot's auto-configuration of the spring.messages.* properties.
 
     @Bean
     public LocaleResolver localeResolver() {
@@ -172,14 +140,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(localeChangeInterceptor());
-    }
-
-    @Bean
-    public MessageSource messageSource() {
-        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("i18n/messages");
-        messageSource.setDefaultEncoding("UTF-8");
-        return messageSource;
     }
 
     @Bean(name = "toolThreadPoolTaskExecutor")

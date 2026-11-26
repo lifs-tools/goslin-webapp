@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+    <head th:replace="~{lifs/layout :: head(${page?.title})}"></head>
+    <body>
+        <link rel="stylesheet" th:href="@{/css/goslin.css}" href="/css/goslin.css"/>
+        <header th:replace="~{fragments/nav :: app-bar(active='about')}"></header>
+
+        <main id="main" class="lifs-main" tabindex="-1">
+            <div th:replace="~{lifs/layout :: messages}"></div>
+
+            <section class="lifs-hero" aria-labelledby="page-title">
+                <div class="lifs-hero__text">
+                    <p class="lifs-eyebrow" th:text="#{about.eyebrow}">LIFS Tools · Goslin</p>
+                    <h1 id="page-title" th:text="#{about.title}">About this service</h1>
+                    <p class="lifs-lead" th:text="#{about.lead}">What Goslin is, how to cite it, what is new, how your data is handled, and which version you are using.</p>
+                </div>
+            </section>
+
+            <div class="doc">
+                <nav id="toc" class="doc__toc" th:aria-label="#{about.toc.title}" aria-label="On this page">
+                    <p class="lifs-eyebrow" th:text="#{about.toc.title}">On this page</p>
+                    <ul>
+                        <li><a href="#about-goslin" th:text="#{about.toc.about}">About Goslin</a></li>
+                        <li><a href="#citing" th:text="#{about.toc.citing}">How to cite</a></li>
+                        <li th:if="${news != null && !news.isEmpty()}"><a href="#news" th:text="#{about.toc.news}">News and updates</a></li>
+                        <li><a href="#contributing" th:text="#{about.toc.contributing}">Contributing</a></li>
+                        <li><a href="#acknowledgements" th:text="#{about.toc.acknowledgements}">Acknowledgements</a></li>
+                        <li><a href="#privacy" th:text="#{about.toc.privacy}">Retention and privacy</a></li>
+                        <li><a href="#version" th:text="#{about.toc.version}">Version</a></li>
+                    </ul>
+                </nav>
+                <div class="doc__content">
+                    <section id="about-goslin" class="doc-section" aria-labelledby="about-goslin-title">
+                        <h2 id="about-goslin-title" th:text="#{about.goslin.title}">About Goslin</h2>
+                        <div class="lifs-prose">
+                            <p th:utext="#{about.goslin.p1('https://pubmed.ncbi.nlm.nih.gov/33037133/')}">Goslin is a grammar-based parser for lipid names.</p>
+                            <p th:text="#{about.goslin.p2}">Goslin harmonizes every name it can read.</p>
+                            <p th:utext="#{about.goslin.p3('https://lipidomics-standards-initiative.org/', 'https://github.com/lifs-tools/goslin')}">The shorthand nomenclature is developed by the Lipidomics Standards Initiative.</p>
+                        </div>
+                    </section>
+
+                    <th:block th:replace="~{fragments/news :: citing}"></th:block>
+                    <th:block th:replace="~{fragments/news :: news}"></th:block>
+                    <th:block th:replace="~{fragments/news :: contributing}"></th:block>
+                    <th:block th:replace="~{fragments/news :: acknowledgements}"></th:block>
+
+                    <section id="privacy" class="doc-section" aria-labelledby="privacy-title">
+                        <h2 id="privacy-title" th:text="#{about.privacy.title}">Retention and privacy</h2>
+                        <div class="lifs-prose">
+                            <p th:utext="#{about.privacy.results(${retentionDays})}">Results are kept for 7 days.</p>
+                            <p th:text="#{about.privacy.consent}">With your consent, the web application counts page views with Matomo.</p>
+                            <p th:text="#{about.privacy.why}">Why we ask for your consent: we report usage statistics to our funders.</p>
+                            <p th:text="#{about.privacy.server}">The server counts each validation anonymously.</p>
+                            <p th:utext="#{about.privacy.policy('https://lifs-tools.org/imprint-privacy-policy.html')}">LIFS imprint and privacy policy.</p>
+                        </div>
+                    </section>
+
+                    <section id="version" class="doc-section" aria-labelledby="version-title">
+                        <h2 id="version-title" th:text="#{about.version.title}">Version</h2>
+                        <dl class="about-version">
+                            <dt th:text="#{about.version.webapp}">Web application</dt>
+                            <dd th:text="${!#strings.isEmpty(page.appVersion)} ? ${page.appVersion} : #{about.version.missing}">2.3.0</dd>
+                            <dt th:text="#{about.version.jgoslin}">jgoslin</dt>
+                            <dd th:text="${!#strings.isEmpty(page.toolVersionNumber)} ? ${page.toolVersionNumber} : #{about.version.missing}">2.2.1</dd>
+                            <dt th:text="#{about.version.built}">Build date</dt>
+                            <dd th:text="${!#strings.isEmpty(page.buildDate)} ? ${page.buildDate} : #{about.version.missing}">2026-11-26</dd>
+                            <dt th:text="#{about.version.commit}">Commit</dt>
+                            <dd><span class="lifs-mono" th:text="${!#strings.isEmpty(page.scmCommitId)} ? ${page.scmCommitId} : #{about.version.missing}">abc1234</span></dd>
+                        </dl>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{lifs/layout :: footer}"></footer>
+        <th:block th:replace="~{lifs/layout :: tracking}"></th:block>
+
+        <script th:src="@{/js/goslin.js}" src="/js/goslin.js" defer></script>
+    </body>
+</html>

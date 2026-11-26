@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.lifs-tools</groupId>
     <artifactId>lifs-goslin-webapp</artifactId>
-    <version>2.2.3-SNAPSHOT</version>
+    <version>2.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>Grammar of Succinct Lipid Nomenclature - Webapplication and REST service for parsing, validation and normalization of lipid names.</description>
     <name>LIFS Goslin webapp.</name>	
@@ -58,23 +58,24 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <!-- for spring boot -->
-        <java.version>21</java.version>
+        <!-- Java 25 (LTS) -->
+        <java.version>25</java.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
         <application.version.number>${project.version}</application.version.number>
         <docker.image.prefix>docker.lifs-tools.org/lifs</docker.image.prefix>
         <docker.base.image>eclipse-temurin</docker.base.image>
-        <docker.base.image.version>21-jdk-alpine</docker.base.image.version>
+        <docker.base.image.version>25-jre-alpine</docker.base.image.version>
         <skip.docker>true</skip.docker>
         <app.port>8083</app.port>
-        <jackson.version>2.18.1</jackson.version>
-        <spring.boot.version>3.4.8</spring.boot.version>
-        <springdoc.version>1.6.15</springdoc.version>
-        <lifs.webapps.common.version>1.1.7</lifs.webapps.common.version>
+        <!-- keep in sync with lifs-webapps-common (plugin versions are not imported with its BOM) -->
+        <spring.boot.version>4.2.0</spring.boot.version>
+        <!-- springdoc-openapi 3.x is the line for Spring Boot 4 -->
+        <springdoc.version>3.2.1</springdoc.version>
+        <lifs.webapps.common.version>2.0.1</lifs.webapps.common.version>
         <jgoslin.version>2.2.1</jgoslin.version>
-        <jacoco.version>0.8.13</jacoco.version>
+        <jacoco.version>0.8.16</jacoco.version>
+        <jsoup.version>1.21.2</jsoup.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
         <app.name>goslin</app.name>
         <contextPath>/goslin</contextPath>
@@ -100,101 +101,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- import dependency management of lifs-webapps-common (includes spring-boot-dependencies) -->
             <dependency>
                 <groupId>org.lifs-tools</groupId>
                 <artifactId>lifs-webapps-common</artifactId>
                 <version>${lifs.webapps.common.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-api</artifactId>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-params</artifactId>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>junit</groupId>
-                        <artifactId>junit</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!-- HTTP client: jersey-client -->
-            <dependency>
-                <groupId>org.glassfish.jersey.core</groupId>
-                <artifactId>jersey-client</artifactId>
-                <version>${jersey.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.media</groupId>
-                <artifactId>jersey-media-multipart</artifactId>
-                <version>${jersey.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.media</groupId>
-                <artifactId>jersey-media-json-jackson</artifactId>
-                <version>${jersey.version}</version>
-            </dependency>
-
-            <!-- JSON processing: jackson -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>2.14.2</version>
-                <type>jar</type>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-joda</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-csv</artifactId>
-                <version>${jackson.version}</version>
-                <type>jar</type>
-            </dependency>
-            <dependency>
-                <groupId>joda-time</groupId>
-                <artifactId>joda-time</artifactId>
-                <version>${jodatime.version}</version>
-            </dependency>
-
-            <!-- Base64 encoding that works in both JVM and Android -->
-            <dependency>
-                <groupId>com.brsanthu</groupId>
-                <artifactId>migbase64</artifactId>
-                <version>${migbase.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.swagger2markup</groupId>
-                <artifactId>swagger2markup</artifactId>
-                <version>${swagger2markup.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -204,6 +117,18 @@
             <groupId>org.lifs-tools</groupId>
             <artifactId>lifs-webapps-common</artifactId>
             <version>${lifs.webapps.common.version}</version>
+            <exclusions>
+                <!-- A migration aid only: it maps renamed keys at runtime and logs them, so it must not
+                     hide outdated configuration in production. -->
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-properties-migrator</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -213,10 +138,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-        <!--SpringFox dependencies -->
+        <!-- Swagger UI at /swagger-ui/index.html, OpenAPI at /v3/api-docs -->
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
 
@@ -229,36 +154,21 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
-        </dependency>
-
-        <!-- webjars -->
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>webjars-locator-lite</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>jquery</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>bootstrap</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <version>${spring.boot.version}</version>
         </dependency>
-        
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -273,27 +183,8 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <type>jar</type>
-            <version>32.1.3-jre</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <groupId>tools.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
         </dependency>
     </dependencies>
 
@@ -326,6 +217,15 @@
         </resources>
         <pluginManagement>
             <plugins>
+                <!-- versions:set is used by .github/workflows/release.yml -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.25.3</version>
+                    <configuration>
+                        <generateBackupPoms>false</generateBackupPoms>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
@@ -425,8 +325,9 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.14.0</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <release>${java.version}</release>
+                        <!-- parameter names for Spring (@PathVariable, @RequestParam); spring-boot-starter-parent sets this too -->
+                        <parameters>true</parameters>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -439,6 +340,25 @@
                         <trimStackTrace>false</trimStackTrace>
                         <workingDirectory>${project.build.directory}/surefire-files</workingDirectory>
                     </configuration>
+                </plugin>
+                <!-- Integration tests: *IT classes, real Tomcat or several application contexts. Skip with -DskipITs. -->
+                <plugin>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.3</version>
+                    <configuration>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <trimStackTrace>false</trimStackTrace>
+                        <!-- test the classes, not the repackaged jar -->
+                        <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -530,6 +450,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
             </plugin>
@@ -537,7 +460,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <executable>true</executable>
                     <!--<mainClass>${start-class}</mainClass>-->
                     <!--<layout>ZIP</layout>-->
                     <profiles>
@@ -567,18 +489,28 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.4.5</version>
+                <version>3.5.2</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-spring-boot-extension-maven</artifactId>
+                        <version>0.1.0</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
+                    <!-- Leaves spring-boot-devtools out of the image (like the repackaged jar does). -->
+                    <pluginExtensions>
+                        <pluginExtension>
+                            <implementation>com.google.cloud.tools.jib.maven.extension.springboot.JibSpringBootExtension</implementation>
+                        </pluginExtension>
+                    </pluginExtensions>
                     <from>
                         <image>${docker.base.image}:${docker.base.image.version}</image>
                     </from>
+                    <!-- Pushes only the version tag; the release workflow adds latest with -Djib.to.tags=latest,
+                         so that snapshot builds from master never replace the latest release. -->
                     <to>
-                        <image>${docker.image.prefix}/${project.artifactId}</image>
-                        <tags>
-                            <tag>${project.version}</tag>
-                            <tag>latest</tag>
-                            <!-- <tag>${project.version}${deploy.env}</tag> -->
-                        </tags>
+                        <image>${docker.image.prefix}/${project.artifactId}:${project.version}</image>
                     </to>
                     <container>
                         <jvmFlags>
@@ -645,6 +577,30 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <!-- A release depends only on released artifacts (lifs-webapps-common included).
+                             Runs in the validate phase, before anything is deployed or pushed. -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>3.7.0</version>
+                        <executions>
+                            <execution>
+                                <id>enforce-release-dependencies</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireReleaseDeps>
+                                            <onlyWhenRelease>false</onlyWhenRelease>
+                                            <failWhenParentIsSnapshot>false</failWhenParentIsSnapshot>
+                                            <message>A release must not depend on SNAPSHOT versions: release them first (e.g. lifs-webapps-common).</message>
+                                        </requireReleaseDeps>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
