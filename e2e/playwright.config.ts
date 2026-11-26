@@ -34,9 +34,6 @@ const screenshots = !!process.env['SCREENSHOTS'];
 
 export default defineConfig({
   testDir: './tests',
-  // `npm run screenshots` runs only screenshots.spec.ts, `npm test` everything else
-  testMatch: screenshots ? /screenshots\.spec\.ts/ : /.*\.spec\.ts/,
-  testIgnore: screenshots ? undefined : /screenshots\.spec\.ts/,
   fullyParallel: true,
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 1 : 0,
@@ -49,7 +46,28 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: screenshots
+    ? // `npm run screenshots`: only screenshots.spec.ts
+      [{ name: 'screenshots', use: { ...devices['Desktop Chrome'] }, testMatch: /screenshots\.spec\.ts/ }]
+    : [
+        {
+          name: 'chromium',
+          use: { ...devices['Desktop Chrome'] },
+          testIgnore: /screenshots\.spec\.ts/,
+          grepInvert: /@timing/,
+        },
+        // Timing tests (tag @timing) run alone, after all other tests, so that no parallel test loads the
+        // server or the machine, and without retries, so that a slow run is not hidden by a fast retry.
+        // When a test of the chromium project fails, they are skipped.
+        {
+          name: 'timing',
+          use: { ...devices['Desktop Chrome'] },
+          testMatch: /harmonize\.spec\.ts/,
+          grep: /@timing/,
+          dependencies: ['chromium'],
+          retries: 0,
+        },
+      ],
   webServer: process.env['E2E_BASE_URL']
     ? undefined
     : {
