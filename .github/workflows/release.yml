@@ -52,6 +52,7 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
+          lfs: true # the lipid database files are in Git LFS
       - uses: ./.github/actions/setup-build
       - name: Determine versions
         id: versions

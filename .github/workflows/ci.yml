@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          lfs: true # the lipid database files (LIPID MAPS, SwissLipids, ChEBI) are in Git LFS
       - uses: ./.github/actions/setup-build
         with:
           common-ref: ${{ vars.LIFS_WEBAPPS_COMMON_REF || 'master' }}
@@ -100,6 +102,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          lfs: true # the lipid database files (LIPID MAPS, SwissLipids, ChEBI) are in Git LFS
       - uses: ./.github/actions/setup-build
         with:
           common-ref: ${{ vars.LIFS_WEBAPPS_COMMON_REF || 'master' }}
