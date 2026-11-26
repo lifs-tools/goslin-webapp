@@ -5,6 +5,7 @@
  * - Result page: filter, sort and page the rendered table rows, open their details rows, and focus the
  *   outcome of a re-run.
  *   Rows are rendered on the server; this only shows, hides and reorders them.
+ * - Any page: a text filter on every [data-filter-target] input (the lipid classes table of the documentation).
  * - Logo: a random blink offset per page load, and a honk on click.
  */
 (function () {
@@ -331,6 +332,36 @@
     // The browser may restore filter values after "back"; apply them.
     render();
   }
+
+  // ---------- any text filter: <input data-filter-target="#table"> hides the rows without the text ----------
+  // The target is a table (its body rows) or any container of tr/li rows; matching ignores case.
+  Array.prototype.forEach.call(document.querySelectorAll('[data-filter-target]'), function (input) {
+    var target = document.querySelector(input.dataset.filterTarget);
+    if (!target) {
+      return;
+    }
+    var items = Array.prototype.map.call(target.querySelectorAll('tbody tr, li'), function (el) {
+      return {el: el, text: el.textContent.toLowerCase()};
+    });
+    var report = document.getElementById(input.id + '-status');
+    var apply = function () {
+      var terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+      var shown = 0;
+      items.forEach(function (item) {
+        var match = terms.every(function (t) {
+          return item.text.indexOf(t) >= 0;
+        });
+        item.el.hidden = !match;
+        shown += match ? 1 : 0;
+      });
+      if (report) {
+        report.textContent = terms.length ? shown.toLocaleString(document.documentElement.lang || undefined) + ' / '
+            + items.length.toLocaleString(document.documentElement.lang || undefined) : '';
+      }
+    };
+    input.addEventListener('input', apply);
+    apply(); // the browser may restore the value after "back"
+  });
 
   // ---------- result page: announce the outcome of a re-run ----------
   // After the redirect the page reloads; moving the focus to the outcome makes screen readers read it.

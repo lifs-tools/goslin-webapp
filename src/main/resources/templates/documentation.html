@@ -1,41 +1,49 @@
-<!DOCTYPE HTML>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/layout}">
-    <head>
-    <th:block th:include="fragments/html-head :: html-head"></th:block>
-</head>
-<body data-spy="scroll" data-target="#toc">
-    <div class="container">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+    <head th:replace="~{lifs/layout :: head(${page?.title})}"></head>
+    <body>
+        <link rel="stylesheet" th:href="@{/css/goslin.css}" href="/css/goslin.css"/>
+        <header th:replace="~{fragments/nav :: app-bar(active='documentation')}"></header>
 
-        <div class="row">
+        <main id="main" class="lifs-main" tabindex="-1">
+            <div th:replace="~{lifs/layout :: messages}"></div>
 
-            <div class="container">
-                <th:block th:include="fragments/nav :: nav"></th:block>
-                <main role="main" class="my-3 col-md-12">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <th:block th:include="fragments/overview :: overview"></th:block>
-                            <th:block th:include="fragments/news :: news"></th:block>
-                            <th:block th:include="fragments/manual :: manual"></th:block>
-                            <th:block th:include="fragments/news :: lipidclasses"></th:block>
-                            <th:block th:include="fragments/news :: contributing"></th:block>
-                            <th:block th:include="fragments/news :: citing"></th:block>
-                            <th:block th:include="fragments/news :: acknowledgements"></th:block>
-                        </div>
-                        <div class="col-sm-3">
-                            <nav id="toc" data-toggle="toc" class="sticky-top"></nav>
-                        </div>
-                    </div>
+            <section class="lifs-hero" aria-labelledby="page-title">
+                <div class="lifs-hero__text">
+                    <p class="lifs-eyebrow">LIFS Tools · Goslin</p>
+                    <h1 id="page-title">Documentation</h1>
+                    <p class="lifs-lead">How Goslin reads lipid names, how to use the web application and the REST API, which lipid classes are supported, and how to cite Goslin.</p>
+                </div>
+            </section>
 
-                </main>
-
-                <th:block th:include="fragments/footer :: footer"></th:block>
-
+            <div class="doc">
+                <nav id="toc" class="doc__toc" aria-label="On this page">
+                    <p class="lifs-eyebrow">On this page</p>
+                    <ul>
+                        <li th:if="${news != null && !news.isEmpty()}"><a href="#news">News and updates</a></li>
+                        <li><a href="#grammars">Grammars</a></li>
+                        <li><a href="#hierarchy">Hierarchical representation</a></li>
+                        <li><a href="#interactive-usage">Interactive usage</a></li>
+                        <li><a href="#rest-api">REST API</a></li>
+                        <li><a href="#lipid-classes">Lipid classes</a></li>
+                        <li><a href="#contributing">Contributing</a></li>
+                        <li><a href="#citing">Citing Goslin</a></li>
+                        <li><a href="#acknowledgements">Acknowledgements</a></li>
+                    </ul>
+                </nav>
+                <div class="doc__content">
+                    <th:block th:replace="~{fragments/news :: news}"></th:block>
+                    <th:block th:replace="~{fragments/manual :: manual}"></th:block>
+                    <th:block th:replace="~{fragments/news :: lipidclasses}"></th:block>
+                    <th:block th:replace="~{fragments/news :: contributing}"></th:block>
+                    <th:block th:replace="~{fragments/news :: citing}"></th:block>
+                    <th:block th:replace="~{fragments/news :: acknowledgements}"></th:block>
+                </div>
             </div>
+        </main>
 
-        </div>
+        <footer th:replace="~{lifs/layout :: footer}"></footer>
 
-    </div>
-<th:block th:include="fragments/script-footer :: script-footer"></th:block>
-</body>
+        <script th:src="@{/js/goslin.js}" src="/js/goslin.js" defer></script>
+    </body>
 </html>

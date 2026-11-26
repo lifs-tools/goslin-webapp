@@ -54,23 +54,22 @@ public class LifsErrorController implements ErrorController {
     public ModelAndView handleError(HttpServletRequest request, Principal principal) {
         log.debug("Handling an error!");
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-        String view = "error";
+        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         if (status != null) {
-            Integer statusCode = Integer.valueOf(status.toString());
-
-            if (statusCode == HttpStatus.NOT_FOUND.value()) {
-                view = "errors/404";
-            } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-                view = "errors/500";
+            HttpStatus resolved = HttpStatus.resolve(Integer.parseInt(status.toString()));
+            if (resolved != null) {
+                httpStatus = resolved;
             }
         }
-        ModelAndView mav = new ModelAndView(view);
-        mav.addObject("status", status);
+        // One design-system page for all errors; it replaces the Bootstrap error templates of lifs-webapps-common.
+        ModelAndView mav = new ModelAndView("error", httpStatus);
+        mav.addObject("status", httpStatus.value());
+        mav.addObject("statusReason", httpStatus.getReasonPhrase());
         mav.addObject("error", request.getAttribute(RequestDispatcher.ERROR_MESSAGE));
-        mav.addObject("page", pageBuilderService.createPage(view));
+        mav.addObject("page", pageBuilderService.createPage(httpStatus.getReasonPhrase()));
         return mav;
     }
-    
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ModelAndView handleMaxUploadSizeExceeded(MaxUploadSizeExceededException exception, HttpServletRequest req,
             HttpServletResponse resp, Principal principal) throws Exception {

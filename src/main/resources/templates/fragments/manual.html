@@ -2,131 +2,157 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xmlns:th="http://www.thymeleaf.org">
     <head><title/></head>
     <body>
-        <div th:fragment="manual">
-            <div class="card my-2">
-                <div class="card-body">
-                    <div>
-                        <h4 id="user-content-lipid-shorthand-nomenclature-grammars"><a id="user-content-2-lipid-shorthand-nomenclature-grammars" class="anchor" aria-hidden="true" href="#2-lipid-shorthand-nomenclature-grammars"></a>Lipid Shorthand Nomenclature Grammars</h4>
-                        <p>Goslin uses ANTLRv4 compatible context-free EBNF grammars. All Goslin implementations use a
-                            generic recursive decent parser (see <a href="https://en.wikipedia.org/wiki/Context-free_language" rel="nofollow" target="_blank">Context-free language</a>, <a href="https://en.wikipedia.org/wiki/LL_parser" rel="nofollow" target="_blank">LL parser</a>, <a href="https://www.antlr.org/about.html" rel="nofollow" target="_blank">ANTLRv4</a>).</p>
-                        <p>These grammars (*.g4 files) are available from our Goslin GitHub repository at <a href="https://github.com/lifs-tools/goslin">https://github.com/lifs-tools/goslin</a>.</p>
-                        <h4 id="user-content-hierarchical-representation-of-lipids"><a id="user-content-3-hierarchical-representation-of-lipids" class="anchor" aria-hidden="true" href="#3-hierarchical-representation-of-lipids"></a>Hierarchical Representation of Lipids</h4>
-                        <p>The grammars model lipids as hierarchically structured bits of information.
-                            We do not model the lipid category or main class explicitly, but rather keep them in a global lookup table data structure, derived from the <a href="https://github.com/lifs-tools/goslin/blob/master/lipid-list.csv" target="_blank"><code>lipid-list.csv</code></a> file for reference.
-                            This allows us to keep the grammars clutter-free and makes them easier to read.</p>
-                        <p>The structural classification of lipids follows the shorthand notation recently updated by Liebisch et al. and is compatible to that of LIPID MAPS. The following example shows the hierarchical representation of PE 16:1(6Z)/16:0;5OH[R],8OH;3oxo:</p>
+        <!-- The manual: grammars, hierarchy, interactive usage and the REST API. Rendered by documentation.html. -->
+        <th:block th:fragment="manual">
+        <section id="grammars" class="doc-section" aria-labelledby="grammars-title">
+            <h2 id="grammars-title">Lipid shorthand nomenclature grammars</h2>
+            <div class="lifs-prose">
+                <p>Goslin uses ANTLRv4 compatible context-free EBNF grammars. All Goslin implementations use a
+                    generic recursive decent parser (see <a href="https://en.wikipedia.org/wiki/Context-free_language" rel="nofollow" target="_blank">Context-free language</a>, <a href="https://en.wikipedia.org/wiki/LL_parser" rel="nofollow" target="_blank">LL parser</a>, <a href="https://www.antlr.org/about.html" rel="nofollow" target="_blank">ANTLRv4</a>).</p>
+                <p>These grammars (*.g4 files) are available from our Goslin GitHub repository at <a href="https://github.com/lifs-tools/goslin" target="_blank" rel="noopener">https://github.com/lifs-tools/goslin</a>.</p>
+            </div>
+        </section>
 
-                        Table 1. Structural hierarchy representation of PE 16:1(6Z)/16:0;5OH[R],8OH;3oxo). LM: LIPID MAPS, HG: Head Group, FA: Fatty Acyl
-                        <table><tbody>
+        <section id="hierarchy" class="doc-section" aria-labelledby="hierarchy-title">
+            <h2 id="hierarchy-title">Hierarchical representation of lipids</h2>
+            <div class="lifs-prose">
+                <p>The grammars model lipids as hierarchically structured bits of information.
+                    We do not model the lipid category or main class explicitly, but rather keep them in a global lookup table data structure, derived from the <a href="https://github.com/lifs-tools/goslin/blob/master/lipid-list.csv" target="_blank"><code>lipid-list.csv</code></a> file for reference.
+                    This allows us to keep the grammars clutter-free and makes them easier to read.</p>
+                <p>The structural classification of lipids follows the shorthand notation recently updated by Liebisch et al. and is compatible to that of LIPID MAPS. The following example shows the hierarchical representation of PE 16:1(6Z)/16:0;5OH[R],8OH;3oxo:</p>
+                <p class="doc-caption"><b>Table 1.</b> Structural hierarchy representation of PE 16:1(6Z)/16:0;5OH[R],8OH;3oxo. LM: LIPID MAPS, HG: Head Group, FA: Fatty Acyl</p>
+                <div class="lifs-table-wrap"><table class="lifs-table"><thead>
                                 <tr>
-                                    <td><p><strong>Level</strong></p></td>
-                                    <td><p><strong>Name</strong></p></td>
-                                    <td><p><strong>Description</strong></p></td>
+                                    <th scope="col">Level</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Description</th>
+                                </tr></thead><tbody>
+                                <tr>
+                                    <td>Category (LM)</td>
+                                    <td>Glycerophospholipids (GP)</td>
+                                    <td>Lipid category</td>
                                 </tr>
                                 <tr>
-                                    <td><p>Category (LM)</p></td>
-                                    <td><p>Glycerophospholipids (GP)</p></td>
-                                    <td><p>Lipid category</p></td>
+                                    <td>Class (LM)</td>
+                                    <td>Glycerophosphoethanolamine (PE) GP02</td>
+                                    <td>Lipid class</td>
                                 </tr>
                                 <tr>
-                                    <td><p>Class (LM)</p></td>
-                                    <td><p>Glycerophosphoethanolamine (PE) GP02</p></td>
-                                    <td><p>Lipid class</p></td>
+                                    <td>Species (LM Subclass)</td>
+                                    <td>Phosphatidylethanolamine, PE 32:2;O3</td>
+                                    <td>HG, FA summary, two double bond equivalents, three oxidations</td>
                                 </tr>
                                 <tr>
-                                    <td><p>Species (LM Subclass)</p></td>
-                                    <td><p>Phosphatidylethanolamine, PE 32:2;O3</p></td>
-                                    <td><p>HG, FA summary, two double bond equivalents, three oxidations</p></td>
+                                    <td>Molecular species</td>
+                                    <td>PE 16:1_16:1;O3</td>
+                                    <td>HG, two FAs, two double bond equivalents, three oxidations</td>
                                 </tr>
                                 <tr>
-                                    <td><p>Molecular species</p></td>
-                                    <td><p>PE 16:1_16:1;O3</p></td>
-                                    <td><p>HG, two FAs, two double bond equivalents, three oxidations</p></td>
+                                    <td><i>sn</i>-Position</td>
+                                    <td>PE 16:1/16:1;O3</td>
+                                    <td>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, two double bond equivalents, three oxidations</td>
                                 </tr>
                                 <tr>
-                                    <td><p><i>sn</i>-Position</p></td>
-                                    <td><p>PE 16:1/16:1;O3</p></td>
-                                    <td><p>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, two double bond equivalents, three oxidations</p></td>
+                                    <td>Structure defined</td>
+                                    <td>PE 16:1(6)/16:1;(OH)2;oxo</td>
+                                    <td>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, three oxidations and unspecified stereo configuration (6) on FA1</td>
                                 </tr>
                                 <tr>
-                                    <td><p>Structure defined</p></td>
-                                    <td><p>PE 16:1(6)/16:1;(OH)2;oxo</p></td>
-                                    <td><p>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, three oxidations and unspecified stereo configuration (6) on FA1</p></td>
+                                    <td>Full structure</td>
+                                    <td>PE 16:1(6Z)/16:1;5OH,8OH;3oxo</td>
+                                    <td>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, positions for oxidations and stereo configuration (6Z) on FA1</td>
                                 </tr>
                                 <tr>
-                                    <td><p>Full structure</p></td>
-                                    <td><p>PE 16:1(6Z)/16:1;5OH,8OH;3oxo</p></td>
-                                    <td><p>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, positions for oxidations and stereo configuration (6Z) on FA1</p></td>
+                                    <td>Complete structure</td>
+                                    <td>PE 16:1(6Z)/16:0;5OH[R],8OH;3oxo</td>
+                                    <td>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, positions for oxidations and stereo configuration ([R]) and double bond position and stereo configuration (6Z) on FA1</td>
                                 </tr>
-                                <tr>
-                                    <td><p>Complete structure</p></td>
-                                    <td><p>PE 16:1(6Z)/16:0;5OH[R],8OH;3oxo</p></td>
-                                    <td><p>HG, SN positions, here: for FA1 at sn1 and FA2 at sn2, positions for oxidations and stereo configuration ([R]) and double bond position and stereo configuration (6Z) on FA1</p></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <p>Please see <a href="https://github.com/lifs-tools/goslin/tree/master/docs#9-goslin-object-model" target="_blank" title="The Goslin object model">the Goslin object model</a> for an overview of the Goslin domain model which is used to represent the structural hierarchy by the different implementations.</p>
-                    </div>
-                    <h4 class="card-title" id="user-content-sec:webserviceusers">Web Application and REST API</h4>
-                    <div>
-                        <h4 id="user-content-interactive-usage">Interactive Usage</h4>
-                        <p>The interactive&nbsp;goslin web application is available
-                            at&nbsp;<a href="https://apps.lifs-tools.org/goslin" rel="nofollow">https://apps.lifs-tools.org/goslin</a>. It provides two forms to i) upload
-                            a file containing one lipid name per line (see <a href="#fig:goslin-webapp-form-01">Figure 1.</a>), or ii)
-                            upload a list of lipid names, defined by the user in an interactive form
-                            (see <a href="#fig:goslin-webapp-form-02">Figure 2</a>). The
-                            latter form also allows pasting lists of lipid names directly from the
-                            clipboard with&nbsp;<code>CTRL+V</code>. Both forms provide feedback for issues
-                            concerning every processed lipid, such as invalid names or typos (see <a href="#fig:goslin-webapp-form-02a">Figure 3.</a>), to
-                            allow the user to cross-check their data before proceeding.</p>
-                        <figure class="figure">
-                            <a id="fig:goslin-webapp-form-01" ><img th:src="@{/img/goslin-webapp-form-01.png}" alt="SubmissionForm1" style="max-width:100%;"/></a>
-                            <figcaption class="figure-caption"><b>Figure 1.</b>&nbsp;Goslin web application submission form for text files with one lipid name per row.</figcaption>
-                        </figure>
-                        <figure class="figure">
-                            <a id="fig:goslin-webapp-form-02"><img th:src="@{/img/goslin-webapp-form-02.png}" alt="SubmissionForm2" style="max-width:100%;"/></a>
-                            <figcaption class="figure-caption"><b>Figure 2.</b>&nbsp;Goslin web application submission form for user-defined lipid names. Tick 'Skip invalid names' to skip over issues with invalid names to proceed to the parsing results. Invalid names will then be indicated inline with valid input names. The order of input lipid names is preserved.</figcaption>
-                        </figure>
-                        <figure class="figure">
-                            <a id="fig:goslin-webapp-form-02a"><img th:src="@{/img/goslin-webapp-form-02a.png}" alt="SubmissionForm3" style="max-width:100%;"/></a>
-                            <figcaption class="figure-caption"><b>Figure 3.</b>&nbsp;Goslin web application submission form for user-defined lipid names provides feedback for unknown or unsupported names and parts thereof.</figcaption>
-                        </figure>
-                        <figure class="figure">
-                            <a id="fig:goslin-webapp-form-03" ><img th:src="@{/img/goslin-webapp-result-03.png}" alt="ResultForm" style="max-width:100%;"/></a>
-                            <figcaption class="figure-caption"><b>Figure 4.</b>&nbsp;Parsing results are displayed as ’cards’ for every lipid name. Clicking on a card opens it and shows details of the according lipid.</figcaption>
-                        </figure>
-                        <p>After successful validation, the validated lipids are returned in
-                            overview cards (see <a href="#fig:goslin-webapp-form-03">Figure 4.</a>),
-                            detailing their LIPID MAPS&REG; classification, cross-links to SwissLipids
-                            and/or LIPID MAPS&REG;. Additionally, the cards show summary
-                            information about the number of carbon atoms, double bonds,
-                            hydroxylations and detailed information, such as double bond position,
-                            long-chain-base status, and the bond type of the fatty acyl to the head
-                            group for each fatty acyl, if available (see <a href="#fig:goslin-webapp-form-04" >Figure 5.</a>).</p>
-                        <figure class="figure">
-                            <a id="fig:goslin-webapp-form-04" ><img th:src="@{/img/goslin-webapp-result-detail-04.png}" alt="ResultDetail" style="max-width:100%;"/></a>
-                            <figcaption class="figure-caption"><b>Figure 5.</b>&nbsp;Each result card displays summary and detail information about a lipid. Depending on the lipid level, this can include information about each individual fatty acyl. Cross-links to SwissLipids and LIPID MAPS&REG; are shown where a normalized lipid name could be matched unambiguously against the normalized names of SwissLipids and / or LIPID MAPS&REG; lipids.</figcaption>
-                        </figure>
-                        <p>Finally, it is also possible to download the translated list of lipid names and their properties as a tab-separated file, by clicking on the <em>Download</em> button. Depending on the lipid level, undefined sn positions of regular lipids will be reported as "-1" in the table and as "0" for solitary fatty acids.</p>
-                        <hr/>
-                        <p>The source code for the web application and instructions to build it as
-                            a Docker container are available at
-                            <a href="https://github.com/lifs-tools/goslin-webapp">https://github.com/lifs-tools/goslin-webapp</a> under the terms of the open
-                            source Apache license version 2.</p>
-                    </div>
-                    <hr/>
-                    <div>
-                        <h4 id="user-content-programmatic-access-via-the-rest-api">Programmatic access via the REST API</h4>
+                            </tbody></table></div>
+                <p>Please see <a href="https://github.com/lifs-tools/goslin/tree/master/docs#9-goslin-object-model" target="_blank" title="The Goslin object model">the Goslin object model</a> for an overview of the Goslin domain model which is used to represent the structural hierarchy by the different implementations.</p>
+            </div>
+        </section>
+
+        <section id="interactive-usage" class="doc-section" aria-labelledby="interactive-usage-title">
+            <h2 id="interactive-usage-title">Interactive usage</h2>
+            <div class="lifs-prose">
+                <p>The interactive Goslin web application is available at
+                    <a href="https://apps.lifs-tools.org/goslin">https://apps.lifs-tools.org/goslin</a>. It harmonizes lipid names: Goslin reads each name,
+                    checks it against the lipid shorthand nomenclature and returns it in the harmonized shorthand notation, together with its
+                    classification, mass, sum formula and links to external databases.</p>
+
+                <h3 id="entering-names">Entering names</h3>
+                <p>The <em>Harmonize</em> page has one text box with one lipid name per line (see <a href="#fig:goslin-webapp-form-01">Figure 1</a>).
+                    Type or paste your names into it. Blank lines are allowed, they are not submitted but still count when lines are numbered.
+                    <em>Load example names</em> fills the box with a few valid and invalid names to try out.</p>
+                <p>You can also use <em>Upload a file</em> or drop a text file (<code>.txt</code>, <code>.csv</code> or <code>.tsv</code>) onto the box. The file content
+                    is placed in the text box, so you can check and edit it before you submit it. Names can be at most 300 characters long.
+                    Files and texts larger than the size limit shown on the page, or with more than 5,000 names, are refused with a message.</p>
+                <figure>
+                    <a id="fig:goslin-webapp-form-01"><img th:src="@{/img/goslin-webapp-form-01.png}" alt="The Harmonize page with an empty text box" style="max-width:100%;"/></a>
+                    <figcaption><b>Figure 1.</b>&nbsp;The Harmonize page: one text box for the lipid names, one per line. Names can be typed, pasted, loaded as examples, or read from a file.</figcaption>
+                </figure>
+
+                <h3 id="skip-invalid-names">Skip invalid names</h3>
+                <p>With <em>Skip invalid names</em> ticked (the default), Goslin harmonizes all names it can read and lists the others on the result page,
+                    where you can correct them. If you clear the tick, nothing is harmonized as long as one name cannot be read:
+                    the page then lists the names that failed, by line, with a plain-language hint (see <a href="#fig:goslin-webapp-form-02a">Figure 2</a>),
+                    so that you can correct them in the box and submit again. The order of the names is always preserved.</p>
+                <figure>
+                    <a id="fig:goslin-webapp-form-02"><img th:src="@{/img/goslin-webapp-form-02.png}" alt="The Harmonize page with lipid names and the option Skip invalid names" style="max-width:100%;"/></a>
+                    <figcaption><b>Figure 2.</b>&nbsp;Names entered in the text box. Tick <em>Skip invalid names</em> to proceed to the result even if some names cannot be read.</figcaption>
+                </figure>
+                <figure>
+                    <a id="fig:goslin-webapp-form-02a"><img th:src="@{/img/goslin-webapp-form-02a.png}" alt="The list of names that could not be read, by line" style="max-width:100%;"/></a>
+                    <figcaption><b>Figure 3.</b>&nbsp;Without <em>Skip invalid names</em>, names that cannot be read are listed by line, with a hint on what is wrong.</figcaption>
+                </figure>
+
+                <h3 id="result-page">The result page</h3>
+                <p>After <em>Harmonize</em>, the result page (see <a href="#fig:goslin-webapp-form-03">Figure 4</a>) shows how many names were submitted, how many were
+                    harmonized and how many could not be read. Each name keeps the <b>line number</b> of the text you submitted.</p>
+                <p><b>Correct these names.</b> Names Goslin could not read are listed first, with the part where Goslin stopped reading underlined and a hint in plain
+                    language, for example that a closing bracket is missing or that the head group is not recognised. Edit a name in place and choose <em>Re-run corrected
+                        names</em> (or press <kbd>Enter</kbd> in the name field). Corrected names that can now be harmonized move into the table, keeping their line number; the
+                    harmonized names already in the table are kept. <em>Remove</em> drops a name you do not need from the result.</p>
+                <p><b>The table.</b> Harmonized names are shown in a table with the submitted name, the harmonized name, the lipid level, the LIPID MAPS category and class,
+                    the sum formula, the mass and links to external databases where the name matches an entry. You can filter the table by text, by
+                    lipid level and by LIPID MAPS category, sort it by clicking a column heading, and page through it. Use the arrow at the start of a row to show its
+                    details (see <a href="#fig:goslin-webapp-form-04">Figure 5</a>): the classification, the fatty acyls with their carbon atoms, double bonds and
+                    functional groups, and cross-links to external databases.</p>
+                <figure>
+                    <a id="fig:goslin-webapp-form-03"><img th:src="@{/img/goslin-webapp-result-03.png}" alt="The result page with counts, names to correct and the table" style="max-width:100%;"/></a>
+                    <figcaption><b>Figure 4.</b>&nbsp;The result page: counts, the names to correct, filters and the table of harmonized names.</figcaption>
+                </figure>
+                <figure>
+                    <a id="fig:goslin-webapp-form-04"><img th:src="@{/img/goslin-webapp-result-detail-04.png}" alt="The details of one harmonized lipid name" style="max-width:100%;"/></a>
+                    <figcaption><b>Figure 5.</b>&nbsp;The details of a name. Depending on the lipid level, they include each individual fatty acyl. Cross-links are shown where the harmonized name could be matched unambiguously against the databases.</figcaption>
+                </figure>
+
+                <h3 id="download-and-keeping-results">Download and keeping results</h3>
+                <p><em>Download table (TSV)</em> saves the result as a tab-separated file. Its first columns are <code>Line</code> (the line number in your text),
+                    the harmonized name, <code>Original Name</code> and <code>Corrected Name</code> (the name you corrected and re-ran, if any),
+                    followed by the grammar, validation messages, adduct and the further properties. Names that could not be read are included in the file.
+                    Depending on the lipid level, undefined sn positions of regular lipids are reported as "-1" and as "0" for solitary fatty acids.</p>
+                <p>Every result has its own address, <code>/result/</code> followed by an identifier. You can bookmark it or share it. Results are kept for <b>7 days</b>
+                    and are then deleted.</p>
+                <p>The source code for the web application and instructions to build it as a Docker container are available at
+                    <a href="https://github.com/lifs-tools/goslin-webapp" target="_blank" rel="noopener">https://github.com/lifs-tools/goslin-webapp</a> under the terms of the open source Apache license version 2.</p>
+            </div>
+        </section>
+
+        <section id="rest-api" class="doc-section" aria-labelledby="rest-api-title">
+            <h2 id="rest-api-title">Programmatic access via the REST API</h2>
+            <div class="lifs-prose">
+
                         <div>
                             <p>An interactive documentation for the rest api of the goslin web
                                 application is available at
-                                <a href="https://apps.lifs-tools.org/goslin/swagger-ui.html" rel="nofollow">https://apps.lifs-tools.org/goslin/swagger-ui.html</a> (see <a href="#fig:goslin-webapp-rest-05">Figure 6.</a>). To
+                                <a href="https://apps.lifs-tools.org/goslin/swagger-ui/index.html" rel="nofollow">https://apps.lifs-tools.org/goslin/swagger-ui/index.html</a> (see <a href="#fig:goslin-webapp-rest-05">Figure 6.</a>). To
                                 illustrate its usage, we will briefly show a small example how a user
                                 can access the rest api with a standard http client.</p>
                         </div>
-                        <figure class="figure">
+                        <figure >
                             <a id="fig:goslin-webapp-rest-05" ><img th:src="@{/img/goslin-webapp-rest-05.png}" alt="RESTForm" style="max-width:100%;"/></a>
-                            <figcaption class="figure-caption"><b>Figure 6.</b>&nbsp;The goslin web application provides an interactive documentation for its rest api to simplify programmatic access.</figcaption>
+                            <figcaption ><b>Figure 6.</b>&nbsp;The goslin web application provides an interactive documentation for its rest api to simplify programmatic access.</figcaption>
                         </figure>
                         <div>
                             <p>The Structure for the request consists of a json object&nbsp;\{} enclosing
@@ -134,7 +160,7 @@
                                 for <code>grammars</code> are: <code>LIPIDMAPS</code>, <code>GOSLIN</code>, <code>SHORTHAND</code>, <code>FATTY_ACID</code>, 
                                 <code>SWISSLIPIDS</code>, and <code>HMDB</code>. A complete list is available from the
                                 interactive rest api documentation’s <code>Models</code> section under
-                                <code>ValidationRequest</code>. The available grammars may also be retrieved by the <a th:href="@{/swagger-ui/#/lipid-grammars/grammarsUsingGET}">grammars</a> method. Both fields in the <code>ValidationRequest</code> accept
+                                <code>ValidationRequest</code>. The available grammars may also be retrieved by the <a th:href="@{/swagger-ui/index.html}">grammars</a> method. Both fields in the <code>ValidationRequest</code> accept
                                 comma-separated entries, enclosed in double quotes:</p>
                         </div>
                         <div>
@@ -298,7 +324,7 @@
                             </div>
                         </div>
                         <div>
-                            <p>The response part also reports the normalized name (<code>goslinName</code>), as
+                            <p>The response part also reports the harmonized name (<code>normalizedName</code>), as
                                 well as classification information using the LIPID MAPS&REG; category and
                                 class associated to the parsed lipid.</p>
                         </div>
@@ -390,9 +416,8 @@
 </code></pre>
                             </div>
                         </div>
-                    </div>
-                </div>
             </div>
-        </div>
+        </section>
+        </th:block>
     </body>
 </html>
