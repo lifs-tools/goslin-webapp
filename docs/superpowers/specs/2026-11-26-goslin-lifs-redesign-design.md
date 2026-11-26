@@ -323,8 +323,10 @@ Nils chose **A**.
     on the same domain therefore carries over.
   - The banner is a `lifs-callout--info` at the bottom of the viewport, with "Accept" (filled) and
     "Deny" (outlined) buttons and a link to the privacy policy.
-  - The fragment renders only when `page.gaId` is set. It reads the site id and tracker URL from
-    `page` (`ga.id`, `ga.url`) and keeps the `<noscript>` opt-out.
+  - The fragment renders only when `page.gaId` is set. It reads the site id from `page` (`ga.id`).
+    The tracker base `https://lifs-tools.org/matomo/` is fixed in the fragment (`data-tracker-url`);
+    `ga.url` stays the server-side `matomo.php` endpoint of `PiwikTracker`. It keeps the
+    `<noscript>` opt-out.
   - The old jQuery script is kept but marked deprecated, so apps that have not migrated keep
     working.
 - **Goslin** includes the fragment on all pages. Its site id stays `ga.id=10`.
