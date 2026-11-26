@@ -30,7 +30,7 @@ The project needs Java 25 (the Maven wrapper downloads Maven). To build the proj
 The web-application is based on https://projects.spring.io/spring-boot/[Spring-Boot] and http://www.thymeleaf.org/[Thymeleaf], with plain CSS and JavaScript in the design of the LIFS application portal (no JavaScript libraries).
 The `target` folder holds all necessary dependencies and resources as a stand-alone, executable JAR file that can be run as follows (please replace <VERSION> with the correct one)
 
-  java -jar goslin-webapp-<VERSION>.jar
+  java -jar lifs-goslin-webapp-<VERSION>.jar
 
 Results are stored as files below `storage.location` (default: the temporary directory) and are kept for 7 days. To use another folder, add `--storage.location=/path/to/folder`.
 

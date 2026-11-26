@@ -25,6 +25,8 @@ test.describe('Harmonize', () => {
     const outcome = page.locator('.lifs-callout--ok', { hasText: '1 corrected name was harmonized' });
     await expect(outcome).toBeVisible();
     await expect(outcome).toBeFocused();
+    // the outcome is not shown again on a reload or in a copied address
+    await expect(page).not.toHaveURL(/rerun=/);
     await expect(page.locator('section#fix')).toHaveCount(0);
     await expect(page.locator('tr.result-row[data-line="3"] .chip-corrected')).toBeVisible();
 
@@ -112,5 +114,37 @@ test.describe('Harmonize', () => {
     await expect(page.locator('tr.result-row[data-line="2"] .chip-corrected')).toBeVisible();
     await expect(page.locator('.fix__row[data-line="3"]')).toBeVisible();
     await expect(page.locator('.fix__row')).toHaveCount(1);
+  });
+
+  test('a double click on Re-run applies the correction once', async ({ page }) => {
+    await harmonize(page, 'PC 32:0\nPC(18:2-20:4');
+    await page.locator('input[name="edit[2]"]').fill('PC(18:2-20:4)');
+    // two clicks before the page changes, as a quick double click does on a slow connection
+    await page.locator('button#rerun').evaluate((button: HTMLButtonElement) => {
+      button.click();
+      setTimeout(() => button.click(), 50);
+    });
+    await expect(page.locator('.lifs-callout--ok', { hasText: '1 corrected name was harmonized' })).toBeVisible();
+    await expect(page.locator('tr.result-row[data-line="2"] .chip-corrected')).toBeVisible();
+  });
+
+  test('remove a name', async ({ page }) => {
+    await harmonize(page, 'PC 32:0\nPC(18:2-20:4\nCholesterl');
+    await expect(page.locator('.fix__row')).toHaveCount(2);
+    await page.locator('.fix__row[data-line="3"] button.fix__remove').click();
+    await expect(page.locator('.fix__row')).toHaveCount(1);
+    await expect(page.locator('.fix__row[data-line="2"]')).toBeVisible();
+  });
+
+  test('a UTF-16 file is read', async ({ page }) => {
+    await page.goto('./');
+    const text = 'PC 32:0\nTG 52:2\n';
+    await page.locator('#file').setInputFiles({
+      name: 'names.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(text, 'utf16le')]),
+    });
+    await expect(page.locator('#lipids')).toHaveValue(text);
+    await expect(page.locator('#lipid-count')).toContainText('2 names');
   });
 });

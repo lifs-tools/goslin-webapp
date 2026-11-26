@@ -2,8 +2,9 @@
  * Goslin pages, plain JavaScript without libraries. Each part runs only when its elements exist.
  * - Input page: load the example names, clear, count the names, read a file into the text area
  *   (file chooser or drag and drop onto .goslin-names).
- * - Result page: filter, sort and page the rendered table rows, open their details rows, and focus the
- *   outcome of a re-run.
+ * - Result page: filter, sort and page the rendered table rows, open their details rows, focus the
+ *   outcome of a re-run and drop it from the address.
+ * - Forms: a second click while the page loads does not post the form again.
  *   Rows are rendered on the server; this only shows, hides and reorders them.
  * - Any page: a text filter on every [data-filter-target] input (the lipid classes table of the documentation).
  * - Documentation page: old links to the sections that moved to the About page are forwarded.
@@ -64,6 +65,18 @@
     var isText = function (f) {
       return f.type === '' || f.type.indexOf('text/') === 0 || /\.(txt|csv|tsv)$/i.test(f.name);
     };
+    // UTF-16 if the file starts with a UTF-16 byte-order mark (Excel's "Unicode text"), otherwise UTF-8.
+    // TextDecoder drops the mark.
+    var decode = function (buffer) {
+      var bytes = new Uint8Array(buffer);
+      var encoding = 'utf-8';
+      if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
+        encoding = 'utf-16le';
+      } else if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
+        encoding = 'utf-16be';
+      }
+      return new TextDecoder(encoding).decode(bytes);
+    };
     var readFile = function (f) {
       if (!f) {
         return;
@@ -79,7 +92,7 @@
         showFileError(fileError && fileError.dataset.tooLarge);
         return;
       }
-      f.text().then(setNames).catch(function () {
+      f.arrayBuffer().then(decode).then(setNames).catch(function () {
         showFileError(fileError && fileError.dataset.unreadable);
       });
     };
@@ -377,6 +390,45 @@
       return true;
     });
   }
+  // The outcome belongs to this visit: a reload or a copied address must not show it again.
+  if (main && window.history && history.replaceState && /[?&](rerun|tooLong)=/.test(location.search)) {
+    var query = location.search.substring(1).split('&').filter(function (part) {
+      return !/^(rerun|tooLong)=/.test(part);
+    }).join('&');
+    history.replaceState(history.state, '', location.pathname + (query ? '?' + query : '') + location.hash);
+  }
+
+  // ---------- forms: one post per click ----------
+  // A second click while the next page loads would post again: a second re-run then finds nothing to re-run
+  // and its page replaces the first one. Later submissions are ignored; the buttons are disabled only after the
+  // form's data is collected, so that the clicked button's name and value (Remove: the line) are sent.
+  var forms = document.querySelectorAll('#harmonize-form, #rerun-form');
+  Array.prototype.forEach.call(forms, function (form) {
+    form.addEventListener('submit', function (event) {
+      if (form.dataset.submitting) {
+        event.preventDefault();
+        return;
+      }
+      form.dataset.submitting = 'true';
+      setTimeout(function () {
+        Array.prototype.forEach.call(form.querySelectorAll('button'), function (button) {
+          button.disabled = true;
+        });
+      }, 0);
+    });
+  });
+  // "Back" may show the page from the cache, as it was left.
+  window.addEventListener('pageshow', function (event) {
+    if (!event.persisted) {
+      return;
+    }
+    Array.prototype.forEach.call(forms, function (form) {
+      delete form.dataset.submitting;
+      Array.prototype.forEach.call(form.querySelectorAll('button'), function (button) {
+        button.disabled = false;
+      });
+    });
+  });
 
   // ---------- old links to sections that moved to the About page ----------
   if (location.pathname.replace(/\/+$/, '').slice(-14) === '/documentation') {

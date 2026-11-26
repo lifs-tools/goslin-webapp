@@ -164,8 +164,22 @@ public class LipidNameValidationController {
     @PostMapping("/validatefile")
     public ModelAndView validateFile(@RequestParam(value = "file", required = false) MultipartFile file,
             Locale locale) throws IOException {
-        String text = file == null ? "" : new String(file.getBytes(), StandardCharsets.UTF_8);
+        String text = file == null ? "" : decode(file.getBytes());
         return harmonize(new HarmonizeForm(text, true), locale);
+    }
+
+    /**
+     * The text of an uploaded file: UTF-16 if it starts with a UTF-16 byte-order mark (Excel's "Unicode text"),
+     * otherwise UTF-8. The mark itself is dropped; a UTF-8 one is dropped when the lines are read.
+     */
+    static String decode(byte[] bytes) {
+        if (bytes.length >= 2 && (bytes[0] & 0xFF) == 0xFF && (bytes[1] & 0xFF) == 0xFE) {
+            return new String(bytes, 2, bytes.length - 2, StandardCharsets.UTF_16LE);
+        }
+        if (bytes.length >= 2 && (bytes[0] & 0xFF) == 0xFE && (bytes[1] & 0xFF) == 0xFF) {
+            return new String(bytes, 2, bytes.length - 2, StandardCharsets.UTF_16BE);
+        }
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     private ModelAndView harmonize(HarmonizeForm form, Locale locale) {
@@ -461,6 +475,10 @@ public class LipidNameValidationController {
         Resource file;
         try {
             UserSessionFile usf = storageService.load(id, slot);
+            // load falls back to another slot's file (the stored entries) when the TSV is missing
+            if (usf == null || !(slot.getName() + slot.getExtension()).equals(usf.getFilename())) {
+                throw new ResultNotFoundException();
+            }
             file = storageService.loadAsResource(usf, slot);
         } catch (StorageFileNotFoundException e) {
             throw new ResultNotFoundException();
