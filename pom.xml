@@ -75,7 +75,7 @@
         <lifs.webapps.common.version>2.0.1</lifs.webapps.common.version>
         <jgoslin.version>2.2.1</jgoslin.version>
         <jacoco.version>0.8.16</jacoco.version>
-        <jsoup.version>1.21.2</jsoup.version>
+        <jsoup.version>1.23.2</jsoup.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
         <app.name>goslin</app.name>
         <contextPath>/goslin</contextPath>
