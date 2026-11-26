@@ -28,7 +28,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -64,6 +67,14 @@ public class LipidNameValidationControllerTest {
                 .param("lipidNames", "CL 18:3(9Z,12Z,15Z)/16:0/22:5(16Z,10Z,19Z,13Z,7Z)/20:0"))
                 .andExpect(status().isSeeOther())
                 .andExpect(redirectedUrlPattern("/result/*"));
+    }
+
+    @Test
+    public void emptySubmissionStaysOnInputPage() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/validate").param("lipidNames", " \n\n "))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(content().string(containsString("Please enter at least one lipid name, one per line.")));
     }
 
     @Test

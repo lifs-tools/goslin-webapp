@@ -35,6 +35,7 @@ import org.lifstools.jgoslin.webapp.config.NewsPropertyConfig;
 import org.lifstools.jgoslin.webapp.domain.AppInfo;
 import org.lifstools.jgoslin.webapp.domain.GoslinStorageServiceSlots;
 import org.lifstools.jgoslin.webapp.domain.HarmonizeForm;
+import org.lifstools.jgoslin.webapp.domain.LineTooLongException;
 import org.lifstools.jgoslin.webapp.domain.NameEntries;
 import org.lifstools.jgoslin.webapp.domain.NameEntry;
 import org.lifstools.jgoslin.webapp.domain.ResultView;
@@ -87,6 +88,7 @@ public class LipidNameValidationController {
     private final LocaleResolver localeResolver;
     private final MessageSource messageSource;
     private final String exampleNames;
+    private final int exampleCount;
     private final NewsPropertyConfig newsPropertyConfig;
     private final int maxItemsInRequest;
     private final long maxFileBytes;
@@ -104,6 +106,7 @@ public class LipidNameValidationController {
         this.localeResolver = localeResolver;
         this.messageSource = messageSource;
         this.exampleNames = lipidnames.getContentAsString(StandardCharsets.UTF_8);
+        this.exampleCount = NameEntries.countNames(exampleNames);
         this.newsPropertyConfig = newsPropertyConfig;
         this.maxItemsInRequest = maxItemsInRequest;
         this.maxFileBytes = maxFileSize.toBytes();
@@ -115,7 +118,7 @@ public class LipidNameValidationController {
         // "?example" has no value, so look for the parameter's presence.
         boolean example = request.getParameterMap().containsKey("example");
         HarmonizeForm form = new HarmonizeForm(example ? exampleNames : "", true);
-        return inputPage(form, List.of(), List.of(), locale);
+        return inputPage(form, example ? exampleCount : 0, List.of(), List.of(), locale);
     }
 
     /** Old bookmarks and reloads of the former result page land on the input page. */
@@ -126,6 +129,7 @@ public class LipidNameValidationController {
 
     @PostMapping("/validate")
     public ModelAndView validate(@ModelAttribute("harmonizeForm") HarmonizeForm harmonizeForm, Locale locale) {
+        // Posts above server.tomcat.max-http-form-post-size are answered with 413 before they get here.
         return harmonize(harmonizeForm, locale);
     }
 
@@ -138,20 +142,27 @@ public class LipidNameValidationController {
     }
 
     private ModelAndView harmonize(HarmonizeForm form, Locale locale) {
+        String text = form.getLipidNames();
+        if (text != null && text.length() > maxFileBytes) {
+            return tooLong(form, locale);
+        }
         List<NameEntry> entries;
         try {
-            entries = NameEntries.fromText(form.getLipidNames(), maxItemsInRequest);
+            entries = NameEntries.fromText(text, maxItemsInRequest);
         } catch (TooManyNamesException e) {
-            return inputPage(form, List.of(PageMessage.error(
+            return inputPage(form, e.getCount(), List.of(PageMessage.error(
                     message("index.error.tooMany", locale, e.getCount(), e.getMax()))), List.of(), locale);
+        } catch (LineTooLongException e) {
+            return inputPage(form, NameEntries.countNames(text), List.of(PageMessage.error(
+                    message("index.error.lineTooLong", locale, e.getLine(), e.getMax()))), List.of(), locale);
         }
         if (entries.isEmpty()) {
-            return inputPage(form, List.of(PageMessage.error(message("index.error.empty", locale))), List.of(), locale);
+            return inputPage(form, 0, List.of(PageMessage.error(message("index.error.empty", locale))), List.of(), locale);
         }
         if (!form.isSkipInvalid()) {
             List<ResultView.FailedRow> failures = resultService.preview(entries);
             if (!failures.isEmpty()) {
-                return inputPage(form, List.of(), failures, locale);
+                return inputPage(form, entries.size(), List.of(), failures, locale);
             }
         }
         ResultView view = resultService.harmonize(entries);
@@ -162,7 +173,14 @@ public class LipidNameValidationController {
         return new ModelAndView(redirect);
     }
 
-    private ModelAndView inputPage(HarmonizeForm form, List<PageMessage> pageMessages,
+    /** The text is larger than the upload limit: say so, and do not send it back. */
+    private ModelAndView tooLong(HarmonizeForm form, Locale locale) {
+        HarmonizeForm empty = new HarmonizeForm("", form.isSkipInvalid());
+        return inputPage(empty, 0, List.of(PageMessage.error(
+                message("index.error.tooLong", locale, appInfo.getMaxFileSize()))), List.of(), locale);
+    }
+
+    private ModelAndView inputPage(HarmonizeForm form, int nameCount, List<PageMessage> pageMessages,
             List<ResultView.FailedRow> failures, Locale locale) {
         ModelAndView model = new ModelAndView("index");
         model.addObject("page", pageBuilderService.createPage(message("index.page.title", locale)));
@@ -174,7 +192,7 @@ public class LipidNameValidationController {
         model.addObject("messages", messages);
         model.addObject("harmonizeForm", form);
         model.addObject("failures", failures);
-        model.addObject("nameCount", NameEntries.fromText(form.getLipidNames(), Integer.MAX_VALUE).size());
+        model.addObject("nameCount", nameCount);
         model.addObject("maxNames", maxItemsInRequest);
         model.addObject("maxFileBytes", maxFileBytes);
         model.addObject("exampleNames", exampleNames);

@@ -45,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles(profiles = {"test", "dev"})
-@TestPropertySource(properties = "jgoslin.maxItemsInRequest=2")
+@TestPropertySource(properties = {"jgoslin.maxItemsInRequest=2", "spring.servlet.multipart.max-file-size=2KB"})
 public class InputPageTest {
 
     private static final String RESULT_LOCATION = ".*/result/[0-9a-f-]{36}";
@@ -100,9 +100,12 @@ public class InputPageTest {
 
     @Test
     public void noNormalizeWordingOnHome() throws Exception {
-        Document doc = getHome("/");
-        assertThat(doc.body().text().toLowerCase(Locale.ROOT)).doesNotContain("normaliz");
-        assertThat(doc.title().toLowerCase(Locale.ROOT)).doesNotContain("normaliz");
+        for (String url : new String[]{"/", "/?lang=de"}) {
+            Document doc = getHome(url);
+            assertThat(doc.body().text().toLowerCase(Locale.ROOT)).doesNotContain("normali");
+            assertThat(doc.title().toLowerCase(Locale.ROOT)).doesNotContain("normali");
+        }
+        assertThat(getHome("/?lang=de").selectFirst("h1").text()).isEqualTo("Lipidnamen harmonisieren");
     }
 
     @Test
@@ -119,9 +122,10 @@ public class InputPageTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andReturn());
-        assertThat(doc.select(".lifs-callout--error")).isNotEmpty();
-        assertThat(doc.select(".lifs-callout--error").text()).contains("3").contains("2");
+        assertThat(doc.select(".lifs-callout--error").text())
+                .contains("You submitted 3 names, but up to 2 can be harmonized at once. Please split the list.");
         assertThat(textArea(doc)).isEqualTo(text);
+        assertThat(doc.selectFirst("#lipid-count").text()).startsWith("3 names");
     }
 
     @Test
@@ -129,7 +133,7 @@ public class InputPageTest {
         String text = "PC 32:0\n\nPC(18:2";
         Document doc = html(mockMvc.perform(post("/validate")
                 .param("lipidNames", text)
-                .param("skipInvalid", "false"))
+                .param("_skipInvalid", "on")) // an unchecked box, as a browser posts it
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andReturn());
@@ -138,6 +142,31 @@ public class InputPageTest {
         assertThat(callout.text()).contains("line 3").contains("PC(18:2").doesNotContain("line 1");
         assertThat(textArea(doc)).isEqualTo(text);
         assertThat(doc.selectFirst("input#skipInvalid").hasAttr("checked")).isFalse();
+    }
+
+    @Test
+    public void tooLongTextIsNotEchoed() throws Exception {
+        String text = "PC 32:0\n".repeat(300); // 2,400 characters, over the 2KB limit
+        Document doc = html(mockMvc.perform(post("/validate").param("lipidNames", text))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andReturn());
+        assertThat(doc.select(".lifs-callout--error").text())
+                .contains("The text is larger than 2KB. Please submit fewer names at once.");
+        assertThat(textArea(doc)).isEmpty();
+    }
+
+    @Test
+    public void tooLongLineIsNamed() throws Exception {
+        String text = "PC 32:0\n" + "C".repeat(1001);
+        Document doc = html(mockMvc.perform(post("/validate").param("lipidNames", text))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andReturn());
+        assertThat(doc.select(".lifs-callout--error").text())
+                .contains("Line 2 is longer than 1,000 characters and cannot be a lipid name.");
+        assertThat(textArea(doc)).isEqualTo(text);
+        assertThat(doc.selectFirst("#lipid-count").text()).startsWith("2 names");
     }
 
     @Test

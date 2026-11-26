@@ -92,4 +92,33 @@ class NameEntriesTest {
         assertTrue(NameEntries.fromText(null, 10).isEmpty());
         assertTrue(NameEntries.fromText(" \n ", 10).isEmpty());
     }
+
+    @Test
+    void rejectsALineLongerThanTheCapAndNamesIt() {
+        String longName = "a".repeat(NameEntries.MAX_LINE_LENGTH + 1);
+        LineTooLongException ex = assertThrows(LineTooLongException.class,
+                () -> NameEntries.fromText("PC 32:0\n\n" + longName, 10));
+        assertEquals(3, ex.getLine());
+        assertEquals(NameEntries.MAX_LINE_LENGTH, ex.getMax());
+    }
+
+    @Test
+    void lineLengthIsMeasuredAfterNormalising() {
+        String name = "a".repeat(NameEntries.MAX_LINE_LENGTH);
+        assertEquals(1, NameEntries.fromText("   " + name + "   ", 10).size());
+    }
+
+    @Test
+    void countsLinesBeyondTheMaxWithoutCheckingThem() {
+        String longName = "a".repeat(NameEntries.MAX_LINE_LENGTH + 1);
+        TooManyNamesException ex = assertThrows(TooManyNamesException.class,
+                () -> NameEntries.fromText("a\nb\n \u00a0 \n" + longName + "\nc", 1));
+        assertEquals(4, ex.getCount());
+    }
+
+    @Test
+    void countNamesCountsNonBlankLines() {
+        assertEquals(3, NameEntries.countNames("a\r\n\r\nb\n\u00a0\n\ufeff\nc"));
+        assertEquals(0, NameEntries.countNames(null));
+    }
 }

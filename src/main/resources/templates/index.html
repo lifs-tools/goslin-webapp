@@ -63,7 +63,8 @@
                         </div>
                         <p class="lifs-note" id="lipids-help" th:utext="#{index.names.help(${page.maxFileSize})}">Type or paste names, one per line, …</p>
                         <p id="file-error" class="lifs-callout lifs-callout--error" role="alert" hidden
-                           th:data-too-large="#{index.file.tooLarge(${page.maxFileSize})}"></p>
+                           th:data-too-large="#{index.file.tooLarge(${page.maxFileSize})}" th:data-not-text="#{index.file.notText}"
+                           th:data-unreadable="#{index.file.unreadable}"></p>
 
                         <label class="check">
                             <input type="checkbox" id="skipInvalid" th:field="*{skipInvalid}"/>

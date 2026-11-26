@@ -23,6 +23,9 @@ import java.util.List;
  */
 public final class NameEntries {
 
+    /** Longest name accepted, after normalising; longer lines are never parsed or stored. */
+    public static final int MAX_LINE_LENGTH = 1000;
+
     private NameEntries() {
     }
 
@@ -39,33 +42,77 @@ public final class NameEntries {
 
     /**
      * Splits text into entries. Line numbers are 1-based positions in the
-     * submitted text; blank lines count but produce no entry.
+     * submitted text; blank lines count but produce no entry. Once there are
+     * more than maxNames names, the remaining lines are only counted.
      *
      * @param text the submitted text, may be null
      * @param maxNames maximum number of non-blank lines
      * @return the entries, empty for null or blank text
      * @throws TooManyNamesException if there are more than maxNames non-blank lines
+     * @throws LineTooLongException if one of the first maxNames names is longer
+     * than {@link #MAX_LINE_LENGTH} characters after normalising
      */
     public static List<NameEntry> fromText(String text, int maxNames) {
         if (text == null) {
             return List.of();
         }
-        String[] lines = text.replace("﻿", "").split("\\r\\n|\\r|\\n", -1);
+        String[] lines = split(text);
         List<NameEntry> entries = new ArrayList<>();
         int count = 0;
         for (int i = 0; i < lines.length; i++) {
+            if (count >= maxNames) {
+                if (!isBlank(lines[i])) {
+                    count++;
+                }
+                continue;
+            }
             String name = normalize(lines[i]);
             if (name.isEmpty()) {
                 continue;
             }
             count++;
-            if (count <= maxNames) {
-                entries.add(NameEntry.of(i + 1, name));
+            if (name.length() > MAX_LINE_LENGTH) {
+                throw new LineTooLongException(i + 1, MAX_LINE_LENGTH);
             }
+            entries.add(NameEntry.of(i + 1, name));
         }
         if (count > maxNames) {
             throw new TooManyNamesException(count, maxNames);
         }
         return List.copyOf(entries);
+    }
+
+    /**
+     * Counts the names (non-blank lines) without normalising them.
+     *
+     * @param text the submitted text, may be null
+     * @return the number of non-blank lines
+     */
+    public static int countNames(String text) {
+        if (text == null) {
+            return 0;
+        }
+        int count = 0;
+        for (String line : split(text)) {
+            if (!isBlank(line)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static String[] split(String text) {
+        return text.replace("\ufeff", "").split("\\r\\n|\\r|\\n", -1);
+    }
+
+    /** Blank as {@link #normalize} sees it: only whitespace and non-breaking spaces. */
+    private static boolean isBlank(String line) {
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (c != '\u00a0' && !Character.isWhitespace(c)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

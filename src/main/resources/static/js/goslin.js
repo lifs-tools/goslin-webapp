@@ -50,6 +50,15 @@
     var file = document.getElementById('file');
     var fileError = document.getElementById('file-error');
     var maxBytes = file ? Number(file.dataset.maxBytes) || Infinity : Infinity;
+    var showFileError = function (text) {
+      if (fileError) {
+        fileError.textContent = text;
+        fileError.hidden = false;
+      }
+    };
+    var isText = function (f) {
+      return f.type === '' || f.type.indexOf('text/') === 0 || /\.(txt|csv|tsv)$/i.test(f.name);
+    };
     var readFile = function (f) {
       if (!f) {
         return;
@@ -57,14 +66,17 @@
       if (fileError) {
         fileError.hidden = true;
       }
-      if (f.size > maxBytes) {
-        if (fileError) {
-          fileError.textContent = fileError.dataset.tooLarge;
-          fileError.hidden = false;
-        }
+      if (!isText(f)) {
+        showFileError(fileError && fileError.dataset.notText);
         return;
       }
-      f.text().then(setNames);
+      if (f.size > maxBytes) {
+        showFileError(fileError && fileError.dataset.tooLarge);
+        return;
+      }
+      f.text().then(setNames).catch(function () {
+        showFileError(fileError && fileError.dataset.unreadable);
+      });
     };
     if (file) {
       file.addEventListener('change', function () {
@@ -73,24 +85,43 @@
       });
     }
 
+    // Only file drags are handled here; dragging selected text into the box keeps working.
+    var hasFiles = function (event) {
+      return !!event.dataTransfer && Array.prototype.indexOf.call(event.dataTransfer.types || [], 'Files') >= 0;
+    };
     var box = document.querySelector('.goslin-names');
     if (box) {
       ['dragenter', 'dragover'].forEach(function (type) {
         box.addEventListener(type, function (event) {
-          event.preventDefault();
-          box.classList.add('goslin-names--drag');
+          if (hasFiles(event)) {
+            event.preventDefault();
+            box.classList.add('goslin-names--drag');
+          }
         });
       });
       ['dragleave', 'drop'].forEach(function (type) {
-        box.addEventListener(type, function (event) {
-          event.preventDefault();
+        box.addEventListener(type, function () {
           box.classList.remove('goslin-names--drag');
         });
       });
       box.addEventListener('drop', function (event) {
-        readFile(event.dataTransfer && event.dataTransfer.files[0]);
+        if (hasFiles(event)) {
+          event.preventDefault();
+          readFile(event.dataTransfer.files[0]);
+        }
       });
     }
+    // A file dropped next to the box must not make the browser leave the page to open it.
+    ['dragover', 'drop'].forEach(function (type) {
+      window.addEventListener(type, function (event) {
+        if (hasFiles(event)) {
+          event.preventDefault();
+        }
+      });
+    });
+
+    // The browser may restore the text area after a reload or "back"; count what is there.
+    updateCount();
   }
 
   // ---------- logo: blink offset and honk ----------
