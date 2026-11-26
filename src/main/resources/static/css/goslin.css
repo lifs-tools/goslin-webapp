@@ -78,11 +78,15 @@
 @media (max-width: 699.98px) { .filters { grid-template-columns: 1fr; } }
 .mono { font-family: var(--lifs-mono); font-size: 12.5px; }
 #results td { font-size: 13px; }
-#results td.mono { overflow-wrap: anywhere; min-width: 9em; }
-#results td.formula { white-space: nowrap; overflow-wrap: normal; min-width: 0; }
-#results .col-toggle { width: 28px; padding-left: 4px; padding-right: 0; }
+/* Columns are styled by position: the 5,000 rows carry no classes. 1 line, 3 submitted, 4 harmonized, 7 formula, 8 mass, 9 databases */
+#results > tbody > tr.result-row > td:nth-child(1), #results > tbody > tr.result-row > td:nth-child(8) { text-align: right; font-family: var(--lifs-mono); }
+#results > tbody > tr.result-row > td:nth-child(3), #results > tbody > tr.result-row > td:nth-child(4),
+#results > tbody > tr.result-row > td:nth-child(7) { font-family: var(--lifs-mono); font-size: 12.5px; overflow-wrap: anywhere; min-width: 9em; }
+#results > tbody > tr.result-row > td:nth-child(7) { white-space: nowrap; overflow-wrap: normal; min-width: 0; }
+#results > tbody > tr.result-row > td:nth-child(9) { white-space: nowrap; }
+#results > tbody > tr.result-row > td:nth-child(9) .lifs-badge + .lifs-badge { margin-left: 4px; }
+#results .col-toggle, #results > tbody > tr.result-row > td:nth-child(2) { width: 28px; padding-left: 4px; padding-right: 0; }
 #results s { color: var(--lifs-grey); }
-#results .db { white-space: nowrap; }
 .xbtn { border: 0; background: none; cursor: pointer; color: var(--lifs-primary); padding: 0 4px; font: 14px var(--lifs-mono); }
 .xbtn:focus-visible, .sort-btn:focus-visible { outline: 2px solid var(--lifs-primary); outline-offset: 2px; }
 .sort-btn {
@@ -105,7 +109,11 @@ th[aria-sort=descending] .sort-btn::after { content: '\25BC'; opacity: 1; font-s
 .kv dd { margin: 0; overflow-wrap: anywhere; }
 .kv .kv__wide { grid-column: 1 / -1; }
 .dbs { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+#results tr.detail a[target=_blank]::after { content: ' \2197'; }
+.chains { margin-top: 4px; border: 1px solid var(--lifs-line); }
 .chains td, .chains th { font-size: 12.5px; }
+.chains td:nth-child(3), .chains td:nth-child(4), .chains th:nth-child(3), .chains th:nth-child(4) { text-align: right; font-family: var(--lifs-mono); }
+.chains td:nth-child(6), .chains td:nth-child(7) { font-family: var(--lifs-mono); }
 .pager { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 
 /* ---------- Goslin logo: blink (CSS) and honk on click (goslin.js) ---------- */

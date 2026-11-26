@@ -117,6 +117,27 @@ public record ResultTableRow(NameEntry entry, ValidationResult result, String le
         return new Chain(fa.getName(), position, fa.getNumCarbon(), fa.getNDoubleBonds(), bondType, dbPositions, groups);
     }
 
+    private static final String LIPID_MAPS_CLASS_SEARCH
+            = "https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM";
+
+    /** The LIPID MAPS class search for the category; see {@link #hasLipidMapsCategory()}. */
+    public String lipidMapsCategoryUrl() {
+        return LIPID_MAPS_CLASS_SEARCH + result.getLipidMapsCategory();
+    }
+
+    /** The LIPID MAPS class search for the main or sub class, if Goslin knows its abbreviation. */
+    public String lipidMapsClassUrl() {
+        return result.getLipidMapsClass() == null ? null : LIPID_MAPS_CLASS_SEARCH + result.getLipidMapsClass();
+    }
+
+    /** The functional group counts, e.g. {@code OH 1, oxo 2}; empty if there are none. */
+    public String functionalGroups() {
+        Map<String, Integer> counts = result.getFunctionalGroupCounts();
+        return counts == null ? "" : counts.entrySet().stream()
+                .map(e -> e.getKey() + " " + e.getValue())
+                .collect(Collectors.joining(", "));
+    }
+
     /** Whether the category links to LIPID MAPS. */
     public boolean hasLipidMapsCategory() {
         return result.getLipidMapsCategory() != null && !"UNDEFINED".equals(result.getLipidMapsCategory());

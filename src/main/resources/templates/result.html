@@ -5,7 +5,7 @@
         <link rel="stylesheet" th:href="@{/css/goslin.css}" href="/css/goslin.css"/>
         <header th:replace="~{fragments/nav :: app-bar(active='harmonize')}"></header>
 
-        <main id="main" class="lifs-main" tabindex="-1">
+        <main id="main" class="lifs-main" tabindex="-1" th:attr="data-outcome=${outcome}">
             <div th:replace="~{lifs/layout :: messages}"></div>
 
             <!-- Unknown or expired id -->
@@ -69,15 +69,15 @@
                                     <label class="visually-hidden" th:for="'edit-' + ${line}" th:text="#{result.fix.label(${line})}">Name from line 34</label>
                                     <input class="lifs-input" type="text" spellcheck="false" autocomplete="off"
                                            th:id="'edit-' + ${line}" th:name="'edit[' + ${line} + ']'" th:value="${name}"
-                                           th:attr="maxlength=${maxNameLength},aria-describedby='hint-' + ${line}"/>
-                                    <div class="fix__msg" th:id="'hint-' + ${line}">
+                                           th:attr="maxlength=${maxNameLength},aria-describedby=${e != null ? 'hint-' + line : null}"/>
+                                    <div class="fix__msg">
                                         <span class="trace" th:if="${e != null}" th:with="marked=${e.marked(name)}"><span th:text="${e.beforeMark(name)}">PC(18:2-20:4</span><mark
                                               th:if="${!#strings.isEmpty(marked)}" th:text="${marked}">x</mark><mark th:if="${#strings.isEmpty(marked)}">&nbsp;</mark><span
                                               th:text="${e.afterMark(name)}"></span></span>
                                         <span class="trace" th:if="${e == null}" th:text="${name}">name</span>
-                                        <span class="lifs-note lifs-prose" th:if="${e != null and e.hint().name() == 'HEAD_GROUP'}"
+                                        <span class="lifs-note lifs-prose" th:id="'hint-' + ${line}" th:if="${e != null and e.hint().name() == 'HEAD_GROUP'}"
                                               th:utext="#{result.fix.headGroup(@{/documentation#lipid-classes})}">Goslin does not recognise the head group. …</span>
-                                        <span class="lifs-note" th:if="${e != null and e.hint().name() != 'HEAD_GROUP'}"
+                                        <span class="lifs-note" th:id="'hint-' + ${line}" th:if="${e != null and e.hint().name() != 'HEAD_GROUP'}"
                                               th:text="#{${'fix.hint.' + #strings.toLowerCase(e.hint().name())}(${e.position() + 1}, ${e.marked(name)})}">A closing bracket is missing.</span>
                                         <details class="fix__original">
                                             <summary th:text="#{result.fix.original}">Goslin’s message</summary>
@@ -127,7 +127,7 @@
                     </div>
 
                     <div class="lifs-table-wrap">
-                        <table class="lifs-table" id="results">
+                        <table class="lifs-table" id="results" th:attr="data-show=#{result.details.show},data-hide=#{result.details.hide}">
                             <caption class="visually-hidden" th:text="#{result.table.caption}">Harmonized names, sorted by line</caption>
                             <thead>
                                 <tr>
@@ -146,96 +146,50 @@
                                 <tr th:if="${#lists.isEmpty(rows)}" class="empty">
                                     <td colspan="9" class="lifs-note" th:text="#{result.table.empty}">No names are harmonized yet.</td>
                                 </tr>
-                                <th:block th:each="r : ${rows}" th:with="line=${r.entry().line()}, res=${r.result()}">
-                                    <tr class="result-row" th:attr="data-line=${line},data-level=${r.level()},data-category=${r.category()},data-search=${r.search()}">
-                                        <td class="lifs-num" th:text="${line}">7</td>
-                                        <td class="col-toggle"><button type="button" class="xbtn" hidden aria-expanded="false"
-                                                th:attr="aria-controls='detail-' + ${line},data-show=#{result.details.show(${line})},data-hide=#{result.details.hide(${line})}"
-                                                th:aria-label="#{result.details.show(${line})}">▸</button></td>
-                                        <td class="mono" th:attr="data-value=${r.entry().current()}"><span th:text="${r.entry().current()}">Cer(d18:1/18:0)</span><th:block th:if="${r.entry().corrected()}"><br/><span
-                                                class="visually-hidden" th:text="#{result.submittedAs}">submitted as</span> <s th:text="${r.entry().original()}">Cer(d18:1/18:0</s></th:block></td>
-                                        <td class="mono" th:attr="data-value=${res.normalizedName}"><strong th:text="${res.normalizedName}">Cer 18:1;O2/18:0</strong>
-                                            <span th:if="${r.entry().corrected()}" class="lifs-lvl lifs-lvl--ok chip-corrected" th:text="#{result.chip.corrected}">corrected</span></td>
-                                        <td th:attr="data-value=${r.levelOrder()}" th:text="#{${r.level()}}">sn position</td>
-                                        <td><abbr th:title="${r.categoryName()}" th:text="${r.category()}">SP</abbr></td>
-                                        <td class="mono formula" th:text="${res.sumFormula}">C36H71NO3</td>
-                                        <td class="lifs-num" th:attr="data-value=${r.mass() == null ? '' : r.mass()}"
-                                            th:text="${r.mass() == null ? '' : #numbers.formatDecimal(r.mass(), 1, 4)}">565.5434</td>
-                                        <td class="db">
-                                            <span th:unless="${r.lipidMapsEntries().isEmpty()}" class="lifs-badge" th:text="'LM ' + ${r.lipidMapsEntries().size()}">LM 2</span>
-                                            <span th:unless="${r.swissLipidsEntries().isEmpty()}" class="lifs-badge" th:text="'SL ' + ${r.swissLipidsEntries().size()}">SL 1</span>
-                                            <span th:unless="${r.chebiEntries().isEmpty()}" class="lifs-badge" th:text="'ChEBI ' + ${r.chebiEntries().size()}">ChEBI 1</span>
-                                            <span th:unless="${r.hasDatabaseEntries()}" class="lifs-badge lifs-badge--plain" th:text="#{result.db.none}">none</span>
-                                        </td>
-                                    </tr>
-                                    <tr class="detail" th:id="'detail-' + ${line}">
-                                        <td colspan="9">
-                                            <details>
-                                                <summary th:text="#{result.details}">Details</summary>
-                                                <dl class="kv">
-                                                    <div><dt th:text="#{result.details.grammar}">Grammar</dt><dd th:text="${res.grammar}">LIPIDMAPS</dd></div>
-                                                    <div><dt th:text="#{result.details.adduct}">Adduct</dt><dd class="mono" th:text="${r.adduct()}">[M]</dd></div>
-                                                    <div><dt th:text="#{result.details.category}">LIPID MAPS category</dt>
-                                                        <dd th:if="${r.hasLipidMapsCategory()}"><a target="_blank" rel="noopener"
-                                                               th:href="'https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM' + ${res.lipidMapsCategory}"
-                                                               th:title="#{result.details.external}"><th:block th:text="${r.categoryName()}">Glycerophospholipids [GP]</th:block> ↗</a></dd>
-                                                        <dd th:unless="${r.hasLipidMapsCategory()}" th:text="${r.categoryName()}">Glycerophospholipids [GP]</dd></div>
-                                                    <div><dt th:text="#{result.details.class}">LIPID MAPS class</dt>
-                                                        <dd th:if="${res.lipidMapsClass != null}"><a target="_blank" rel="noopener"
-                                                               th:href="'https://www.lipidmaps.org/data/structure/LMSDSearch.php?Mode=ProcessClassSearch&LMID=LM' + ${res.lipidMapsClass}"
-                                                               th:title="#{result.details.external}"><th:block th:text="${r.className()}">Diacylglycerophosphoethanolamines [GP0201]</th:block> ↗</a></dd>
-                                                        <dd th:if="${res.lipidMapsClass == null}" th:text="${r.className()}">Class</dd></div>
-                                                    <div><dt th:text="#{result.details.level}">Level</dt><dd th:text="#{${r.level()}}">Full structure</dd></div>
-                                                    <div th:if="${r.numCarbon() != null}"><dt th:text="#{result.details.carbons}">C atoms · double bonds</dt>
-                                                        <dd class="mono" th:text="${r.numCarbon()} + ' · ' + ${r.doubleBonds() != null ? r.doubleBonds() : '–'}">34 · 3</dd></div>
-                                                    <div th:if="${res.functionalGroupCounts != null and !#maps.isEmpty(res.functionalGroupCounts)}"><dt th:text="#{result.details.functionalGroups}">Functional groups</dt>
-                                                        <dd class="mono"><th:block th:each="g, s : ${res.functionalGroupCounts}" th:text="${g.key} + ' ' + ${g.value} + (${s.last} ? '' : ', ')">OH 1</th:block></dd></div>
-                                                    <div th:if="${r.mass() != null}"><dt th:text="#{result.details.mass}">Exact mass</dt><dd class="mono" th:text="${#numbers.formatDecimal(r.mass(), 1, 4)}">713.4996</dd></div>
-                                                    <div th:if="${res.sumFormula != null and !#strings.isEmpty(res.sumFormula)}"><dt th:text="#{result.details.formula}">Formula</dt><dd class="mono" th:text="${res.sumFormula}">C39H72NO8P</dd></div>
-                                                    <div th:if="${r.faBondType() != null}"><dt th:text="#{result.details.bondType}">Bond to head group</dt><dd th:text="#{${r.faBondType()}}">Ester</dd></div>
-                                                    <div th:if="${res.messages != null and !#lists.isEmpty(res.messages)}" class="kv__wide"><dt th:text="#{result.details.messages}">Goslin’s messages</dt>
-                                                        <dd><th:block th:each="m : ${res.messages}"><span th:text="${m}">Message</span><br/></th:block></dd></div>
-                                                    <div class="kv__wide"><dt th:text="#{result.details.databases}">Database entries</dt>
-                                                        <dd th:unless="${r.hasDatabaseEntries()}" class="lifs-note" th:text="#{result.details.noDatabases}">No LIPID MAPS, SwissLipids or ChEBI entry for this name</dd>
-                                                        <dd th:if="${r.hasDatabaseEntries()}" class="dbs">
-                                                            <span th:each="d : ${r.lipidMapsEntries()}"><a target="_blank" rel="noopener" th:href="${d.databaseUrl + d.databaseElementId}" th:title="${d.databaseElementId}"><span
-                                                                class="lifs-badge">LM</span> <th:block th:text="${d.nativeName != null and !#strings.isEmpty(d.nativeName) ? d.nativeName : d.databaseElementId}">name</th:block> ↗</a></span>
-                                                            <span th:each="d : ${r.swissLipidsEntries()}"><a target="_blank" rel="noopener" th:href="${d.databaseUrl + d.databaseElementId}" th:title="${d.databaseElementId}"><span
-                                                                class="lifs-badge">SL</span> <th:block th:text="${d.nativeName != null and !#strings.isEmpty(d.nativeName) ? d.nativeName : d.databaseElementId}">name</th:block> ↗</a></span>
-                                                            <span th:each="d : ${r.chebiEntries()}"><a target="_blank" rel="noopener" th:href="${d.databaseUrl}" th:title="${d.databaseElementId}"><span
-                                                                class="lifs-badge">ChEBI</span> <th:block th:text="${d.nativeName != null and !#strings.isEmpty(d.nativeName) ? d.nativeName : d.databaseElementId}">name</th:block> ↗</a></span>
-                                                        </dd></div>
-                                                </dl>
-                                                <div class="lifs-table-wrap" th:unless="${#lists.isEmpty(r.chains())}">
-                                                    <table class="lifs-table chains">
-                                                        <thead>
-                                                            <tr>
-                                                                <th scope="col" th:text="#{result.chain.name}">Chain</th>
-                                                                <th scope="col" th:text="#{result.chain.position}">Position</th>
-                                                                <th scope="col" class="lifs-num" th:text="#{result.chain.carbons}"># C</th>
-                                                                <th scope="col" class="lifs-num" th:text="#{result.chain.doubleBonds}"># DB</th>
-                                                                <th scope="col" th:text="#{result.chain.bondType}">Bond to head group</th>
-                                                                <th scope="col" th:text="#{result.chain.dbPositions}">DB positions</th>
-                                                                <th scope="col" th:text="#{result.chain.functionalGroups}">Functional groups</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr th:each="c : ${r.chains()}">
-                                                                <td th:text="${c.name()}">FA1</td>
-                                                                <td><th:block th:if="${c.position() != null}" th:text="${c.position()}">sn1</th:block><abbr th:if="${c.position() == null}" th:title="#{result.chain.notDefined.title}" th:text="#{result.chain.notDefined}">N.D.</abbr></td>
-                                                                <td class="lifs-num" th:text="${c.numCarbon()}">16</td>
-                                                                <td class="lifs-num" th:text="${c.doubleBonds()}">2</td>
-                                                                <td th:text="${c.bondType() != null} ? #{${c.bondType()}} : ''">Ester</td>
-                                                                <td class="mono"><th:block th:if="${c.doubleBondPositions() != null}" th:text="${c.doubleBondPositions()}">9Z, 12Z</th:block><abbr th:if="${c.doubleBondPositions() == null}" th:title="#{result.chain.notDefined.title}" th:text="#{result.chain.notDefined}">N.D.</abbr></td>
-                                                                <td class="mono"><th:block th:if="${c.functionalGroups() != null}" th:text="${c.functionalGroups()}">{OH:[OH]}</th:block><abbr th:if="${c.functionalGroups() == null}" th:title="#{result.chain.notDefined.title}" th:text="#{result.chain.notDefined}">N.D.</abbr></td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </details>
-                                        </td>
-                                    </tr>
-                                </th:block>
+<!--/* Rows repeat up to 5,000 times, so the markup inside this loop is kept lean: no indentation, line breaks
+       only inside tags, no repeated classes (goslin.css styles the columns by position), and the ▸ button's
+       label comes from the table's data-show/data-hide (goslin.js). */-->
+<th:block th:each="r : ${rows}" th:with="line=${r.entry().line()}, res=${r.result()}, corrected=${r.entry().corrected()}"><tr
+class="result-row" th:attr="data-line=${line},data-level=${r.level()},data-category=${r.category()},data-search=${r.search()}"><td
+th:text="${line}">7</td><td><button type="button" class="xbtn" hidden aria-expanded="false" th:attr="aria-controls='detail-' + ${line}">▸</button></td><td
+th:unless="${corrected}" th:text="${r.entry().current()}">Cer(d18:1/18:0)</td><td
+th:if="${corrected}"><span th:text="${r.entry().current()}">PC(18:2-20:4)</span><br/><span class="visually-hidden" th:text="#{result.submittedAs}">submitted as</span> <s
+th:text="${r.entry().original()}">PC(18:2-20:4</s></td><td><strong th:text="${res.normalizedName}">Cer 18:1;O2/18:0</strong><th:block th:if="${corrected}"> <span
+class="lifs-lvl lifs-lvl--ok chip-corrected" th:text="#{result.chip.corrected}">corrected</span></th:block></td><td
+th:attr="data-value=${r.levelOrder()}" th:text="#{${r.level()}}">sn position</td><td><abbr th:title="${r.categoryName()}" th:text="${r.category()}">SP</abbr></td><td
+th:text="${res.sumFormula}">C36H71NO3</td><td th:attr="data-value=${r.mass()}" th:text="${r.mass() == null ? '' : #numbers.formatDecimal(r.mass(), 1, 4)}">565.5434</td><td><span
+th:unless="${r.lipidMapsEntries().isEmpty()}" class="lifs-badge" th:text="'LM ' + ${r.lipidMapsEntries().size()}">LM 2</span><span
+th:unless="${r.swissLipidsEntries().isEmpty()}" class="lifs-badge" th:text="'SL ' + ${r.swissLipidsEntries().size()}">SL 1</span><span
+th:unless="${r.chebiEntries().isEmpty()}" class="lifs-badge" th:text="'ChEBI ' + ${r.chebiEntries().size()}">ChEBI 1</span><span
+th:unless="${r.hasDatabaseEntries()}" class="lifs-badge lifs-badge--plain" th:text="#{result.db.none}">none</span></td></tr><tr
+class="detail" th:id="'detail-' + ${line}"><td colspan="9"><details><summary th:text="#{result.details.summary(${line})}">Details for line 7</summary><dl
+class="kv"><div><dt th:text="#{result.details.grammar}">Grammar</dt><dd th:text="${res.grammar}">LIPIDMAPS</dd></div><div><dt
+th:text="#{result.details.adduct}">Adduct</dt><dd th:text="${r.adduct()}">[M]</dd></div><div><dt th:text="#{result.details.category}">LIPID MAPS category</dt><dd><a
+th:if="${r.hasLipidMapsCategory()}" target="_blank" th:href="${r.lipidMapsCategoryUrl()}" th:text="${r.categoryName()}">Glycerophospholipids [GP]</a><th:block
+th:unless="${r.hasLipidMapsCategory()}" th:text="${r.categoryName()}">Glycerophospholipids [GP]</th:block></dd></div><div><dt th:text="#{result.details.class}">LIPID MAPS class</dt><dd><a
+th:if="${res.lipidMapsClass != null}" target="_blank" th:href="${r.lipidMapsClassUrl()}" th:text="${r.className()}">Diacylglycerophosphoethanolamines [GP0201]</a><th:block
+th:if="${res.lipidMapsClass == null}" th:text="${r.className()}">Class</th:block></dd></div><div><dt th:text="#{result.details.level}">Level</dt><dd th:text="#{${r.level()}}">Full structure</dd></div><div
+th:if="${r.numCarbon() != null}"><dt th:text="#{result.details.carbons}">C atoms · double bonds</dt><dd th:text="${r.numCarbon()} + ' · ' + ${r.doubleBonds() != null ? r.doubleBonds() : '–'}">34 · 3</dd></div><div
+th:if="${!#strings.isEmpty(r.functionalGroups())}"><dt th:text="#{result.details.functionalGroups}">Functional groups</dt><dd th:text="${r.functionalGroups()}">OH 1</dd></div><div
+th:if="${r.mass() != null}"><dt th:text="#{result.details.mass}">Exact mass</dt><dd th:text="${#numbers.formatDecimal(r.mass(), 1, 4)}">713.4996</dd></div><div
+th:unless="${#strings.isEmpty(res.sumFormula)}"><dt th:text="#{result.details.formula}">Formula</dt><dd th:text="${res.sumFormula}">C39H72NO8P</dd></div><div
+th:if="${r.faBondType() != null}"><dt th:text="#{result.details.bondType}">Bond to head group</dt><dd th:text="#{${r.faBondType()}}">Ester</dd></div><div
+th:if="${res.messages != null and !#lists.isEmpty(res.messages)}" class="kv__wide"><dt th:text="#{result.details.messages}">Goslin’s messages</dt><dd
+th:text="${#strings.listJoin(res.messages, ' | ')}">Message</dd></div><div
+th:unless="${r.hasDatabaseEntries()}" class="kv__wide"><dt th:text="#{result.details.databases}">Database entries</dt><dd th:text="#{result.details.noDatabases}">No LIPID MAPS, SwissLipids or ChEBI entry for this name</dd></div><div
+th:unless="${r.lipidMapsEntries().isEmpty()}" class="kv__wide"><dt th:text="#{result.details.lipidMaps}">LIPID MAPS entries</dt><dd
+class="dbs"><a th:each="d : ${r.lipidMapsEntries()}" target="_blank" th:href="${d.databaseUrl + d.databaseElementId}" th:text="${#strings.isEmpty(d.nativeName) ? d.databaseElementId : d.nativeName}">name</a></dd></div><div
+th:unless="${r.swissLipidsEntries().isEmpty()}" class="kv__wide"><dt th:text="#{result.details.swissLipids}">SwissLipids entries</dt><dd
+class="dbs"><a th:each="d : ${r.swissLipidsEntries()}" target="_blank" th:href="${d.databaseUrl + d.databaseElementId}" th:text="${#strings.isEmpty(d.nativeName) ? d.databaseElementId : d.nativeName}">name</a></dd></div><div
+th:unless="${r.chebiEntries().isEmpty()}" class="kv__wide"><dt th:text="#{result.details.chebi}">ChEBI entries</dt><dd
+class="dbs"><a th:each="d : ${r.chebiEntries()}" target="_blank" th:href="${d.databaseUrl}" th:text="${#strings.isEmpty(d.nativeName) ? d.databaseElementId : d.nativeName}">name</a></dd></div></dl><table
+th:unless="${#lists.isEmpty(r.chains())}" class="lifs-table chains"><thead><tr><th th:text="#{result.chain.name}">Chain</th><th
+th:text="#{result.chain.position}">Position</th><th th:text="#{result.chain.carbons}"># C</th><th th:text="#{result.chain.doubleBonds}"># DB</th><th
+th:text="#{result.chain.bondType}">Bond to head group</th><th th:text="#{result.chain.dbPositions}">DB positions</th><th
+th:text="#{result.chain.functionalGroups}">Functional groups</th></tr></thead><tbody><tr th:each="c : ${r.chains()}"><td th:text="${c.name()}">FA1</td><td
+th:text="${c.position() != null} ? ${c.position()} : #{result.chain.notDefined}">sn1</td><td th:text="${c.numCarbon()}">16</td><td th:text="${c.doubleBonds()}">2</td><td
+th:text="${c.bondType() != null} ? #{${c.bondType()}} : ''">Ester</td><td th:text="${c.doubleBondPositions() != null} ? ${c.doubleBondPositions()} : #{result.chain.notDefined}">9Z, 12Z</td><td
+th:text="${c.functionalGroups() != null} ? ${c.functionalGroups()} : #{result.chain.notDefined}">{OH:[OH]}</td></tr></tbody></table></details></td></tr></th:block>
                             </tbody>
                         </table>
                     </div>

@@ -31,7 +31,8 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The re-run form posts one parameter per failed name; real Tomcat must accept more than its default of 1,000.
+ * Real Tomcat: the re-run form posts one parameter per failed name, more than Tomcat's default of 1,000, and
+ * large result pages are sent gzipped.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -70,5 +71,21 @@ public class ResultPageParamsIT {
         HttpResponse<String> rerun = postForm(location + "/rerun", edits);
         assertThat(rerun.statusCode()).as(rerun.body()).isEqualTo(303);
         assertThat(rerun.headers().firstValue("Location").orElseThrow()).endsWith(location + "?rerun=" + NAMES + ",0");
+    }
+
+    @Test
+    public void resultPageAndTableAreGzipped() throws Exception {
+        HttpResponse<String> created = postForm("/goslin/validate", "lipidNames=" + encode("PC 32:0\nCer(d18:1/18:0)\nTG 52:2"));
+        String location = created.headers().firstValue("Location").orElseThrow();
+        for (String path : new String[]{location, location.replace("/result/", "/download/") + "/OUTPUT_TSV_FILE",
+            "/goslin/js/goslin.js", "/goslin/css/goslin.css"}) {
+            HttpResponse<byte[]> response = http.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+                    .header("Accept-Encoding", "gzip").GET().build(), HttpResponse.BodyHandlers.ofByteArray());
+            assertThat(response.statusCode()).as(path).isEqualTo(200);
+            assertThat(response.headers().firstValue("Content-Encoding")).as(path).hasValue("gzip");
+            byte[] body = response.body();
+            assertThat(body.length).as(path).isGreaterThan(2);
+            assertThat(new byte[]{body[0], body[1]}).as(path).containsExactly(0x1f, 0x8b);
+        }
     }
 }

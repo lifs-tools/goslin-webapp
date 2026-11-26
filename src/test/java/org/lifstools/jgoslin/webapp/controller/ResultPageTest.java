@@ -354,4 +354,69 @@ public class ResultPageTest {
         assertThat(doc.select("table#results th[data-sort]")).isNotEmpty();
         assertThat(doc.selectFirst(".lifs-callout--ok").text()).contains("All 3 names were harmonized.");
     }
+
+    @Test
+    public void outcomeIsTheFocusTarget() throws Exception {
+        String id = harmonize("Cer(d18:1/18:0)\n\nPC(18:2-20:4");
+        Document doc = html(page("/result/" + id + "?rerun=1,0"));
+        String outcome = doc.selectFirst("main#main").attr("data-outcome");
+        assertThat(outcome).startsWith("1 corrected name was harmonized");
+        assertThat(doc.select("main .lifs-callout").eachText()).anyMatch(t -> t.contains(outcome));
+        assertThat(result(id).selectFirst("main#main").hasAttr("data-outcome")).isFalse();
+    }
+
+    @Test
+    public void nothingToRerunReadsWell() throws Exception {
+        String id = harmonize("Cer(d18:1/18:0)");
+        for (String[] c : new String[][]{{"en", "There was nothing to re-run: all names are harmonized."},
+            {"de", "Es gab nichts erneut zu prüfen: Alle Namen sind harmonisiert."}}) {
+            Document doc = html(page("/result/" + id + "?rerun=0,0&lang=" + c[0]));
+            assertThat(doc.select("main .lifs-callout").text()).contains(c[1])
+                    .doesNotContain("No corrected name").doesNotContain("Kein korrigierter Name");
+        }
+        assertThat(html(page("/result/" + id + "?rerun=0,2")).select(".lifs-callout--info").text())
+                .contains("No corrected name could be harmonized. 2 names still need attention.");
+    }
+
+    @Test
+    public void correctionIsDescribedByItsHintOnly() throws Exception {
+        Document doc = result(harmonize("PC 32:0\nPC(18:2-20:4"));
+        Element input = doc.selectFirst("input[name=edit[2]]");
+        Element hint = doc.getElementById(input.attr("aria-describedby"));
+        assertThat(hint).isNotNull();
+        assertThat(hint.text()).isEqualTo("A closing bracket is missing.");
+        assertThat(hint.select("details")).isEmpty();
+        assertThat(hint.closest("details")).isNull();
+    }
+
+    @Test
+    public void detailsRowKeepsEveryFieldInLeanMarkup() throws Exception {
+        Document doc = result(harmonize("PE(16:2(9Z,12Z)/18:1(6Z))\n13S-HODE-(d4)\nCer(d18:1/18:0)\nSM d35:1 [M+H]1+"));
+        assertThat(doc.selectFirst("tr#detail-1 summary").text()).isEqualTo("Details for line 1");
+        java.util.List<String> labels = doc.select("tr.detail dt").eachText();
+        assertThat(labels).contains("Grammar", "Adduct", "LIPID MAPS category", "LIPID MAPS class", "Level",
+                "C atoms · double bonds", "Functional groups", "Exact mass", "Formula", "LIPID MAPS entries");
+        assertThat(doc.select("tr.detail dd").eachText()).contains("[M+H]1+");
+        assertThat(doc.select("tr#detail-1 table.chains th").eachText())
+                .containsExactly("Chain", "Position", "# C", "# DB", "Bond to head group", "DB positions", "Functional groups");
+        assertThat(doc.select("tr#detail-1 table.chains td").eachText()).contains("sn1", "9Z, 12Z", "Ester");
+        // one element per database reference: a link, no badge, title or arrow text inside
+        Element link = doc.selectFirst("tr.detail .dbs > a");
+        assertThat(link).isNotNull();
+        assertThat(link.children()).isEmpty();
+        assertThat(link.hasAttr("title")).isFalse();
+        assertThat(link.attr("target")).isEqualTo("_blank");
+        assertThat(link.text()).doesNotContain("↗");
+        // the ▸ buttons get their label from the table (goslin.js)
+        assertThat(doc.selectFirst("table#results").attr("data-show")).isEqualTo("Show details for line {0}");
+        assertThat(doc.selectFirst("tr.result-row .xbtn").attr("aria-controls")).isEqualTo("detail-1");
+    }
+
+    @Test
+    public void removeDoesNotChangeThePostedCorrections() {
+        LipidNameValidationController.Corrections corrections = LipidNameValidationController.Corrections.of(
+                new java.util.HashMap<>(java.util.Map.of(2, "PC 32:0", 3, "PC 34:1")));
+        assertThat(corrections.acceptedWithout(3)).containsOnlyKeys(2);
+        assertThat(corrections.accepted()).containsOnlyKeys(2, 3);
+    }
 }

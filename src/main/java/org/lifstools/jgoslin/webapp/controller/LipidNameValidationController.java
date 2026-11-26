@@ -264,9 +264,12 @@ public class LipidNameValidationController {
         ResultView view = resultService.view(resultId(id)).orElseThrow(ResultNotFoundException::new);
         List<PageMessage> messages = baseMessages(locale);
         int[] outcome = parsePair(rerun);
+        String outcomeText = null;
         if (outcome != null) {
-            String text = message("result.rerun.outcome", locale, outcome[0], outcome[1]);
-            messages.add(outcome[0] > 0 ? PageMessage.ok(text) : PageMessage.info(text));
+            outcomeText = outcome[0] == 0 && outcome[1] == 0
+                    ? message("result.rerun.nothing", locale)
+                    : message("result.rerun.outcome", locale, outcome[0], outcome[1]);
+            messages.add(outcome[0] > 0 ? PageMessage.ok(outcomeText) : PageMessage.info(outcomeText));
         }
         int[] skipped = parsePair(tooLong);
         if (skipped != null && skipped[0] > 0) {
@@ -287,6 +290,8 @@ public class LipidNameValidationController {
         model.addObject("categories", categories);
         model.addObject("maxNameLength", NameEntries.MAX_NAME_LENGTH);
         model.addObject("notFound", false);
+        // goslin.js moves the focus to this callout after a re-run, so that screen readers announce it.
+        model.addObject("outcome", outcomeText);
         return model;
     }
 
@@ -311,11 +316,10 @@ public class LipidNameValidationController {
             @ModelAttribute RerunForm rerunForm) {
         UUID uuid = resultId(id);
         Corrections corrections = Corrections.of(rerunForm.getEdit());
-        corrections.accepted().remove(line);
+        Map<Integer, String> edits = corrections.acceptedWithout(line);
         int harmonized = 0;
-        if (!corrections.accepted().isEmpty()) {
-            harmonized = resultService.rerun(uuid, corrections.accepted())
-                    .orElseThrow(ResultNotFoundException::new).harmonized();
+        if (!edits.isEmpty()) {
+            harmonized = resultService.rerun(uuid, edits).orElseThrow(ResultNotFoundException::new).harmonized();
         }
         ResultView view = resultService.remove(uuid, line).orElseThrow(ResultNotFoundException::new);
         log.info("Removed line {} from result {}.", line, uuid);
@@ -348,6 +352,18 @@ public class LipidNameValidationController {
      * {@link NameEntries#MAX_NAME_LENGTH} after normalising, which are neither saved nor parsed.
      */
     record Corrections(Map<Integer, String> accepted, List<Integer> tooLong) {
+
+        Corrections {
+            accepted = Map.copyOf(accepted);
+            tooLong = List.copyOf(tooLong);
+        }
+
+        /** The accepted corrections without the one for the given line. */
+        Map<Integer, String> acceptedWithout(int line) {
+            Map<Integer, String> edits = new HashMap<>(accepted);
+            edits.remove(line);
+            return edits;
+        }
 
         static Corrections of(Map<Integer, String> edits) {
             Map<Integer, String> accepted = new HashMap<>();

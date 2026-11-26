@@ -2,7 +2,8 @@
  * Goslin pages, plain JavaScript without libraries. Each part runs only when its elements exist.
  * - Input page: load the example names, clear, count the names, read a file into the text area
  *   (file chooser or drag and drop onto .goslin-names).
- * - Result page: filter, sort and page the rendered table rows, and open their details rows.
+ * - Result page: filter, sort and page the rendered table rows, open their details rows, and focus the
+ *   outcome of a re-run.
  *   Rows are rendered on the server; this only shows, hides and reorders them.
  * - Logo: a random blink offset per page load, and a honk on click.
  */
@@ -164,12 +165,14 @@
       if (details) {
         details.open = true;
       }
+      var line = row.tr.dataset.line;
       row.detail.hidden = true;
       button.hidden = false;
+      button.setAttribute('aria-label', format(table.dataset.show, line));
       button.addEventListener('click', function () {
         row.expanded = !row.expanded;
         button.setAttribute('aria-expanded', String(row.expanded));
-        button.setAttribute('aria-label', row.expanded ? button.dataset.hide : button.dataset.show);
+        button.setAttribute('aria-label', format(row.expanded ? table.dataset.hide : table.dataset.show, line));
         button.textContent = row.expanded ? '\u25BE' : '\u25B8';
         row.detail.hidden = !row.expanded;
       });
@@ -192,7 +195,9 @@
     var sortDir = 1;
     var value = function (row, col, numeric) {
       var cell = row.tr.cells[col];
-      var v = cell ? (cell.hasAttribute('data-value') ? cell.getAttribute('data-value') : cell.textContent.trim()) : '';
+      // data-value if set, otherwise the cell's first element (the name, not the struck-through original), or its text
+      var v = !cell ? '' : cell.hasAttribute('data-value') ? cell.getAttribute('data-value')
+          : (cell.firstElementChild || cell).textContent.trim();
       return numeric ? parseFloat(v) : v;
     };
     var sortRows = function () {
@@ -325,6 +330,20 @@
     }
     // The browser may restore filter values after "back"; apply them.
     render();
+  }
+
+  // ---------- result page: announce the outcome of a re-run ----------
+  // After the redirect the page reloads; moving the focus to the outcome makes screen readers read it.
+  var main = document.getElementById('main');
+  if (main && main.dataset.outcome) {
+    Array.prototype.some.call(main.querySelectorAll('.lifs-callout'), function (callout) {
+      if (callout.textContent.indexOf(main.dataset.outcome) < 0) {
+        return false;
+      }
+      callout.setAttribute('tabindex', '-1');
+      callout.focus();
+      return true;
+    });
   }
 
   // ---------- logo: blink offset and honk ----------
