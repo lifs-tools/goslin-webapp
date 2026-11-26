@@ -60,7 +60,8 @@ public class Page extends DefaultPage {
     }
 
     public Page(String title, String appVersion, String gaId, String description, String author, String buildDate, String scmCommitId, String scmBranch, String scmUrl, String supportUrl, String toolTitle, String toolDescription, String toolAuthor, String toolLicense, String toolLicenseUrl, String toolVersionNumber, String toolUrl, String toolContact, String authServerBaseUrl, String authServerRealm, String maxFileSize) {
-        super(title, appVersion, gaId, description, author, buildDate, scmCommitId, scmBranch, scmUrl, supportUrl, toolTitle, toolDescription, toolAuthor, toolLicense, toolLicenseUrl, toolVersionNumber, toolUrl, toolContact, authServerBaseUrl, authServerRealm);
+        super(title, appVersion, gaId, description, author, buildDate, scmCommitId, scmBranch, scmUrl, supportUrl, toolTitle, toolDescription, toolAuthor, toolLicense, toolLicenseUrl, toolVersionNumber, toolUrl, toolContact, authServerBaseUrl, authServerRealm,
+                null); // faviconUrl: null keeps the default LIFS favicon
         this.maxFileSize = maxFileSize;
     }
 
