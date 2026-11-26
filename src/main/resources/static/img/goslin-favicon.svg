@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Goslin favicon: the head and neck of the Goslin logo (goslin-logo.svg, same colours and geometry, in the
+     logo's inner coordinates), cropped to a square. The eye is drawn larger (r 2.2 instead of 0.96) so that
+     it stays visible at 16 x 16 px. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="24.5 6.8 46 46" width="32" height="32">
+  <path fill="#0c6d00" d="m 47.438,12.254 v 15.668 h -22.2"/>
+  <path fill="#0c6d00" d="M 40.902,47.398 H 25.238 V 27.922"/>
+  <path fill="#20bf00" d="M 25.234,27.922 H 40.902 V 47.398"/>
+  <path fill="#20bf00" d="M 47.438,12.254 V 27.922 H 69.715"/>
+  <circle cx="51.188" cy="21.045" r="2.2" fill="#000"/>
+</svg>

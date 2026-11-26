@@ -32,7 +32,7 @@
                     <div class="lifs-row">
                         <a id="load-example" class="lifs-btn lifs-btn--outlined lifs-btn--small" th:href="@{/?example}" href="/?example" th:text="#{index.example}">Load example names</a>
                         <form id="upload-fallback" class="goslin-upload" method="post" enctype="multipart/form-data" th:action="@{/validatefile}" action="/validatefile">
-                            <input type="file" id="file" name="file" class="visually-hidden" accept=".txt,.csv,.tsv,text/plain" th:data-max-bytes="${maxFileBytes}"/>
+                            <input type="file" id="file" name="file" class="visually-hidden" accept=".txt,.csv,.tsv,text/plain" th:data-max-bytes="${maxTextBytes}"/>
                             <label for="file" class="lifs-btn lifs-btn--text lifs-btn--small" th:text="#{index.upload}">Upload a file…</label>
                             <noscript><button type="submit" class="lifs-btn lifs-btn--outlined lifs-btn--small" th:text="#{index.upload.submit}">Harmonize the file</button></noscript>
                         </form>
@@ -61,9 +61,9 @@
                             <textarea id="lipids" th:field="*{lipidNames}" rows="16" spellcheck="false" autocomplete="off" required
                                       aria-describedby="lipids-help" th:placeholder="#{index.names.placeholder}"></textarea>
                         </div>
-                        <p class="lifs-note" id="lipids-help" th:utext="#{index.names.help(${page.maxFileSize})}">Type or paste names, one per line, …</p>
+                        <p class="lifs-note" id="lipids-help" th:utext="#{index.names.help(${maxTextSize})}">Type or paste names, one per line, …</p>
                         <p id="file-error" class="lifs-callout lifs-callout--error" role="alert" hidden
-                           th:data-too-large="#{index.file.tooLarge(${page.maxFileSize})}" th:data-not-text="#{index.file.notText}"
+                           th:data-too-large="#{index.file.tooLarge(${maxTextSize})}" th:data-not-text="#{index.file.notText}"
                            th:data-unreadable="#{index.file.unreadable}"></p>
 
                         <label class="check">

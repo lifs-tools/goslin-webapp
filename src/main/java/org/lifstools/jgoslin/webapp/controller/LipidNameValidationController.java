@@ -91,7 +91,8 @@ public class LipidNameValidationController {
     private final int exampleCount;
     private final NewsPropertyConfig newsPropertyConfig;
     private final int maxItemsInRequest;
-    private final long maxFileBytes;
+    /** Largest text accepted, pasted or read from a file: the upload limit, or less if no valid list can be longer. */
+    private final long maxTextBytes;
 
     @Autowired
     public LipidNameValidationController(ResultService resultService, StorageService storageService,
@@ -109,7 +110,8 @@ public class LipidNameValidationController {
         this.exampleCount = NameEntries.countNames(exampleNames);
         this.newsPropertyConfig = newsPropertyConfig;
         this.maxItemsInRequest = maxItemsInRequest;
-        this.maxFileBytes = maxFileSize.toBytes();
+        this.maxTextBytes = Math.min(maxFileSize.toBytes(),
+                (long) maxItemsInRequest * (NameEntries.MAX_NAME_LENGTH + 2));
     }
 
     /** The input page; {@code ?example} fills the text area with the example names, {@code ?lang=de} switches the language. */
@@ -143,7 +145,7 @@ public class LipidNameValidationController {
 
     private ModelAndView harmonize(HarmonizeForm form, Locale locale) {
         String text = form.getLipidNames();
-        if (text != null && text.length() > maxFileBytes) {
+        if (text != null && text.length() > maxTextBytes) {
             return tooLong(form, locale);
         }
         List<NameEntry> entries;
@@ -177,7 +179,7 @@ public class LipidNameValidationController {
     private ModelAndView tooLong(HarmonizeForm form, Locale locale) {
         HarmonizeForm empty = new HarmonizeForm("", form.isSkipInvalid());
         return inputPage(empty, 0, List.of(PageMessage.error(
-                message("index.error.tooLong", locale, appInfo.getMaxFileSize()))), List.of(), locale);
+                message("index.error.tooLong", locale, formatSize(maxTextBytes, locale)))), List.of(), locale);
     }
 
     private ModelAndView inputPage(HarmonizeForm form, int nameCount, List<PageMessage> pageMessages,
@@ -194,10 +196,22 @@ public class LipidNameValidationController {
         model.addObject("failures", failures);
         model.addObject("nameCount", nameCount);
         model.addObject("maxNames", maxItemsInRequest);
-        model.addObject("maxFileBytes", maxFileBytes);
+        model.addObject("maxTextBytes", maxTextBytes);
+        model.addObject("maxTextSize", formatSize(maxTextBytes, locale));
         model.addObject("exampleNames", exampleNames);
         model.addObject("appInfo", appInfo);
         return model;
+    }
+
+    /** Binary units, as Spring's DataSize reads spring.servlet.multipart.max-file-size: 512 KB, 1.4 MB, 604 B. */
+    static String formatSize(long bytes, Locale locale) {
+        if (bytes >= 1024L * 1024L) {
+            return String.format(locale, "%.1f MB", bytes / (1024.0 * 1024.0));
+        }
+        if (bytes >= 1024L) {
+            return (bytes / 1024L) + " KB";
+        }
+        return bytes + " B";
     }
 
     private String message(String key, Locale locale, Object... args) {

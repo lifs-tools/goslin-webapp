@@ -23,8 +23,11 @@ import java.util.List;
  */
 public final class NameEntries {
 
-    /** Longest name accepted, after normalising; longer lines are never parsed or stored. */
-    public static final int MAX_LINE_LENGTH = 1000;
+    /**
+     * Longest name accepted, after normalising; longer lines are never parsed or stored. The longest real name in
+     * Goslin's test data has 257 characters, and parse time grows steeply with length for some inputs.
+     */
+    public static final int MAX_NAME_LENGTH = 300;
 
     private NameEntries() {
     }
@@ -50,7 +53,7 @@ public final class NameEntries {
      * @return the entries, empty for null or blank text
      * @throws TooManyNamesException if there are more than maxNames non-blank lines
      * @throws LineTooLongException if one of the first maxNames names is longer
-     * than {@link #MAX_LINE_LENGTH} characters after normalising
+     * than {@link #MAX_NAME_LENGTH} characters after normalising
      */
     public static List<NameEntry> fromText(String text, int maxNames) {
         if (text == null) {
@@ -71,8 +74,8 @@ public final class NameEntries {
                 continue;
             }
             count++;
-            if (name.length() > MAX_LINE_LENGTH) {
-                throw new LineTooLongException(i + 1, MAX_LINE_LENGTH);
+            if (name.length() > MAX_NAME_LENGTH) {
+                throw new LineTooLongException(i + 1, MAX_NAME_LENGTH);
             }
             entries.add(NameEntry.of(i + 1, name));
         }

@@ -15,13 +15,19 @@
  */
 package org.lifstools.jgoslin.webapp.controller;
 
+import java.nio.charset.StandardCharsets;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -41,6 +47,19 @@ public class BaselinePagesTest {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"));
+    }
+
+    @Test
+    public void homeLinksTheGoslinFavicon() throws Exception {
+        String html = mockMvc.perform(get("/")).andExpect(status().isOk()).andReturn()
+                .getResponse().getContentAsString(StandardCharsets.UTF_8);
+        Element icon = Jsoup.parse(html).selectFirst("link[rel=icon][type=image/svg+xml]");
+        assertThat(icon).isNotNull();
+        assertThat(icon.attr("href")).endsWith("/img/goslin-favicon.svg");
+        mockMvc.perform(get("/img/goslin-favicon.svg")).andExpect(status().isOk());
+        mockMvc.perform(get("/img/favicon.png"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.IMAGE_PNG));
     }
 
     @Test

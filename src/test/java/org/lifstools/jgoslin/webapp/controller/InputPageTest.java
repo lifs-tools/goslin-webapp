@@ -146,25 +146,27 @@ public class InputPageTest {
 
     @Test
     public void tooLongTextIsNotEchoed() throws Exception {
-        String text = "PC 32:0\n".repeat(300); // 2,400 characters, over the 2KB limit
+        // The text cap is min(2KB, 2 names x 302) = 604 bytes.
+        String text = "PC 32:0\n".repeat(100);
         Document doc = html(mockMvc.perform(post("/validate").param("lipidNames", text))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andReturn());
         assertThat(doc.select(".lifs-callout--error").text())
-                .contains("The text is larger than 2KB. Please submit fewer names at once.");
+                .contains("The text is larger than 604 B. Please submit fewer names at once.");
+        assertThat(doc.selectFirst("input#file").attr("data-max-bytes")).isEqualTo("604");
         assertThat(textArea(doc)).isEmpty();
     }
 
     @Test
     public void tooLongLineIsNamed() throws Exception {
-        String text = "PC 32:0\n" + "C".repeat(1001);
+        String text = "PC 32:0\n" + "C".repeat(301);
         Document doc = html(mockMvc.perform(post("/validate").param("lipidNames", text))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andReturn());
         assertThat(doc.select(".lifs-callout--error").text())
-                .contains("Line 2 is longer than 1,000 characters and cannot be a lipid name.");
+                .contains("Line 2 is longer than 300 characters and cannot be a lipid name.");
         assertThat(textArea(doc)).isEqualTo(text);
         assertThat(doc.selectFirst("#lipid-count").text()).startsWith("2 names");
     }
