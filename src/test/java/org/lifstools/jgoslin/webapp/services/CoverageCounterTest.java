@@ -48,12 +48,8 @@ class CoverageCounterTest {
     void classifiesHeadGroupWithBracket() {
         OptionalInt bracket = CoverageCounter.classOf("PE-N(FA 16:0) 34:1");
         assertThat(bracket).isPresent();
-        int plain = Headgroup.getClass("PE-N");
-        if (plain != LipidClasses.UNDEFINED_CLASS) {
-            assertThat(bracket.getAsInt()).isEqualTo(plain);
-        } else {
-            assertThat(meta(bracket.getAsInt()).lipidCategory).isEqualTo(LipidCategory.GP);
-        }
+        assertThat(bracket.getAsInt()).isEqualTo(Headgroup.getClass("PE-N"));
+        assertThat(CoverageCounter.classOf("PE-N 34:1")).hasValue(Headgroup.getClass("PE-N"));
     }
 
     @Test
