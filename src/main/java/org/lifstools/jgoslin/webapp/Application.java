@@ -16,6 +16,7 @@
 package org.lifstools.jgoslin.webapp;
 
 import org.lifstools.jgoslin.webapp.config.NewsPropertyConfig;
+import org.lifstools.jgoslin.webapp.config.DatabaseProperties;
 import org.lifstools.jgoslin.webapp.config.ParserProperties;
 import org.lifstools.lifs.webapps.common.service.storage.StorageProperties;
 import org.springframework.boot.ExitCodeGenerator;
@@ -31,7 +32,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication
 @EnableConfigurationProperties(value = {StorageProperties.class,
-    NewsPropertyConfig.class, ParserProperties.class})
+    NewsPropertyConfig.class, ParserProperties.class, DatabaseProperties.class})
 @EnableScheduling
 @ComponentScan(basePackages = {"org.lifstools.lifs.webapps", "org.lifstools.jgoslin"})
 public class Application {

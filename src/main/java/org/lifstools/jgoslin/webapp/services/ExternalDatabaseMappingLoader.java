@@ -27,6 +27,7 @@ import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.lifstools.jgoslin.domain.LipidAdduct;
 import org.lifstools.jgoslin.parser.GoslinParser;
+import org.lifstools.jgoslin.webapp.domain.DatabaseCoverage;
 import org.lifstools.jgoslin.webapp.domain.ExternalChebiDatabaseReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,15 +50,21 @@ public class ExternalDatabaseMappingLoader {
     private final MultiValuedMap<String, ExternalDatabaseReference> swissLipidsReferences;
     private final MultiValuedMap<String, ExternalDatabaseReference> chebiReferences;
 
+    private final List<DatabaseCoverage> coverage;
+
     public ExternalDatabaseMappingLoader() {
         this.lipidMapsReferences = new ArrayListValuedHashMap<>();
         this.swissLipidsReferences = new ArrayListValuedHashMap<>();
         this.chebiReferences = new ArrayListValuedHashMap<>();
+        CoverageCounter lipidMapsCounter = new CoverageCounter(DatabaseCoverage.Database.LIPID_MAPS);
+        CoverageCounter swissLipidsCounter = new CoverageCounter(DatabaseCoverage.Database.SWISS_LIPIDS);
+        CoverageCounter chebiCounter = new CoverageCounter(DatabaseCoverage.Database.CHEBI);
         int lipidMapsEntries = 0;
         for (ExternalDatabaseReference edr : loadObjectList(ExternalDatabaseReference.class, "lipidmaps-normalized.tsv", '\t')) {
             this.lipidMapsReferences.put(edr.getNormalizedName(), edr);
 //            this.lipidMapsReferences.put(edr.getNativeAbbreviation(), edr);
 //            this.lipidMapsReferences.put(edr.getNativeName(), edr);
+            lipidMapsCounter.countName(edr.getNormalizedName());
             lipidMapsEntries++;
         }
         log.info("Loaded {} records for Lipid MAPS!", lipidMapsEntries);
@@ -66,6 +73,7 @@ public class ExternalDatabaseMappingLoader {
             this.swissLipidsReferences.put(edr.getNormalizedName(), edr);
 //            this.swissLipidsReferences.put(edr.getNativeAbbreviation(), edr);
 //            this.swissLipidsReferences.put(edr.getNativeName(), edr);
+            swissLipidsCounter.countName(edr.getNormalizedName());
             swissLipidsEntries++;
         }
 
@@ -76,6 +84,7 @@ public class ExternalDatabaseMappingLoader {
         GoslinParser parser = new GoslinParser();
         for (ExternalChebiDatabaseReference ecdr : loadObjectList(ExternalChebiDatabaseReference.class, "names-chebi-Jan-18-2024.tsv", '\t')) {
             totalChebiEntries++;
+            boolean read = false;
             if ("SYNONYM".equals(ecdr.getType())) {
                 switch(ecdr.getSource()) {
                     case "ChEBI":
@@ -98,12 +107,25 @@ public class ExternalDatabaseMappingLoader {
                             log.debug("Adding external database reference: {}", edr);
                             this.chebiReferences.put(edr.getNormalizedName(), edr);
                             chebiEntries++;
+                            chebiCounter.countParsed(lipidAdduct);
+                            read = true;
                         }
                         break;
                 }
             }
+            if (!read) {
+                chebiCounter.countUnparsed();
+            }
         }
         log.info("Loaded {}/{} records for ChEBI!", chebiEntries, totalChebiEntries);
+        this.coverage = List.of(lipidMapsCounter.build(), swissLipidsCounter.build(), chebiCounter.build());
+    }
+
+    /**
+     * Coverage statistics in the order LIPID MAPS, SwissLipids, ChEBI.
+     */
+    public List<DatabaseCoverage> getCoverage() {
+        return coverage;
     }
 
     public Optional<Collection<ExternalDatabaseReference>> findSwissLipidsEntry(String... names) {
