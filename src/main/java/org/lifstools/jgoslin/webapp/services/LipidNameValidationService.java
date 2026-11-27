@@ -545,6 +545,7 @@ public class LipidNameValidationService implements AutoCloseable {
         int stop = 0;
         Attempt last = null;
         Grammar lastGrammar = null;
+        String lastPosition = null;
         for (Grammar grammar : grammars) {
             if (Thread.currentThread().isInterrupted() || (deadline != Long.MAX_VALUE && System.nanoTime() - deadline >= 0)) {
                 return null;
@@ -554,6 +555,9 @@ public class LipidNameValidationService implements AutoCloseable {
             lastGrammar = grammar;
             stop = Math.max(stop, ParseStopLocator.stopOf(name, last.errorMessage()));
             String error = last.errorMessage();
+            if (error != null && !error.isEmpty()) {
+                lastPosition = error;
+            }
             if (last.adduct() != null && (anyGrammar || error == null || error.isEmpty())) {
                 return new ParsedName(createValidationResult(last.adduct(), name, grammar, ""), Outcome.PARSED, 0);
             }
@@ -563,8 +567,9 @@ public class LipidNameValidationService implements AutoCloseable {
         result.setLipidName(name);
         String error = last == null ? null : last.errorMessage();
         if (anyGrammar) {
-            // jgoslin's LipidParser: the message of its LipidParsingException, from the last parser's handler
-            String at = error == null || error.isEmpty() ? name : error;
+            // jgoslin's LipidParser: the message of its LipidParsingException, with the position from the last
+            // grammar that reported one
+            String at = lastPosition == null ? name : lastPosition;
             String message = "Could not parse lipid '" + name + "' with any parser!" + " Parsing failed " + "at or after " + at;
             result.setGrammar(Grammar.NONE);
             result.setMessages(Arrays.asList("Could not parse " + name + " with any parser. Original message:" + message));
