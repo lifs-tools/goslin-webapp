@@ -73,7 +73,7 @@
         <!-- springdoc-openapi 3.x is the line for Spring Boot 4 -->
         <springdoc.version>3.2.1</springdoc.version>
         <lifs.webapps.common.version>2.0.2</lifs.webapps.common.version>
-        <jgoslin.version>2.2.1</jgoslin.version>
+        <jgoslin.version>2.3.0</jgoslin.version>
         <jacoco.version>0.8.16</jacoco.version>
         <jsoup.version>1.21.2</jsoup.version>
         <assembly.dir>${project.artifactId}</assembly.dir>
