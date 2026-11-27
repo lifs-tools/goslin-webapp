@@ -24,7 +24,7 @@ import org.lifstools.jgoslin.domain.LipidCategory;
  * @param database the database
  * @param entriesLoaded number of entries loaded: rows for LIPID MAPS and SwissLipids, compounds for ChEBI
  * @param namesRead entries with a lipid name that could be read (not undefined, not "NA", not unparsable)
- * @param byCategory read names per lipid category; only counts above zero, plus {@link LipidCategory#UNDEFINED}
+ * @param byCategory read entries per lipid category (for ChEBI: compounds); only counts above zero, plus {@link LipidCategory#UNDEFINED}
  * for read names without a known class
  * @param byClass read names per lipid class, keyed by the class name
  */

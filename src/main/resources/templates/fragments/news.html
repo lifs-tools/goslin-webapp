@@ -56,7 +56,7 @@
             <p class="doc-caption" id="db-note">* The LIPID MAPS file holds only the entries submitted to normalization; the total size of the March 2023 release was not recorded. Names were normalized when the dumps were made, with an earlier Goslin version; see <a href="https://github.com/lifs-tools/goslin-webapp/issues/129" target="_blank" rel="noopener">issue #129</a>.</p>
 
             <figure class="coverage" aria-labelledby="coverage-caption">
-                <figcaption id="coverage-caption" class="coverage__title">Share of the names Goslin reads, by lipid category</figcaption>
+                <figcaption id="coverage-caption" class="coverage__title">Share of the entries Goslin reads, by lipid category</figcaption>
                 <ul class="coverage__legend" aria-hidden="true">
                     <li th:each="cat : ${coverageCategories}" th:if="${cat.present()}"><span class="coverage__swatch" th:attr="data-category=${cat.code()}"></span><span th:text="${cat.label()}">x</span></li>
                 </ul>

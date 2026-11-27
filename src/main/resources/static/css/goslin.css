@@ -215,4 +215,4 @@ th[aria-sort=descending] .sort-btn::after { content: '\25BC'; opacity: 1; font-s
 @media (max-width: 520px) {
     .coverage__row { grid-template-columns: 1fr; gap: 4px; }
 }
-.lifs-table th.db-num { text-align: right; }
+.lifs-table th.db-num { text-align: right; white-space: normal; }
