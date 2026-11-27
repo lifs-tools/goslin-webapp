@@ -49,6 +49,12 @@
                     </div>
                 </div>
 
+                <!-- Matches are candidates, not identifications: say so where the matches are shown -->
+                <div th:if="${nHarmonized > 0}" id="database-caution" class="lifs-callout lifs-callout--info" role="note">
+                    <b th:text="#{result.databases.title}">Database matches are candidates, not identifications.</b>
+                    <span class="lifs-prose" th:utext="#{result.databases.body(@{/documentation#databases})}">Goslin lists LIPID MAPS, SwissLipids and ChEBI entries.</span>
+                </div>
+
                 <!-- Names that could not be read come first (mock note A) -->
                 <form th:if="${nFailed > 0}" id="rerun-form" method="post" th:action="@{/result/{id}/rerun(id=${result.id()})}" action="#">
                     <section id="fix" class="lifs-card fix" aria-labelledby="fix-title">
