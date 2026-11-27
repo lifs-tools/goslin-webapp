@@ -144,7 +144,7 @@ public class DocumentationPageTest {
         Document doc = documentation();
         Element table = doc.selectFirst("table.db-categories");
         assertThat(table).isNotNull();
-        assertThat(doc.getElementById("db-categories-title").text()).isEqualTo("Entries per lipid category");
+        assertThat(doc.getElementById("db-categories-title").text()).isEqualTo("Entries Goslin reads, per lipid category");
         for (String label : new String[]{"Fatty acyls (FA)", "Glycerolipids (GL)", "Glycerophospholipids (GP)", "Sphingolipids (SP)", "Sterol lipids (ST)", "Not classified"}) {
             assertThat(table.select("tbody tr th").eachText()).contains(label);
         }
@@ -152,6 +152,37 @@ public class DocumentationPageTest {
         String swiss = fa.child(2).text();
         assertThat(swiss).isNotBlank().doesNotStartWith("0 ");
         assertThat(swiss).isNotEqualTo("0");
+    }
+
+    @Test
+    public void tinySharesAreNotShownAsZero() throws Exception {
+        Element fa = documentation().selectFirst("table.db-categories").select("tbody tr").stream()
+                .filter(r -> r.child(0).text().equals("Fatty acyls (FA)")).findFirst().orElseThrow();
+        assertThat(fa.child(2).text()).contains("<0.1 %").doesNotContain("0.0 %");
+    }
+
+    @Test
+    public void sharesUseAPointInEveryLocale() throws Exception {
+        Document doc = html(mockMvc.perform(get("/documentation").param("lang", "de")).andExpect(status().isOk()).andReturn());
+        Element fa = doc.selectFirst("table.db-categories").select("tbody tr").stream()
+                .filter(r -> r.child(0).text().equals("Fatty acyls (FA)")).findFirst().orElseThrow();
+        assertThat(fa.child(1).text()).containsPattern("\\d,\\d{3} \\(\\d+\\.\\d %\\)").doesNotContain("0.0 %");
+    }
+
+    @Test
+    public void introAndFootnoteWording() throws Exception {
+        Element section = documentation().getElementById("databases");
+        assertThat(section.text()).contains("three external databases").doesNotContain("external lipid databases")
+                .contains("Entries with a name Goslin reads", "submitted to normalization", "with an earlier Goslin version");
+    }
+
+    @Test
+    public void legendListsOnlyCategoriesInABar() throws Exception {
+        Document doc = documentation();
+        java.util.Set<String> inBars = new java.util.HashSet<>(doc.select(".coverage-bar [data-category]").eachAttr("data-category"));
+        assertThat(doc.select(".coverage__legend .coverage__swatch").eachAttr("data-category")).containsExactlyInAnyOrderElementsOf(inBars);
+        assertThat(inBars).doesNotContain("PK", "SL");
+        assertThat(doc.select("table.db-categories tbody tr th").eachText()).contains("Polyketides (PK)", "Saccharolipids (SL)");
     }
 
     @Test

@@ -22,7 +22,7 @@
         <section th:fragment="databases" id="databases" class="doc-section" aria-labelledby="databases-title">
             <h2 id="databases-title">Databases Goslin matches against</h2>
             <div class="lifs-prose">
-                <p>The result page links the names you submit to three external lipid databases. They differ in what they contain, so the same lipid can be found in one and missing from another.</p>
+                <p>The result page links the names you submit to three external databases. They differ in what they contain, so the same lipid can be found in one and missing from another.</p>
             </div>
             <div class="lifs-table-wrap">
                 <table class="lifs-table db-overview">
@@ -33,7 +33,7 @@
                             <th scope="col">What it contains</th>
                             <th scope="col">Version</th>
                             <th scope="col" class="db-num">Entries loaded</th>
-                            <th scope="col" class="db-num">Names Goslin reads</th>
+                            <th scope="col" class="db-num">Entries with a name Goslin reads</th>
                             <th scope="col" class="db-num">Assigned to a lipid class</th>
                         </tr>
                     </thead>
@@ -53,12 +53,12 @@
                     </tbody>
                 </table>
             </div>
-            <p class="doc-caption" id="db-note">* The LIPID MAPS file holds only the entries that were normalized; the total size of the March 2023 release was not recorded. See <a href="https://github.com/lifs-tools/goslin-webapp/issues/129" target="_blank" rel="noopener">issue #129</a>.</p>
+            <p class="doc-caption" id="db-note">* The LIPID MAPS file holds only the entries submitted to normalization; the total size of the March 2023 release was not recorded. Names were normalized when the dumps were made, with an earlier Goslin version; see <a href="https://github.com/lifs-tools/goslin-webapp/issues/129" target="_blank" rel="noopener">issue #129</a>.</p>
 
             <figure class="coverage" aria-labelledby="coverage-caption">
                 <figcaption id="coverage-caption" class="coverage__title">Share of the names Goslin reads, by lipid category</figcaption>
                 <ul class="coverage__legend" aria-hidden="true">
-                    <li th:each="cat : ${coverageCategories}"><span class="coverage__swatch" th:attr="data-category=${cat.code()}"></span><span th:text="${cat.label()}">x</span></li>
+                    <li th:each="cat : ${coverageCategories}" th:if="${cat.present()}"><span class="coverage__swatch" th:attr="data-category=${cat.code()}"></span><span th:text="${cat.label()}">x</span></li>
                 </ul>
                 <div class="coverage__row" th:each="db, dbStat : ${databases}">
                     <span class="coverage__name" th:text="${db.database().displayName()}">x</span>
@@ -66,13 +66,13 @@
                         <th:block th:each="cat : ${coverageCategories}" th:with="cell=${cat.cells().get(dbStat.index)}">
                             <span th:if="${cell.count() > 0}" class="coverage-bar__seg" th:attr="data-category=${cat.code()}"
                                   th:style="'flex-grow:' + ${#numbers.formatDecimal(cell.share(), 1, 3, 'POINT')}"
-                                  th:title="${cat.label() + ': ' + #numbers.formatInteger(cell.count(), 1, 'COMMA') + ' (' + #numbers.formatDecimal(cell.share(), 1, 1) + ' %)'}"></span>
+                                  th:title="${cat.label() + ': ' + #numbers.formatInteger(cell.count(), 1, 'COMMA') + ' (' + cell.sharePercent() + ')'}"></span>
                         </th:block>
                     </div>
                 </div>
             </figure>
 
-            <h3 id="db-categories-title">Entries per lipid category</h3>
+            <h3 id="db-categories-title">Entries Goslin reads, per lipid category</h3>
             <div class="lifs-table-wrap">
                 <table class="lifs-table db-categories" aria-labelledby="db-categories-title">
                     <thead>
@@ -86,7 +86,7 @@
                             <th scope="row"><span class="coverage__swatch" aria-hidden="true" th:attr="data-category=${cat.code()}"></span> <span th:text="${cat.label()}">x</span></th>
                             <td class="db-num" th:each="cell : ${cat.cells()}">
                                 <span th:text="${#numbers.formatInteger(cell.count(), 1, 'COMMA')}">0</span>
-                                <span class="db-share" th:text="'(' + ${#numbers.formatDecimal(cell.share(), 1, 1)} + ' %)'">(0 %)</span>
+                                <span class="db-share" th:text="'(' + ${cell.sharePercent()} + ')'">(0 %)</span>
                             </td>
                         </tr>
                     </tbody>

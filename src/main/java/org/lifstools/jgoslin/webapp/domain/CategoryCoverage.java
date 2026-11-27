@@ -17,6 +17,7 @@ package org.lifstools.jgoslin.webapp.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.lifstools.jgoslin.domain.LipidCategory;
 
 /**
@@ -35,6 +36,23 @@ public record CategoryCoverage(String code, String label, List<Cell> cells) {
      */
     public record Cell(long count, double share) {
 
+        /**
+         * The share as text with one decimal and a decimal point in every locale, e.g. "29.4 %"; a non-zero
+         * count whose share rounds to zero reads "&lt;0.1 %" so it is not mistaken for none.
+         */
+        public String sharePercent() {
+            if (count > 0 && share < 0.05) {
+                return "<0.1 %";
+            }
+            return String.format(Locale.ROOT, "%.1f %%", share);
+        }
+    }
+
+    /**
+     * Whether any database has an entry in this category, i.e. whether it appears in a bar.
+     */
+    public boolean present() {
+        return cells.stream().anyMatch(cell -> cell.count() > 0);
     }
 
     private record Def(String code, String label, LipidCategory... categories) {

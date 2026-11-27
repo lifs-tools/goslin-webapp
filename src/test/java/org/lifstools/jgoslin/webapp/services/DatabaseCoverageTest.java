@@ -44,9 +44,11 @@ class DatabaseCoverageTest {
         assertThat(lipidMaps.namesRead()).isEqualTo(26_832);
         assertThat(swissLipids.entriesLoaded()).isEqualTo(777_956);
         assertThat(swissLipids.namesRead()).isEqualTo(766_511);
-        assertThat(chebi.entriesLoaded()).isEqualTo(381_571);
-        // depends on the jgoslin build
-        assertThat(chebi.namesRead()).isBetween(2_000L, 3_000L);
+        assertThat(chebi.entriesLoaded()).isEqualTo(147_453);
+        // compounds with a parsed name; depends on the jgoslin build
+        assertThat(chebi.namesRead()).isBetween(1_500L, 2_500L);
+        assertThat(lipidMaps.countForClass("ST 28:2;O")).isGreaterThan(0);
+        assertThat(lipidMaps.countForClass("ST 27:1;O")).isLessThan(lipidMaps.countForClass("ST 28:2;O") * 100);
         assertThat(lipidMaps.classified() / (double) lipidMaps.namesRead()).isGreaterThan(0.99);
         assertThat(swissLipids.classified() / (double) swissLipids.namesRead()).isGreaterThan(0.99);
     }

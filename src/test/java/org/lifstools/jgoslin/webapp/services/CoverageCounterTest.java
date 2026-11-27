@@ -95,16 +95,50 @@ class CoverageCounterTest {
     }
 
     @Test
-    void chebiCountsParsedAndUnparsed() {
+    void classifiesHeadGroupsWithSpaceInTheirName() {
+        assertThat(Headgroup.getClass("ST 28:2;O")).isNotEqualTo(LipidClasses.UNDEFINED_CLASS);
+        assertThat(CoverageCounter.classOf("ST 28:2;O")).hasValue(Headgroup.getClass("ST 28:2;O"));
+        assertThat(meta(CoverageCounter.classOf("ST 28:2;O").getAsInt()).lipidClassName).isEqualTo("ST 28:2;O");
+        assertThat(CoverageCounter.classOf("ST 27:1;O")).hasValue(Headgroup.getClass("ST 27:1;O"));
+        assertThat(CoverageCounter.classOf("SE 28:2/16:0")).hasValue(Headgroup.getClass("SE 28:2"));
+        assertThat(meta(CoverageCounter.classOf("SE 28:2/16:0").getAsInt()).lipidClassName).isEqualTo("SE 28:2");
+        assertThat(meta(CoverageCounter.classOf("GM1 alpha 36:1;O2").getAsInt()).lipidClassName).isEqualTo("GM1 alpha");
+        assertThat(CoverageCounter.classOf("PC 34:1")).hasValue(Headgroup.getClass("PC"));
+    }
+
+    @Test
+    void chebiCountsCompoundsNotNameRows() {
         GoslinParser parser = new GoslinParser();
         LipidAdduct adduct = parser.parse("PC 16:0/18:1", parser.newEventHandler(), false);
         CoverageCounter counter = new CoverageCounter(Database.CHEBI);
-        counter.countParsed(adduct);
-        counter.countUnparsed();
-        counter.countUnparsed();
+        counter.countChebiName("1", null);
+        counter.countChebiName("1", adduct);
+        counter.countChebiName("1", adduct);
         DatabaseCoverage coverage = counter.build();
-        assertThat(coverage.entriesLoaded()).isEqualTo(3);
+        assertThat(coverage.entriesLoaded()).isEqualTo(1);
         assertThat(coverage.namesRead()).isEqualTo(1);
         assertThat(coverage.byCategory()).isEqualTo(new EnumMap<>(Map.of(LipidCategory.GP, 1L)));
+        assertThat(coverage.byClass()).isEqualTo(Map.of("PC", 1L));
+    }
+
+    @Test
+    void chebiCompoundsWithoutParsedNameAreLoadedNotRead() {
+        CoverageCounter counter = new CoverageCounter(Database.CHEBI);
+        counter.countChebiName("1", null);
+        counter.countChebiName("2", null);
+        counter.countChebiName("2", null);
+        DatabaseCoverage coverage = counter.build();
+        assertThat(coverage.entriesLoaded()).isEqualTo(2);
+        assertThat(coverage.namesRead()).isZero();
+        assertThat(coverage.byCategory()).isEmpty();
+    }
+
+    @Test
+    void chebiClassComesFromTheFirstParsedName() {
+        GoslinParser parser = new GoslinParser();
+        CoverageCounter counter = new CoverageCounter(Database.CHEBI);
+        counter.countChebiName("1", parser.parse("PC 16:0/18:1", parser.newEventHandler(), false));
+        counter.countChebiName("1", parser.parse("PE 16:0/18:1", parser.newEventHandler(), false));
+        assertThat(counter.build().byClass()).isEqualTo(Map.of("PC", 1L));
     }
 }

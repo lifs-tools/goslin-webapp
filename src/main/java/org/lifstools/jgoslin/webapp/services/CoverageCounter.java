@@ -17,8 +17,10 @@ package org.lifstools.jgoslin.webapp.services;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.TreeMap;
 import org.lifstools.jgoslin.domain.Headgroup;
 import org.lifstools.jgoslin.domain.LipidAdduct;
@@ -36,6 +38,8 @@ final class CoverageCounter {
     private final DatabaseCoverage.Database database;
     private final Map<LipidCategory, Long> byCategory = new EnumMap<>(LipidCategory.class);
     private final Map<String, Long> byClass = new TreeMap<>();
+    private final Set<String> loadedCompounds = new HashSet<>();
+    private final Set<String> readCompounds = new HashSet<>();
     private long entriesLoaded;
     private long namesRead;
 
@@ -63,47 +67,66 @@ final class CoverageCounter {
     }
 
     /**
-     * A ChEBI row that was not read.
+     * A ChEBI name row. ChEBI is counted per compound: the compound is loaded once however many names it has, and
+     * read when at least one of its names was parsed; the category and class come from the first parsed name.
+     *
+     * @param compoundId the ChEBI compound id of the row
+     * @param adduct the parsed name, null when Goslin could not read it
      */
-    void countUnparsed() {
-        entriesLoaded++;
-    }
-
-    /**
-     * A ChEBI row that was read.
-     */
-    void countParsed(LipidAdduct adduct) {
-        entriesLoaded++;
+    void countChebiName(String compoundId, LipidAdduct adduct) {
+        loadedCompounds.add(compoundId);
+        if (adduct == null || !readCompounds.add(compoundId)) {
+            return;
+        }
         namesRead++;
         Headgroup headGroup = adduct.getLipid().getHeadGroup();
         int classIndex = headGroup.getLipidClass();
         LipidCategory category = headGroup.getLipidCategory();
-        if (classIndex != LipidClasses.UNDEFINED_CLASS) {
+        boolean classified = classIndex != LipidClasses.UNDEFINED_CLASS && category != null
+                && category != LipidCategory.UNDEFINED && category != LipidCategory.NO_CATEGORY;
+        if (classified) {
             increment(category, LipidClasses.getInstance().get(classIndex).lipidClassName);
         } else {
-            increment(category == null ? LipidCategory.UNDEFINED : category, null);
+            increment(LipidCategory.UNDEFINED, null);
         }
     }
 
     DatabaseCoverage build() {
-        return new DatabaseCoverage(database, entriesLoaded, namesRead,
+        return new DatabaseCoverage(database, database == DatabaseCoverage.Database.CHEBI ? loadedCompounds.size() : entriesLoaded, namesRead,
                 Collections.unmodifiableMap(new EnumMap<>(byCategory)),
                 Collections.unmodifiableMap(new TreeMap<>(byClass)));
     }
 
     /**
-     * The class of the head group at the start of the name, without parsing: the token before the first space,
-     * or, when that is unknown and has a bracket, the part before the bracket.
+     * The class of the head group at the start of the name, without parsing. Some class names contain a space
+     * (e.g. {@code ST 28:2;O}), so the longest known prefix wins: the whole name, the name cut at the first
+     * {@code /} or {@code _}, the first two space separated tokens, the first token and, when that is unknown
+     * and has a bracket, the part before the bracket.
      *
      * @return the index into {@link LipidClasses}, empty when the head group is unknown
      */
     static OptionalInt classOf(String normalizedName) {
-        int space = normalizedName.indexOf(' ');
-        String token = space < 0 ? normalizedName : normalizedName.substring(0, space);
-        int classIndex = Headgroup.getClass(token);
-        int bracket = token.indexOf('(');
-        if (classIndex == LipidClasses.UNDEFINED_CLASS && bracket > 0) {
-            classIndex = Headgroup.getClass(token.substring(0, bracket));
+        int classIndex = Headgroup.getClass(normalizedName);
+        if (classIndex == LipidClasses.UNDEFINED_CLASS) {
+            int cut = firstIndexOf(normalizedName, '/', '_');
+            if (cut > 0) {
+                classIndex = Headgroup.getClass(normalizedName.substring(0, cut));
+            }
+        }
+        if (classIndex == LipidClasses.UNDEFINED_CLASS) {
+            int first = normalizedName.indexOf(' ');
+            int second = first < 0 ? -1 : normalizedName.indexOf(' ', first + 1);
+            if (second > 0) {
+                classIndex = Headgroup.getClass(normalizedName.substring(0, second));
+            }
+            String token = first < 0 ? normalizedName : normalizedName.substring(0, first);
+            if (classIndex == LipidClasses.UNDEFINED_CLASS) {
+                classIndex = Headgroup.getClass(token);
+            }
+            int bracket = token.indexOf('(');
+            if (classIndex == LipidClasses.UNDEFINED_CLASS && bracket > 0) {
+                classIndex = Headgroup.getClass(token.substring(0, bracket));
+            }
         }
         if (classIndex == LipidClasses.UNDEFINED_CLASS) {
             return OptionalInt.empty();
@@ -113,6 +136,12 @@ final class CoverageCounter {
             return OptionalInt.empty();
         }
         return OptionalInt.of(classIndex);
+    }
+
+    private static int firstIndexOf(String text, char a, char b) {
+        int ia = text.indexOf(a);
+        int ib = text.indexOf(b);
+        return ia < 0 ? ib : ib < 0 ? ia : Math.min(ia, ib);
     }
 
     private void increment(LipidCategory category, String className) {

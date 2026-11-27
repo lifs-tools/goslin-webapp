@@ -84,7 +84,7 @@ public class ExternalDatabaseMappingLoader {
         GoslinParser parser = new GoslinParser();
         for (ExternalChebiDatabaseReference ecdr : loadObjectList(ExternalChebiDatabaseReference.class, "names-chebi-Jan-18-2024.tsv", '\t')) {
             totalChebiEntries++;
-            boolean read = false;
+            LipidAdduct parsed = null;
             if ("SYNONYM".equals(ecdr.getType())) {
                 switch(ecdr.getSource()) {
                     case "ChEBI":
@@ -107,15 +107,12 @@ public class ExternalDatabaseMappingLoader {
                             log.debug("Adding external database reference: {}", edr);
                             this.chebiReferences.put(edr.getNormalizedName(), edr);
                             chebiEntries++;
-                            chebiCounter.countParsed(lipidAdduct);
-                            read = true;
+                            parsed = lipidAdduct;
                         }
                         break;
                 }
             }
-            if (!read) {
-                chebiCounter.countUnparsed();
-            }
+            chebiCounter.countChebiName(ecdr.getCompoundId(), parsed);
         }
         log.info("Loaded {}/{} records for ChEBI!", chebiEntries, totalChebiEntries);
         this.coverage = List.of(lipidMapsCounter.build(), swissLipidsCounter.build(), chebiCounter.build());

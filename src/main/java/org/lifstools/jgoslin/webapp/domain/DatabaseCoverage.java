@@ -22,8 +22,8 @@ import org.lifstools.jgoslin.domain.LipidCategory;
  * How many entries of an external database were loaded and how many of their names were classified.
  *
  * @param database the database
- * @param entriesLoaded number of rows loaded
- * @param namesRead rows with a lipid name that could be read (not undefined, not "NA", not unparsable)
+ * @param entriesLoaded number of entries loaded: rows for LIPID MAPS and SwissLipids, compounds for ChEBI
+ * @param namesRead entries with a lipid name that could be read (not undefined, not "NA", not unparsable)
  * @param byCategory read names per lipid category; only counts above zero, plus {@link LipidCategory#UNDEFINED}
  * for read names without a known class
  * @param byClass read names per lipid class, keyed by the class name
