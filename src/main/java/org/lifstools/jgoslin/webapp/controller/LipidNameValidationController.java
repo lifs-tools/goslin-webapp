@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,9 +37,12 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.lifstools.jgoslin.domain.LipidCategory;
 import org.lifstools.jgoslin.domain.LipidClasses;
+import org.lifstools.jgoslin.webapp.config.DatabaseProperties;
 import org.lifstools.jgoslin.webapp.config.NewsPropertyConfig;
 import org.lifstools.jgoslin.webapp.config.ParserProperties;
 import org.lifstools.jgoslin.webapp.domain.AppInfo;
+import org.lifstools.jgoslin.webapp.domain.CategoryCoverage;
+import org.lifstools.jgoslin.webapp.domain.DatabaseCoverage;
 import org.lifstools.jgoslin.webapp.domain.GoslinStorageServiceSlots;
 import org.lifstools.jgoslin.webapp.domain.HarmonizeForm;
 import org.lifstools.jgoslin.webapp.domain.LineTooLongException;
@@ -49,6 +53,7 @@ import org.lifstools.jgoslin.webapp.domain.RerunOutcome;
 import org.lifstools.jgoslin.webapp.domain.ResultTableRow;
 import org.lifstools.jgoslin.webapp.domain.ResultView;
 import org.lifstools.jgoslin.webapp.domain.TooManyNamesException;
+import org.lifstools.jgoslin.webapp.services.ExternalDatabaseMappingLoader;
 import org.lifstools.jgoslin.webapp.services.LipidNameValidationService;
 import org.lifstools.jgoslin.webapp.services.PageBuilderService;
 import org.lifstools.jgoslin.webapp.services.ResultService;
@@ -107,6 +112,8 @@ public class LipidNameValidationController {
     private final int exampleCount;
     private final NewsPropertyConfig newsPropertyConfig;
     private final int maxItemsInRequest;
+    private final ExternalDatabaseMappingLoader databaseLoader;
+    private final DatabaseProperties databaseProperties;
     /** Days a result is kept; the same property the clean-up of old results reads. */
     private final int retentionDays;
     /** Largest text accepted, pasted or read from a file: the upload limit, or less if no valid list can be longer. */
@@ -121,7 +128,10 @@ public class LipidNameValidationController {
             MessageSource messageSource, @Value("classpath:lipidnames.txt") Resource lipidnames,
             NewsPropertyConfig newsPropertyConfig, @Value("${jgoslin.maxItemsInRequest}") int maxItemsInRequest,
             @Value("${spring.servlet.multipart.max-file-size}") DataSize maxFileSize,
-            @Value("${minCleanupAge}") int retentionDays, ParserProperties parserProperties) throws IOException {
+            @Value("${minCleanupAge}") int retentionDays, ParserProperties parserProperties,
+            ExternalDatabaseMappingLoader databaseLoader, DatabaseProperties databaseProperties) throws IOException {
+        this.databaseLoader = databaseLoader;
+        this.databaseProperties = databaseProperties;
         this.resultService = resultService;
         this.usageCounter = usageCounter;
         this.storageService = storageService;
@@ -291,6 +301,14 @@ public class LipidNameValidationController {
             }
             return t.lipidClassName.compareTo(t1.lipidClassName);
         }).collect(Collectors.toList()));
+        List<DatabaseCoverage> coverage = databaseLoader.getCoverage();
+        Map<DatabaseCoverage.Database, String> versions = new EnumMap<>(DatabaseCoverage.Database.class);
+        for (DatabaseCoverage.Database database : DatabaseCoverage.Database.values()) {
+            versions.put(database, databaseProperties.versionOf(database));
+        }
+        model.addObject("databases", coverage);
+        model.addObject("databaseVersions", versions);
+        model.addObject("coverageCategories", CategoryCoverage.of(coverage));
         return model;
     }
 

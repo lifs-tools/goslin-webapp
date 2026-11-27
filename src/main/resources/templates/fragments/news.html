@@ -19,6 +19,81 @@
             </div>
         </section>
 
+        <section th:fragment="databases" id="databases" class="doc-section" aria-labelledby="databases-title">
+            <h2 id="databases-title">Databases Goslin matches against</h2>
+            <div class="lifs-prose">
+                <p>The result page links the names you submit to three external lipid databases. They differ in what they contain, so the same lipid can be found in one and missing from another.</p>
+            </div>
+            <div class="lifs-table-wrap">
+                <table class="lifs-table db-overview">
+                    <caption class="visually-hidden">The external databases and how many of their entries Goslin reads</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Database</th>
+                            <th scope="col">What it contains</th>
+                            <th scope="col">Version</th>
+                            <th scope="col" class="db-num">Entries loaded</th>
+                            <th scope="col" class="db-num">Names Goslin reads</th>
+                            <th scope="col" class="db-num">Assigned to a lipid class</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="db : ${databases}">
+                            <th scope="row" th:text="${db.database().displayName()}">LIPID MAPS</th>
+                            <td class="db-kind" th:switch="${db.database().name()}">
+                                <span th:case="'LIPID_MAPS'">Structures mostly reported for lipids measured from authentic samples. Many are filed under species-level abbreviations such as PC 34:1. Goslin uses LMSD only, not the computationally generated COMPDB.</span>
+                                <span th:case="'SWISS_LIPIDS'">Generated combinatorially from known building blocks: it lists structures that are biochemically plausible, not structures that were observed.</span>
+                                <span th:case="'CHEBI'">Manually curated chemical entities. It holds far fewer lipids than LIPID MAPS or SwissLipids, and names them by trivial or systematic names rather than by the shorthand nomenclature, especially at its intermediate levels. Goslin reads only a small share of its names.</span>
+                            </td>
+                            <td th:text="${databaseVersions.get(db.database())}">1</td>
+                            <td class="db-num"><span th:text="${#numbers.formatInteger(db.entriesLoaded(), 1, 'COMMA')}">1</span><a th:if="${db.database().name()=='LIPID_MAPS'}" class="db-note-ref" href="#db-note" aria-label="Note on the LIPID MAPS entry count">*</a></td>
+                            <td class="db-num" th:text="${#numbers.formatInteger(db.namesRead(), 1, 'COMMA')}">1</td>
+                            <td class="db-num" th:text="${#numbers.formatInteger(db.classified(), 1, 'COMMA')}">1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="doc-caption" id="db-note">* The LIPID MAPS file holds only the entries that were normalized; the total size of the March 2023 release was not recorded. See <a href="https://github.com/lifs-tools/goslin-webapp/issues/129" target="_blank" rel="noopener">issue #129</a>.</p>
+
+            <figure class="coverage" aria-labelledby="coverage-caption">
+                <figcaption id="coverage-caption" class="coverage__title">Share of the names Goslin reads, by lipid category</figcaption>
+                <ul class="coverage__legend" aria-hidden="true">
+                    <li th:each="cat : ${coverageCategories}"><span class="coverage__swatch" th:attr="data-category=${cat.code()}"></span><span th:text="${cat.label()}">x</span></li>
+                </ul>
+                <div class="coverage__row" th:each="db, dbStat : ${databases}">
+                    <span class="coverage__name" th:text="${db.database().displayName()}">x</span>
+                    <div class="coverage-bar" role="img" th:attr="aria-label=${db.database().displayName() + ': share by lipid category, the numbers are in the table below'}">
+                        <th:block th:each="cat : ${coverageCategories}" th:with="cell=${cat.cells().get(dbStat.index)}">
+                            <span th:if="${cell.count() > 0}" class="coverage-bar__seg" th:attr="data-category=${cat.code()}"
+                                  th:style="'flex-grow:' + ${#numbers.formatDecimal(cell.share(), 1, 3, 'POINT')}"
+                                  th:title="${cat.label() + ': ' + #numbers.formatInteger(cell.count(), 1, 'COMMA') + ' (' + #numbers.formatDecimal(cell.share(), 1, 1) + ' %)'}"></span>
+                        </th:block>
+                    </div>
+                </div>
+            </figure>
+
+            <h3 id="db-categories-title">Entries per lipid category</h3>
+            <div class="lifs-table-wrap">
+                <table class="lifs-table db-categories" aria-labelledby="db-categories-title">
+                    <thead>
+                        <tr>
+                            <th scope="col">Lipid category</th>
+                            <th scope="col" class="db-num" th:each="db : ${databases}" th:text="${db.database().displayName()}">x</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cat : ${coverageCategories}">
+                            <th scope="row"><span class="coverage__swatch" aria-hidden="true" th:attr="data-category=${cat.code()}"></span> <span th:text="${cat.label()}">x</span></th>
+                            <td class="db-num" th:each="cell : ${cat.cells()}">
+                                <span th:text="${#numbers.formatInteger(cell.count(), 1, 'COMMA')}">0</span>
+                                <span class="db-share" th:text="'(' + ${#numbers.formatDecimal(cell.share(), 1, 1)} + ' %)'">(0 %)</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <section th:fragment="lipidclasses" id="lipid-classes" class="doc-section" aria-labelledby="lipid-classes-title">
             <h2 id="lipid-classes-title">Lipid classes supported by Goslin and the web application</h2>
             <div class="lifs-field doc-filter" th:unless="${#lists.isEmpty(lipidClasses)}">
@@ -39,6 +114,7 @@
                             <th scope="col">Sum formula (head group)</th>
                             <th scope="col">Mass (head group)</th>
                             <th scope="col">Synonyms</th>
+                            <th scope="col" class="db-num" th:each="db : ${databases}" th:text="${db.database().displayName()}">x</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,6 +128,10 @@
                             <td th:if="${lipidClass.getElements().getMass()>0}" th:text="${#numbers.formatDecimal(lipidClass.getElements().getMass(), 1, 4)}"></td>
                             <td th:unless="${lipidClass.getElements().getMass()>0}"><abbr title="Not defined">N.D.</abbr></td>
                             <td th:text="${lipidClass.synonyms}"></td>
+                            <td class="db-num" th:each="db : ${databases}" th:with="n=${db.countForClass(lipidClass.lipidClassName)}">
+                                <span th:if="${n > 0}" th:text="${#numbers.formatInteger(n, 1, 'COMMA')}">1</span>
+                                <span th:unless="${n > 0}" class="db-none">none</span>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
