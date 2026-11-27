@@ -413,6 +413,31 @@ public class ResultPageTest {
     }
 
     @Test
+    public void calloutWarnsThatMatchesAreCandidates() throws Exception {
+        Document doc = result(harmonize("PC 34:1"));
+        Element callout = doc.selectFirst("#database-caution");
+        assertThat(callout).isNotNull();
+        assertThat(callout.text()).contains("Database matches are candidates, not identifications.")
+                .contains("do not report them as identified lipids");
+        assertThat(callout.selectFirst("a[href=/documentation#databases]")).isNotNull();
+        Element banner = doc.selectFirst("main .lifs-callout");
+        assertThat(doc.getAllElements().indexOf(banner)).isLessThan(doc.getAllElements().indexOf(callout));
+    }
+
+    @Test
+    public void noCalloutWithoutHarmonizedNames() throws Exception {
+        Document doc = result(harmonize("PC(18:2-20:4"));
+        assertThat(doc.selectFirst("#database-caution")).isNull();
+    }
+
+    @Test
+    public void calloutIsGerman() throws Exception {
+        String id = harmonize("PC 34:1");
+        Document doc = html(page("/result/" + id + "?lang=de"));
+        assertThat(doc.selectFirst("#database-caution").text()).contains("Datenbanktreffer sind Kandidaten");
+    }
+
+    @Test
     public void removeDoesNotChangeThePostedCorrections() {
         LipidNameValidationController.Corrections corrections = LipidNameValidationController.Corrections.of(
                 new java.util.HashMap<>(java.util.Map.of(2, "PC 32:0", 3, "PC 34:1")));
